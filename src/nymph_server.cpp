@@ -27,7 +27,7 @@ bool NymphServer::running;
 
 
 // --- START ---
-bool NymphServer::start(port) {
+bool NymphServer::start(int port) {
 	try {
 		server = new Net::TCPServer(new Net::TCPServerConnectionFactoryImpl<NymphSession>(),
 								port
