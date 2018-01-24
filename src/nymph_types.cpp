@@ -122,12 +122,13 @@ bool NymphArray::deserialize(string binary, int &index) {
 /* NymphBoolean::NymphBoolean(bool value) {
 	this->value = value;
 	isEmpty = false;
-}
+}*/
 
 
 NymphBoolean::NymphBoolean(string value) {
-	deserialize(value, 0);
-} */
+	int index = 0;
+	deserialize(value, index);
+}
 
 
 // --- TO STRING ---
