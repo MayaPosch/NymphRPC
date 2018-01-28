@@ -1,5 +1,5 @@
 /*
-	nymph_types.h	- Defines the NymphRPC data types.
+	nymph_types.cpp	- Defines the NymphRPC data types.
 	
 	Revision 0
 	
