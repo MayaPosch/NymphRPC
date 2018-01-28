@@ -157,7 +157,12 @@ void NymphSocketListener::run() {
 			NymphRequest* req = it->second;
 			req->mutex.lock();
 			if (msg->isReply()) { req->response = msg->getResponse(); }
-			else {req->response = 0; }
+			else if (msg->isException())  {
+				req->exception = true;
+				req->response = 0;
+				req->exceptionData = msg->getException();
+			}				
+			else { req->response = 0; }
 			req->condition.signal();
 			req->mutex.unlock();
 			

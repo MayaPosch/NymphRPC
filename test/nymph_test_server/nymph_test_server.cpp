@@ -93,7 +93,7 @@ NymphMessage* helloCallback(int session, NymphMessage* msg, void* data) {
 
 
 int main() {
-	// Initialise the remote server instance.
+	// Initialise the server instance.
 	cout << "Initialising server...\n";
 	long timeout = 5000; // 5 seconds.
 	NymphRemoteClient::init(logFunction, NYMPH_LOG_LEVEL_TRACE, timeout);

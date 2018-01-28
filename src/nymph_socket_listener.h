@@ -47,6 +47,8 @@ struct NymphRequest {
 	Mutex mutex;
 	Condition condition;
 	NymphType* response;
+	bool exception;
+	NymphException exceptionData;
 };
 
 // ---

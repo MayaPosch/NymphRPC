@@ -376,6 +376,7 @@ bool NymphRemoteServer::callMethod(int handle, string name, vector<NymphType*> &
 	// Add NymphRequest to listener.
 	NymphRequest* request = new NymphRequest;
 	request->response = 0;
+	request->exception = false;
 	request->handle = handle;
 	request->mutex.lock();
 	
@@ -402,8 +403,17 @@ bool NymphRemoteServer::callMethod(int handle, string name, vector<NymphType*> &
 	// Remove message from listener since we're done with it.
 	NymphListener::removeMessage(handle, request->messageId);
 	
-	// Set output result. This is a singular NymphType value.
-	returnvalue = request->response;
+	// Check for an exception.
+	if (request->exception) {
+		NYMPH_LOG_DEBUG("Exception found: " + request->exceptionData.value);
+		
+		result = to_string(request->exceptionData.id) + " - " + request->exceptionData.value;
+		returnvalue = 0;
+	}
+	else {
+		// Set output result. This is a singular NymphType value.
+		returnvalue = request->response;
+	}
 	
 	delete request;
 	
@@ -464,8 +474,15 @@ bool NymphRemoteServer::callMethodId(int handle, UInt32 id, vector<NymphType*> &
 	// Remove message from listener since we're done with it.
 	NymphListener::removeMessage(handle, request->messageId);
 	
-	// Set output result. This is a singular NymphType value.
-	returnvalue = request->response;
+	// Check for an exception.
+	if (request->exception) {
+		result = to_string(request->exceptionData.id) + " - " + request->exceptionData.value;
+		returnvalue = 0;
+	}
+	else {
+		// Set output result. This is a singular NymphType value.
+		returnvalue = request->response;
+	}
 	
 	delete request;
 	

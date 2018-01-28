@@ -109,6 +109,9 @@ NymphMessage::NymphMessage(string binmsg) {
 		}
 	}
 	else if (flags & NYMPH_MESSAGE_EXCEPTION) {
+		responseId = *((UInt64*) &binmsg[index]);
+		index += 8;
+		
 		// Read in the exception (integer, string).
 		typecode = *((UInt8*) &binmsg[index++]);
 		NymphType* value;
@@ -162,6 +165,10 @@ NymphMessage::~NymphMessage() {
 			delete values[i];
 		}
 	}
+	
+	/* if (response) {
+		delete response;
+	} */
 	
 	values.clear();
 }
@@ -219,10 +226,11 @@ bool NymphMessage::finish(string &output) {
 	// ===
 	// 18 bytes + other values size.
 	// 
-	// For a response message, add another 8 bytes to the length.
+	// For a response message, add another 8 bytes to the length. (incl. exceptions).
 	// For a callback message, add 1 byte + callback name length.
 	length = (UInt32) (content.length() + 18);
 	if (flags & NYMPH_MESSAGE_REPLY) { length += 8; }
+	if (flags & NYMPH_MESSAGE_EXCEPTION) { length += 8; }
 	else if (flags & NYMPH_MESSAGE_CALLBACK) {
 		length += cbnStr.length();
 	}
@@ -237,7 +245,7 @@ bool NymphMessage::finish(string &output) {
 	methodIdStr = string(((const char*) &methodId), 4);
 	flagsStr = string(((const char*) &flags), 4);
 	msgIdStr = string(((const char*) &messageId), 8);
-	if (flags & NYMPH_MESSAGE_REPLY) {
+	if (flags & NYMPH_MESSAGE_REPLY || flags & NYMPH_MESSAGE_EXCEPTION) {
 		replyStr = string(((const char*) &responseId), 8);
 	}
 	
@@ -247,7 +255,7 @@ bool NymphMessage::finish(string &output) {
 	output += methodIdStr;
 	output += flagsStr;
 	output += msgIdStr;
-	if (flags & NYMPH_MESSAGE_REPLY) {
+	if (flags & NYMPH_MESSAGE_REPLY || flags & NYMPH_MESSAGE_EXCEPTION) {
 		output += replyStr;
 	}
 	else if (flags & NYMPH_MESSAGE_CALLBACK) {
@@ -269,7 +277,6 @@ void NymphMessage::setInReplyTo(UInt64 msgId) {
 	
 	responseId = msgId;
 	messageId = msgId + 1;
-	flags |= NYMPH_MESSAGE_REPLY;
 	
 	
 	NYMPH_LOG_DEBUG("New message flags: 0x" + NumberFormatter::formatHex(flags));
@@ -279,6 +286,7 @@ void NymphMessage::setInReplyTo(UInt64 msgId) {
 // --- SET RESULT VALUE ---
 // Sets the result value for a response message. Message takes ownership of value.
 void NymphMessage::setResultValue(NymphType* value) {
+	flags |= NYMPH_MESSAGE_REPLY;
 	response = value;
 }
 

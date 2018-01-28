@@ -147,7 +147,7 @@ bool NymphUtilities::parseValue(UInt8 typecode, string &binmsg, int &index, Nymp
 			value = new NymphSint16(binmsg, index);
 			break;
 		case NYMPH_TYPE_UINT32:
-			NYMPH_LOG_DEBUG("NYMPH_TYPE_UINT132");
+			NYMPH_LOG_DEBUG("NYMPH_TYPE_UINT32");
 			value = new NymphUint32(binmsg, index);
 			break;
 		case NYMPH_TYPE_SINT32:
