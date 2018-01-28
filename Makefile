@@ -49,3 +49,9 @@ clean-test: clean-test-client clean-test-server
 clean-lib:
 	$(RM) $(OBJECTS)
 	
+clean-test-client:
+	$(MAKE) -C ./test/nymph_test_client clean
+	
+clean-test-server:
+	$(MAKE) -C ./test/nymph_test_server clean
+	
