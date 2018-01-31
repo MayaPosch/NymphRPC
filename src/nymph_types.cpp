@@ -634,7 +634,7 @@ string NymphStruct::serialize() {
 	}
 	
 	typecode = NYMPH_TYPE_NONE;
-	out = string(((const char*) &typecode), 1);
+	out += string(((const char*) &typecode), 1);
 	
 	return out;
 }
