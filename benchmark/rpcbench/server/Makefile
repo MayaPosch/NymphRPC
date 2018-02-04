@@ -7,8 +7,8 @@ MAKEDIR = mkdir -p
 RM = rm
 
 OUTPUT = rpc_server
-INCLUDE = -I /usr/local/include
-LIB := -L /usr/local/lib -lrpc -lws2
+INCLUDE = -I /usr/local/include -I./
+LIB := -L /usr/local/lib -lrpc -L ./ -lpthread
 CFLAGS := $(INCLUDE) -std=c++11 -O1
 SOURCES := $(wildcard *.cpp)
 OBJECTS := $(addprefix obj/,$(notdir) $(SOURCES:.cpp=.o))

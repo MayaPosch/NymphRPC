@@ -6,14 +6,14 @@
 class RPCClientFixture : public ::hayai::Fixture {
 public:
     virtual void SetUp() {
-        this->rpcclient = new RPCClientClass();
+        this->rpcclient = new RPCClient();
     }
 
     virtual void TearDown() {
         delete this->rpcclient;
     }
 
-    RPCClientClass* rpcclient;
+    RPCClient* rpcclient;
 };
 
 BENCHMARK_F(RPCClientFixture, GetAnswer, 10, 100) {

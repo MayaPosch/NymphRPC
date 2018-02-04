@@ -6,12 +6,12 @@ GCC = g++
 MAKEDIR = mkdir -p
 RM = rm
 
-OUTPUT = nymphbench
-INCLUDE = -I $(TOP)/src
-LIB := -L ../../lib -lnymphrpc -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON
-CFLAGS := $(INCLUDE) -std=c++11 -U__STRICT_ANSI__ -O1
+OUTPUT = rpcbench
+INCLUDE = -I ./
+LIB := -L ./ -lrpc -lpthread
+CFLAGS := $(INCLUDE) -std=c++11 -O1
 #SOURCES := $(wildcard *.cpp)
-SOURCES := nymphbench_with_fixture.cpp nymphclientclass.cpp
+SOURCES := rpcbench_fixture.cpp
 OBJECTS := $(addprefix obj/,$(notdir) $(SOURCES:.cpp=.o))
 
 all: makedir $(OBJECTS) bin/$(OUTPUT)
