@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-//#include <rpc/server.h>
-
 
 int get_answer(int num);
 const std::string& get_blob(int size);

@@ -9,6 +9,8 @@
 #include <string>
 using std::string;
 
+//#include "server/struct_helpers.h"
+
 
 class RPCClient {
 	rpc::client* server;
@@ -29,21 +31,8 @@ public:
 	}
 	
 	void get_blob(uint32_t i) {
-		int string = server->call("get_blob", i).as<int>();
+		server->call("get_blob", i).as<int>();
 	}
 };
 
 #endif
-
-
-// int main() {
-//   rpc::client c("localhost", 8080);
-// 
-//   string input, result;
-//   while (std::getline(std::cin, input)) {
-//     if (!input.empty()) {
-//       result = c.call("echo", input).as<string>();
-//       std::cout << result << std::endl;
-//     }
-//   }
-// }

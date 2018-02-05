@@ -6,6 +6,7 @@ using std::string;
 using std::vector;
 
 #include "target_code.h"
+#include "struct_helpers.h"
 
 constexpr std::size_t min_size = 1 << 10;
 constexpr std::size_t max_size = 16 << 10 << 10;
@@ -18,6 +19,9 @@ int main() {
 		get_blob(s);
 	}
 	
+	// Initalizing struct cache...
+	rpclib_code::fill_struct_cache();
+	
 	rpc::server srv(8080);
 
 	srv.bind("get_answer", []() {
@@ -26,8 +30,9 @@ int main() {
 
 
 	srv.bind("get_struct", []() {
-		vector<string> tmp;
-		return tmp;
+		std::vector<rpclib_code::Student> result;
+		result = rpclib_code::get_structs();
+		return result;
 	});
 
 

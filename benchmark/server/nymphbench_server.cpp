@@ -31,6 +31,7 @@ using namespace Poco;
 
 
 #include "target_code.h"
+#include "structs.h"
 
 constexpr std::size_t min_size = 1 << 10;
 constexpr std::size_t max_size = 16 << 10 << 10;
@@ -39,11 +40,9 @@ constexpr std::size_t multiplier = 2;
 
 Condition gCon;
 Mutex gMutex;
-//volatile sig_atomic_t gSignalTrigger = 0;
 
 
 void signal_handler(int signal) {
-	//gSignalTrigger = 1;
 	gCon.signal();
 }
 
@@ -56,8 +55,6 @@ void logFunction(int level, string logStr) {
 
 // Callback for get_answer() method.
 NymphMessage* get_answer_cb(int session, NymphMessage* msg, void* data) {
-	//cout << "Received message for session: " << session << ", msg ID: " << msg->getMessageId() << "\n";
-	
 	NymphMessage* returnMsg = msg->getReplyMessage();
 	NymphUint32* response = new NymphUint32(42);
 	returnMsg->setResultValue(response);
@@ -67,10 +64,7 @@ NymphMessage* get_answer_cb(int session, NymphMessage* msg, void* data) {
 
 // Callback for get_blob() method.
 NymphMessage* get_blob_cb(int session, NymphMessage* msg, void* data) {
-	//cout << "Received message for session: " << session << ", msg ID: " << msg->getMessageId() << "\n";
-	
 	uint32_t num = ((NymphUint32*) msg->parameters()[0])->getValue();
-	//cout << "Message string: " << echoStr << "\n";
 	
 	NymphMessage* returnMsg = msg->getReplyMessage();
 	NymphString* world = new NymphString(get_blob(num));
@@ -81,12 +75,8 @@ NymphMessage* get_blob_cb(int session, NymphMessage* msg, void* data) {
 
 // Callback for get_struct() method.
 NymphMessage* get_struct_cb(int session, NymphMessage* msg, void* data) {
-	//cout << "Received message for session: " << session << ", msg ID: " << msg->getMessageId() << "\n";
-		
 	NymphMessage* returnMsg = msg->getReplyMessage();
-	NymphStruct* str = new NymphStruct();
-	// TODO: add struct values.
-	returnMsg->setResultValue(str);
+	returnMsg->setResultValue(createStudentsStruct());
 	return returnMsg;
 }
 
@@ -100,7 +90,7 @@ int main() {
 	// Initialise the server instance.
 	cout << "Initialising server...\n";
 	long timeout = 5000; // 5 seconds.
-	NymphRemoteClient::init(logFunction, NYMPH_LOG_LEVEL_WARNING, timeout);
+	NymphRemoteClient::init(logFunction, NYMPH_LOG_LEVEL_TRACE, timeout);
 	
 	// Register methods to expose to the clients.
 	cout << "Registering methods...\n";
@@ -109,7 +99,7 @@ int main() {
 	getAnswerFunction.setCallback(get_answer_cb);
 	NymphRemoteClient::registerMethod("get_answer", getAnswerFunction);
 	
-	NymphMethod getStructFunction("get_struct", parameters, NYMPH_STRUCT);
+	NymphMethod getStructFunction("get_struct", parameters, NYMPH_ARRAY);
 	getStructFunction.setCallback(get_struct_cb);
 	NymphRemoteClient::registerMethod("get_struct", getStructFunction);
 	
@@ -125,7 +115,6 @@ int main() {
 	NymphRemoteClient::start(4004);
 	
 	// Loop until the SIGINT signal has been received.
-	//while (gSignalTrigger == 0) { }
 	gMutex.lock();
 	gCon.wait(gMutex);
 	

@@ -13,7 +13,7 @@ void logFunction(int level, string logStr) {
 NymphClientClass::NymphClientClass() {
 	// Initialise the remote client instance.
 	long timeout = 5000; // 5 seconds.
-	NymphRemoteServer::init(logFunction, NYMPH_LOG_LEVEL_WARNING, timeout);
+	NymphRemoteServer::init(logFunction, NYMPH_LOG_LEVEL_ERROR, timeout);
 	
 	// Connect to the remote server.
 	if (!NymphRemoteServer::connect("localhost", 4004, handle, 0, result)) {
@@ -72,7 +72,7 @@ void NymphClientClass::get_struct() {
 	
 	if (!returnValue) { return; }
 	
-	if (returnValue->type() != NYMPH_STRUCT) {
+	if (returnValue->type() != NYMPH_ARRAY) {
 		cout << "Return value wasn't a struct. Type: " << returnValue->type() << endl;
 		NymphRemoteServer::disconnect(handle, result);
 		NymphRemoteServer::shutdown();
