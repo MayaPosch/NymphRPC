@@ -81,12 +81,12 @@ void NymphSession::run() {
 			
 			NYMPH_LOG_DEBUG("Message length: 0x" + NumberFormatter::formatHex(length));
 			
-			char buff[length];
+			char* buff = new char[length];
 			
 			// Read the entire message into a string. This is then used to
 			// construct an NymphMessage instance.
-			received = socket.receiveBytes((void*) &buff, length);
-			string binMsg;
+			received = socket.receiveBytes((void*) buff, length);
+			string* binMsg;
 			if (received != length) {
 				// Handle incomplete message.
 				NYMPH_LOG_WARNING("Incomplete message: " + NumberFormatter::format(received) + " of " + NumberFormatter::format(length));
@@ -94,37 +94,40 @@ void NymphSession::run() {
 				// Loop until the rest of the message has been received.
 				// TODO: Set a maximum number of loops/timeout? Reset when 
 				// receiving data, timeout when poll times out N times?
-				binMsg = string((const char*) &buff, received);
+				binMsg = new string((const char*) buff, received);
 				int unread = length - received;
 				while (1) {
 					if (socket.poll(timeout, Net::Socket::SELECT_READ)) {
-						char buff1[unread];
-						received = socket.receiveBytes((void*) &buff1, unread);
+						char* buff1 = new char[unread];
+						received = socket.receiveBytes((void*) buff1, unread);
 						if (received == 0) {
 							// Remote disconnnected. Socket should be discarded.
 							NYMPH_LOG_INFORMATION("Received remote disconnected notice. Terminating listener thread.");
 							break;
 						}
 						else if (received != unread) {
-							binMsg += string((const char*) &buff1, received);
+							*binMsg += string((const char*) buff1, received);
 							unread -= received;
 							NYMPH_LOG_WARNING("Incomplete message: " + NumberFormatter::format(unread) + "/" + NumberFormatter::format(length) + " unread.");
 							continue;
 						}
 						
 						// Full message was read. Continue with processing.
-						binMsg += string((const char*) &buff1, received);
+						*binMsg += string((const char*) buff1, received);
 						break;
 					} // if
 				} //while
 			}
 			else { 
 				NYMPH_LOG_DEBUG("Read " + NumberFormatter::format(received) + " bytes.");
-				binMsg = string(((const char*) &buff), length);
+				binMsg = new string(((const char*) buff), length);
 			}
 			
+			delete buff;
+			
 			// Parse the string into an NymphMessage instance.
-			NymphMessage* msg = new NymphMessage(binMsg);
+			NymphMessage* msg = new NymphMessage(*binMsg);
+			delete binMsg;
 			if (msg->getState() != 0) {
 				// Error during the parsing of the message. Abort.
 				NYMPH_LOG_ERROR("Failed to parse the binary message. Skipping...");

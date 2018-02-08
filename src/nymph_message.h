@@ -49,6 +49,7 @@ class NymphMessage {
 	UInt64 responseId;
 	NymphException exception;
 	bool hasResult;
+	bool responseOwned;
 	string callbackName;
 	NymphType* response;
 	string loggerName;
@@ -66,7 +67,7 @@ public:
 	UInt64 getResponseId() { return responseId; }
 	UInt64 getMessageId() { return messageId; }
 	void setResultValue(NymphType* value);
-	NymphType* getResponse() { return response; }
+	NymphType* getResponse() { return response; responseOwned = false; }
 	vector<NymphType*> parameters() { return values; }
 	UInt32 getMethodId() { return methodId; }
 	NymphMessage* getReplyMessage();

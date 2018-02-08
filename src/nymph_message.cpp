@@ -37,6 +37,7 @@ NymphMessage::NymphMessage() {
 	response = 0;
 	responseId = 0;
 	hasResult = false;
+	responseOwned = false;
 	loggerName = "NymphMessage";
 }
 
@@ -46,6 +47,8 @@ NymphMessage::NymphMessage(UInt32 methodId) {
 	state = 0; // no error
 	response = 0;
 	responseId = 0;
+	hasResult = false;
+	responseOwned = false;
 	this->methodId = methodId;
 	loggerName = "NymphMessage";
 }
@@ -58,6 +61,7 @@ NymphMessage::NymphMessage(string binmsg) {
 	response = 0;
 	responseId = 0;
 	hasResult = false;
+	responseOwned = false;
 	loggerName = "NymphMessage";
 	UInt64 binLength = binmsg.length();
 	
@@ -166,9 +170,9 @@ NymphMessage::~NymphMessage() {
 		}
 	}
 	
-	/* if (response) {
+	if (responseOwned && response) {
 		delete response;
-	} */
+	}
 	
 	values.clear();
 }
@@ -288,6 +292,7 @@ void NymphMessage::setInReplyTo(UInt64 msgId) {
 void NymphMessage::setResultValue(NymphType* value) {
 	flags |= NYMPH_MESSAGE_REPLY;
 	response = value;
+	responseOwned = true;
 }
 
 

@@ -13,7 +13,7 @@ void logFunction(int level, string logStr) {
 NymphClientClass::NymphClientClass() {
 	// Initialise the remote client instance.
 	long timeout = 5000; // 5 seconds.
-	NymphRemoteServer::init(logFunction, NYMPH_LOG_LEVEL_ERROR, timeout);
+	NymphRemoteServer::init(logFunction, NYMPH_LOG_LEVEL_TRACE, timeout);
 	
 	// Connect to the remote server.
 	if (!NymphRemoteServer::connect("localhost", 4004, handle, 0, result)) {
