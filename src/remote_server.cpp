@@ -271,6 +271,8 @@ bool NymphRemoteServer::connect(Poco::Net::SocketAddress sa, int &handle,
 	handle = lastHandle++;
 	socketsMutex.unlock();
 	
+	NYMPH_LOG_DEBUG("Added new connection with handle: " + NumberFormatter::format(handle));
+	
 	// Fetch remote method signatures from the server.
 	if (!sync(ns.handle, result)) {
 		return false;
@@ -287,7 +289,7 @@ bool NymphRemoteServer::disconnect(int handle, string &result) {
 	socketsMutex.lock();
 	it = sockets.find(handle);
 	if (it == sockets.end()) { 
-		result = "Provided handle was not found.";
+		result = "Provided handle " + NumberFormatter::format(handle) + " was not found.";
 		socketsMutex.unlock();
 		return false; 
 	}
@@ -314,6 +316,8 @@ bool NymphRemoteServer::disconnect(int handle, string &result) {
 	socketSemaphores.erase(sit);
 	
 	socketsMutex.unlock();
+	
+	NYMPH_LOG_DEBUG("Removed connection with handle: " + NumberFormatter::format(handle));
 	
 	return true;
 }
@@ -345,7 +349,7 @@ bool NymphRemoteServer::callMethod(int handle, string name, vector<NymphType*> &
 	socketsMutex.lock();
 	it = sockets.find(handle);
 	if (it == sockets.end()) { 
-		result = "Provided handle was not found.";
+		result = "Provided handle " + NumberFormatter::format(handle) + " was not found.";
 		socketsMutex.unlock();
 		
 		// Delete the values in the values vector since we own them.
@@ -392,7 +396,7 @@ bool NymphRemoteServer::callMethod(int handle, string name, vector<NymphType*> &
 	// We use tryWait() since it's exception-free.
 	if (!request->condition.tryWait(request->mutex, timeout)) {
 		// Handle timeout of the message.
-		result = "Message timed out while waiting for response.";
+		result = "Method call for " + name + " timed out while waiting for response.";
 		request->mutex.unlock();
 		NymphListener::removeMessage(handle, request->messageId);
 		return false;
@@ -427,7 +431,7 @@ bool NymphRemoteServer::callMethodId(int handle, UInt32 id, vector<NymphType*> &
 	socketsMutex.lock();
 	it = sockets.find(handle);
 	if (it == sockets.end()) { 
-		result = "Provided handle was not found.";
+		result = "Provided handle " + NumberFormatter::format(handle) + " was not found.";
 		socketsMutex.unlock();
 		return false; 
 	}
@@ -463,7 +467,7 @@ bool NymphRemoteServer::callMethodId(int handle, UInt32 id, vector<NymphType*> &
 	// We use tryWait() since it's exception-free.
 	if (!request->condition.tryWait(request->mutex, timeout)) {
 		// Handle timeout of the message.
-		result = "Message timed out while waiting for response.";
+		result = "Method call for ID " + NumberFormatter::format(id) + " timed out while waiting for response.";
 		request->mutex.unlock();
 		NymphListener::removeMessage(handle, request->messageId);
 		return false;

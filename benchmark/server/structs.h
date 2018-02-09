@@ -8,6 +8,7 @@
 #include "target_code.h"
 
 // --- Global struct data.
+NymphArray* studentsStruct;
 
 // Create struct with 34 items in it.
 NymphArray* createStudentsStruct() {

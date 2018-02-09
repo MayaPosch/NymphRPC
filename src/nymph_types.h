@@ -76,12 +76,6 @@ enum NymphTypes {
 };
 
 
-/* struct NymphEnumValue {
-	string name;
-	int value;
-}; */
-
-
 class NymphType {
 public:
 	virtual ~NymphType() {}

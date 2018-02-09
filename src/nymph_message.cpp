@@ -107,6 +107,12 @@ NymphMessage::NymphMessage(string binmsg) {
 		typecode = *((UInt8*) &binmsg[index++]);
 		NymphUtilities::parseValue(typecode, binmsg, index, response);
 		
+		if (index >= binLength) {
+			// Out of bounds, abort.
+			NYMPH_LOG_ERROR("Message parsing index out of bounds. Abort.");
+			return;
+		}
+		
 		if (binmsg[index] != NYMPH_TYPE_NONE) {
 			// We didn't reach the message end. 
 			// FIXME: handle this case, maybe do some pre-flight checks.

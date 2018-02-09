@@ -77,6 +77,9 @@ NymphMessage* get_blob_cb(int session, NymphMessage* msg, void* data) {
 NymphMessage* get_struct_cb(int session, NymphMessage* msg, void* data) {
 	NymphMessage* returnMsg = msg->getReplyMessage();
 	returnMsg->setResultValue(createStudentsStruct());
+	//NymphArray* array;
+	//*array = *studentsStruct;
+	//returnMsg->setResultValue(array);
 	return returnMsg;
 }
 
@@ -87,10 +90,13 @@ int main() {
 		get_blob(s);
 	}
 	
+	// Init student array.
+	//studentsStruct = createStudentsStruct();
+	
 	// Initialise the server instance.
 	cout << "Initialising server...\n";
 	long timeout = 5000; // 5 seconds.
-	NymphRemoteClient::init(logFunction, NYMPH_LOG_LEVEL_TRACE, timeout);
+	NymphRemoteClient::init(logFunction, NYMPH_LOG_LEVEL_ERROR, timeout);
 	
 	// Register methods to expose to the clients.
 	cout << "Registering methods...\n";

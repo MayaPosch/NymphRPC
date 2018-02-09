@@ -172,10 +172,8 @@ bool NymphUtilities::parseValue(UInt8 typecode, string &binmsg, int &index, Nymp
             break;
         case NYMPH_TYPE_ARRAY: {
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_ARRAY");
-			NymphArray* array = new NymphArray;
-			array->deserialize(binmsg, index);
-			
-			value = array;            
+			value = new NymphArray;
+			value->deserialize(binmsg, index);
             break;
 		}
 		case NYMPH_TYPE_STRUCT:

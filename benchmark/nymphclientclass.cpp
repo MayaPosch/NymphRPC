@@ -2,6 +2,8 @@
 
 #include "nymphclientclass.h"
 
+#include <Poco/Thread.h>
+
 
 // --- LOG FUNCTION ---
 void logFunction(int level, string logStr) {
@@ -12,8 +14,8 @@ void logFunction(int level, string logStr) {
 // --- CONSTRUCTOR ---
 NymphClientClass::NymphClientClass() {
 	// Initialise the remote client instance.
-	long timeout = 5000; // 5 seconds.
-	NymphRemoteServer::init(logFunction, NYMPH_LOG_LEVEL_TRACE, timeout);
+	long timeout = 200000; // 200 seconds.
+	NymphRemoteServer::init(logFunction, NYMPH_LOG_LEVEL_DEBUG, timeout);
 	
 	// Connect to the remote server.
 	if (!NymphRemoteServer::connect("localhost", 4004, handle, 0, result)) {
@@ -21,6 +23,10 @@ NymphClientClass::NymphClientClass() {
 		NymphRemoteServer::disconnect(handle, result);
 		NymphRemoteServer::shutdown();
 	}
+	
+	// Wait for 100 ms.
+	//cout << "Sleeping..." << endl;
+	//Thread::sleep(1000);
 }
 
 
@@ -73,7 +79,7 @@ void NymphClientClass::get_struct() {
 	if (!returnValue) { return; }
 	
 	if (returnValue->type() != NYMPH_ARRAY) {
-		cout << "Return value wasn't a struct. Type: " << returnValue->type() << endl;
+		cout << "Return value wasn't an array. Type: " << returnValue->type() << endl;
 		NymphRemoteServer::disconnect(handle, result);
 		NymphRemoteServer::shutdown();
 		return;
