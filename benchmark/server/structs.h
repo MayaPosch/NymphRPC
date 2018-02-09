@@ -73,6 +73,7 @@ NymphArray* createStudentsStruct() {
 			}
 			
 			school->addValue(school_emails);
+			schools->addValue(school);
 		}
 		
 		student->addValue(favorite_subjects);
