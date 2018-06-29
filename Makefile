@@ -14,7 +14,8 @@ AR = ar
 
 OUTPUT = libnymphrpc.a
 INCLUDE = -I src
-CFLAGS := $(INCLUDE) -g3 -std=c++11 -U__STRICT_ANSI__
+#-DPOCO_WIN32_UTF8
+CFLAGS := $(INCLUDE) -g3 -std=c++11 -U__STRICT_ANSI__ 
 SOURCES := $(wildcard src/*.cpp)
 OBJECTS := $(addprefix obj/,$(notdir) $(SOURCES:.cpp=.o))
 

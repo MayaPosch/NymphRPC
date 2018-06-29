@@ -77,6 +77,8 @@ enum NymphTypes {
 
 
 class NymphType {
+	//
+	
 public:
 	virtual ~NymphType() {}
 	virtual NymphTypes type() = 0;
@@ -84,6 +86,7 @@ public:
 	virtual string serialize() = 0;
 	virtual bool deserialize(string binary, int &index) = 0;
 	virtual bool empty() = 0;
+	virtual UInt32 binarySize() = 0;
 };
 
 
@@ -103,15 +106,17 @@ public:
 	string serialize() { return string(); }
 	bool deserialize(string binary, int &index) { return true; }
 	bool empty() { return true; }
+	UInt32 binarySize() { return 0; }
 };
 
 
 class NymphArray : public NymphType {
 	vector<NymphType*> values;
 	bool isEmpty;
+	UInt32 binSize; // For pre-allocating.
 	
 public:
-	NymphArray() { }
+	NymphArray() { isEmpty = true; binSize = 0; }
 	~NymphArray();
 	NymphTypes type() { return NYMPH_ARRAY; }
 	string toString(bool quotes = false);
@@ -120,6 +125,7 @@ public:
 	string serialize();
 	bool deserialize(string binary, int &index);
 	bool empty() { return isEmpty; }
+	UInt32 binarySize() { return (10 + binSize); }
 };
 
 
@@ -138,6 +144,7 @@ public:
 	string serialize();
 	bool deserialize(string binary, int &index);
 	bool empty() { return isEmpty; }
+	UInt32 binarySize() { return 1; }
 };
 
 
@@ -155,6 +162,7 @@ public:
 	string serialize();
 	bool deserialize(string binary, int &index);
 	bool empty() { return isEmpty; }
+	UInt32 binarySize() { return 2; }
 };
 
 
@@ -172,6 +180,7 @@ public:
 	string serialize();
 	bool deserialize(string binary, int &index);
 	bool empty() { return isEmpty; }
+	UInt32 binarySize() { return 2; }
 };
 
 
@@ -189,6 +198,7 @@ public:
 	string serialize();
 	bool deserialize(string binary, int &index);
 	bool empty() { return isEmpty; }
+	UInt32 binarySize() { return 3; }
 };
 
 
@@ -206,6 +216,7 @@ public:
 	string serialize();
 	bool deserialize(string binary, int &index);
 	bool empty() { return isEmpty; }
+	UInt32 binarySize() { return 3; }
 };
 
 
@@ -223,6 +234,7 @@ public:
 	string serialize();
 	bool deserialize(string binary, int &index);
 	bool empty() { return isEmpty; }
+	UInt32 binarySize() { return 5; }
 };
 
 
@@ -240,6 +252,7 @@ public:
 	string serialize();
 	bool deserialize(string binary, int &index);
 	bool empty() { return isEmpty; }
+	UInt32 binarySize() { return 5; }
 };
 
 
@@ -257,6 +270,7 @@ public:
 	string serialize();
 	bool deserialize(string binary, int &index);
 	bool empty() { return isEmpty; }
+	UInt32 binarySize() { return 9; }
 };
 
 
@@ -274,6 +288,7 @@ public:
 	string serialize();
 	bool deserialize(string binary, int &index);
 	bool empty() { return isEmpty; }
+	UInt32 binarySize() { return 9; }
 };
 
 
@@ -291,6 +306,7 @@ public:
 	bool empty() { return isEmpty; }
 	void setValue(double value) { this->value = value; }
 	double getValue() { return value; }
+	UInt32 binarySize() { return 9; }
 };
 
 
@@ -308,6 +324,7 @@ public:
 	bool empty() { return isEmpty; }
 	void setValue(float value) { this->value = value; }
 	float getValue() { return value; }
+	UInt32 binarySize() { return 5; }
 };
 
 
@@ -316,9 +333,10 @@ class NymphString : public NymphType {
 	string value;
 	bool emptyString;
 	bool isEmpty;
+	UInt32 binSize;
 	
 public:
-	NymphString() { isEmpty = true; emptyString = true; }
+	NymphString() { isEmpty = true; emptyString = true; binSize = 0; }
 	NymphString(string value);
 	NymphString(string value, int &index) { deserialize(value, index); }
 	NymphTypes type() { return NYMPH_STRING; }
@@ -329,20 +347,23 @@ public:
 	void setValue(string value);
 	string getValue() { return value; }
 	void setEmptyString(bool val = true) { isEmpty = false; emptyString = val; }
+	UInt32 binarySize() { return binSize; }
 };
 
 
 class NymphStruct : public NymphType {
 	vector<NymphPair> pairs;
 	bool isEmpty;
+	UInt32 binSize; // For pre-allocating.
 	
 public:
-	NymphStruct() { isEmpty = true; }
+	NymphStruct() { isEmpty = true; binSize = 0; }
 	NymphTypes type() { return NYMPH_STRUCT; }
 	string toString(bool quotes = false);
 	string serialize();
 	bool deserialize(string binary, int &index);
 	bool empty() { return isEmpty; }
+	UInt32 binarySize() { return binSize; }
 };
 
 

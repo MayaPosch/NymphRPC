@@ -15,7 +15,7 @@ void logFunction(int level, string logStr) {
 NymphClientClass::NymphClientClass() {
 	// Initialise the remote client instance.
 	long timeout = 200000; // 200 seconds.
-	NymphRemoteServer::init(logFunction, NYMPH_LOG_LEVEL_DEBUG, timeout);
+	NymphRemoteServer::init(logFunction, NYMPH_LOG_LEVEL_ERROR, timeout);
 	
 	// Connect to the remote server.
 	if (!NymphRemoteServer::connect("localhost", 4004, handle, 0, result)) {
@@ -46,8 +46,8 @@ void NymphClientClass::get_answer() {
 	NymphType* returnValue = 0;
 	if (!NymphRemoteServer::callMethod(handle, "get_answer", values, returnValue, result)) {
 		cout << "Error calling remote method: " << result << endl;
-		NymphRemoteServer::disconnect(handle, result);
-		NymphRemoteServer::shutdown();
+		//NymphRemoteServer::disconnect(handle, result);
+		//NymphRemoteServer::shutdown();
 		return;
 	}
 	

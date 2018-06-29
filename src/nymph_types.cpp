@@ -50,7 +50,8 @@ NymphArray::~NymphArray() {
 // --- ADD VALUE ---
 void NymphArray::addValue(NymphType* value) {
 	values.push_back(value); 
-	isEmpty = false; 
+	isEmpty = false;
+	binSize += value->binarySize();
 	//if (value->type() == NYMPH_ARRAY) { ++dimension; }
 }
 
@@ -63,11 +64,12 @@ string NymphArray::toString(bool quotes) {
 // ---- SERIALIZE ---
 string NymphArray::serialize() {
 	string out;
+	out.reserve(3 + binSize); // type & terminator + size.
 	UInt8 typecode = NYMPH_TYPE_ARRAY;
-	out = string(((const char*) &typecode), 1);
+	out.append(((const char*) &typecode), 1);
 	
 	UInt64 valueCount = (UInt64) values.size();
-	out += string(((const char*) &valueCount), 1);
+	out.append(((const char*) &valueCount), 8);
 	
 	vector<NymphType*>::iterator it;
 	for (it = values.begin(); it != values.end(); ++it) {
@@ -75,7 +77,7 @@ string NymphArray::serialize() {
 	}
 	
 	typecode = NYMPH_TYPE_NONE;
-	out += string(((const char*) &typecode), 1);
+	out.append(((const char*) &typecode), 1);
 	
 	return out;
 }
@@ -90,7 +92,8 @@ bool NymphArray::deserialize(string binary, int &index) {
 	// typecode.
 	
 	// Size of the array, in number of elements.
-	UInt64 numElements = ((UInt8) binary[index++]);
+	UInt64 numElements = ((UInt64) binary[index]);
+	index += 8;
 	
 	NYMPH_LOG_DEBUG("Array size: " + NumberFormatter::format(numElements) + " elements.");
 	
@@ -100,7 +103,10 @@ bool NymphArray::deserialize(string binary, int &index) {
 		typecode = ((UInt8) binary[index++]);
 		NymphType* elVal;
 		NymphUtilities::parseValue(typecode, binary, index, elVal);
-		values.push_back(elVal);
+		if (elVal) {
+			values.push_back(elVal);
+			binSize += elVal->binarySize();
+		}
 	}
 	
 	typecode = ((UInt8) binary[index++]);
@@ -148,11 +154,12 @@ bool NymphBoolean::getValue() { return value; }
 // --- SERIALIZE ---
 string NymphBoolean::serialize() {
 	string out;
+	out.reserve(1);
 	Int8 typecode = 0;
 	if (value) { typecode = NYMPH_TYPE_BOOLEAN_TRUE; }
 	else { typecode = NYMPH_TYPE_BOOLEAN_FALSE; }
 	
-	out = string(((const char*) &typecode), 1);
+	out.append(((const char*) &typecode), 1);
 	return out;
 }
 
@@ -187,6 +194,7 @@ NymphString::NymphString(string value) {
 	this->value = value;
 	isEmpty = false;
 	emptyString = false;
+	binSize = 0;
 } 
 
 // --- TO STRING ---
@@ -199,46 +207,64 @@ string NymphString::toString(bool quotes) {
 	return out;
 }
 
-void NymphString::setValue(string value) { this->value = value; isEmpty = false; }
+
+// --- SET VALUE ---
+void NymphString::setValue(string value) { 
+	this->value = value; 
+	isEmpty = false; 
+	
+	UInt64 length = value.length();
+	if (length <= 0xFF) { binSize = 3 + length; }
+	else if (length <= 0xFFFF) { binSize = 4 + length; }
+	else if (length <= 0xFFFFFFFF) { binSize = 6 + length; }
+	else { binSize = 10 + length; }
+}
 
 
 // ---- SERIALIZE ---
 string NymphString::serialize() {
-	UInt8 strType;
 	string out;
+	UInt8 strType;
 	if (emptyString) {
 		strType = NYMPH_TYPE_EMPTY_STRING;
-		out = string(((const char*) &strType), 1);
+		out.append(((const char*) &strType), 1);
+		return out;
 	}
-	else { 
-		strType = NYMPH_TYPE_STRING;
-		out = string(((const char*) &strType), 1);
-		
+	else {
+		strType = NYMPH_TYPE_STRING;		
 		UInt64 length = value.length();
 		UInt8 typecode = 0;
 		if (length <= 0xFF) {
+			out.reserve(3 + value.length());
+			out.append(((const char*) &strType), 1);
 			typecode = NYMPH_TYPE_UINT8;			
-			out += string(((const char*) &typecode), 1);
+			out.append(((const char*) &typecode), 1);
 			UInt8 l = length;
-			out += string(((const char*) &l), 1);
+			out.append(((const char*) &l), 1);
 		}
 		else if (length <= 0xFFFF) {
+			out.reserve(4 + value.length());
+			out.append(((const char*) &strType), 1);
 			typecode = NYMPH_TYPE_UINT16;			
-			out += string(((const char*) &typecode), 1);
+			out.append(((const char*) &typecode), 1);
 			UInt16 l = length;
-			out += string(((const char*) &l), 2);
+			out.append(((const char*) &l), 2);
 		}
 		else if (length <= 0xFFFFFFFF) {
+			out.reserve(6 + value.length());
+			out.append(((const char*) &strType), 1);
 			typecode = NYMPH_TYPE_UINT32;			
-			out += string(((const char*) &typecode), 1);
+			out.append(((const char*) &typecode), 1);
 			UInt8 l = length;
-			out += string(((const char*) &l), 4);
+			out.append(((const char*) &l), 4);
 		}
 		else {
+			out.reserve(10 + value.length());
+			out.append(((const char*) &strType), 1);
 			typecode = NYMPH_TYPE_UINT64;			
-			out += string(((const char*) &typecode), 1);
+			out.append(((const char*) &typecode), 1);
 			UInt8 l = length;
-			out += string(((const char*) &l), 8);
+			out.append(((const char*) &l), 8);
 		}
 		
 		out += value;
@@ -288,6 +314,13 @@ bool NymphString::deserialize(string binary, int &index) {
 	isEmpty = false;
 	emptyString = false;
 	
+	// Set size of the serialised message.
+	UInt64 length = value.length();
+	if (length <= 0xFF) { binSize = 3 + length; }
+	else if (length <= 0xFFFF) { binSize = 4 + length; }
+	else if (length <= 0xFFFFFFFF) { binSize = 6 + length; }
+	else { binSize = 10 + length; }
+	
 	return true;
 }
 
@@ -308,10 +341,11 @@ string NymphDouble::toString(bool quotes) {
 // ---- SERIALIZE ---
 string NymphDouble::serialize() {
 	string out;
+	out.reserve(9);
 	UInt8 typecode = NYMPH_TYPE_DOUBLE;
-	out = string(((const char*) &typecode), 1);
+	out.append(((const char*) &typecode), 1);
 	
-	string valStr = string(((const char*) &value), 8);
+	string valStr(((const char*) &value), 8);
 	reverse(valStr.begin(), valStr.end());
 	out += valStr;
 	return out;
@@ -342,10 +376,11 @@ string NymphFloat::toString(bool quotes) {
 // ---- SERIALIZE ---
 string NymphFloat::serialize() {
 	string out;
+	out.reserve(5);
 	UInt8 typecode = NYMPH_TYPE_FLOAT;
-	out = string(((const char*) &typecode), 1);
+	out.append(((const char*) &typecode), 1);
 	
-	string valStr = string(((const char*) &value), 4);
+	string valStr(((const char*) &value), 4);
 	reverse(valStr.begin(), valStr.end());
 	out += valStr;
 	return out;
@@ -377,11 +412,11 @@ string NymphUint8::toString(bool quotes) {
 // ---- SERIALIZE ---
 string NymphUint8::serialize() {
 	string out;
+	out.reserve(2);
 	UInt8 typecode = NYMPH_TYPE_UINT8;
-	out = string(((const char*) &typecode), 1);
+	out.append(((const char*) &typecode), 1);
 	
-	string valStr = string(((const char*) &value), 1);
-	out += valStr;
+	out.append(((const char*) &value), 1);
 	return out;
 }
 
@@ -407,11 +442,10 @@ string NymphSint8::toString(bool quotes) {
 // ---- SERIALIZE ---
 string NymphSint8::serialize() {
 	string out;
+	out.reserve(2);
 	UInt8 typecode = NYMPH_TYPE_SINT8;
-	out = string(((const char*) &typecode), 1);
-	
-	string valStr = string(((const char*) &value), 1);
-	out += valStr;
+	out.append(((const char*) &typecode), 1);
+	out.append(((const char*) &value), 1);
 	return out;
 }
 
@@ -437,11 +471,10 @@ string NymphUint16::toString(bool quotes) {
 // ---- SERIALIZE ---
 string NymphUint16::serialize() {
 	string out;
+	out.reserve(3);
 	UInt8 typecode = NYMPH_TYPE_UINT16;
-	out = string(((const char*) &typecode), 1);
-	
-	string valStr = string(((const char*) &value), 2);
-	out += valStr;
+	out.append(((const char*) &typecode), 1);
+	out.append(((const char*) &value), 2);
 	return out;
 }
 
@@ -468,11 +501,10 @@ string NymphSint16::toString(bool quotes) {
 // ---- SERIALIZE ---
 string NymphSint16::serialize() {
 	string out;
+	out.reserve(3);
 	UInt8 typecode = NYMPH_TYPE_SINT16;
-	out = string(((const char*) &typecode), 1);
-	
-	string valStr = string(((const char*) &value), 2);
-	out += valStr;
+	out.append(((const char*) &typecode), 1);
+	out.append(((const char*) &value), 2);
 	return out;
 }
 
@@ -499,11 +531,10 @@ string NymphUint32::toString(bool quotes) {
 // ---- SERIALIZE ---
 string NymphUint32::serialize() {
 	string out;
+	out.reserve(5);
 	UInt8 typecode = NYMPH_TYPE_UINT32;
-	out = string(((const char*) &typecode), 1);
-	
-	string valStr = string(((const char*) &value), 4);
-	out += valStr;
+	out.append(((const char*) &typecode), 1);
+	out.append(((const char*) &value), 4);
 	return out;
 }
 
@@ -530,11 +561,10 @@ string NymphSint32::toString(bool quotes) {
 // ---- SERIALIZE ---
 string NymphSint32::serialize() {
 	string out;
+	out.reserve(5);
 	UInt8 typecode = NYMPH_TYPE_SINT32;
-	out = string(((const char*) &typecode), 1);
-	
-	string valStr = string(((const char*) &value), 4);
-	out += valStr;
+	out.append(((const char*) &typecode), 1);
+	out.append(((const char*) &value), 4);
 	return out;
 }
 
@@ -561,11 +591,10 @@ string NymphUint64::toString(bool quotes) {
 // ---- SERIALIZE ---
 string NymphUint64::serialize() {
 	string out;
+	out.reserve(9);
 	UInt8 typecode = NYMPH_TYPE_UINT64;
-	out = string(((const char*) &typecode), 1);
-	
-	string valStr = string(((const char*) &value), 8);
-	out += valStr;
+	out.append(((const char*) &typecode), 1);
+	out.append(((const char*) &value), 8);
 	return out;
 }
 
@@ -592,10 +621,10 @@ string NymphSint64::toString(bool quotes) {
 // ---- SERIALIZE ---
 string NymphSint64::serialize() {
 	string out;
+	out.reserve(9);
 	UInt8 typecode = NYMPH_TYPE_SINT64;
-	out = string(((const char*) &typecode), 1);
-	
-	string valStr = string(((const char*) &value), 8);
+	out.append(((const char*) &typecode), 1);
+	out.append(((const char*) &value), 8);
 	return out;
 }
 
@@ -624,8 +653,9 @@ string NymphStruct::toString(bool quotes) {
 // ---- SERIALIZE ---
 string NymphStruct::serialize() {
 	string out;
+	out.reserve(2 + binSize); // type & terminator + size.
 	UInt8 typecode = NYMPH_TYPE_STRUCT;
-	out = string(((const char*) &typecode), 1);
+	out.append(((const char*) &typecode), 1);
 	
 	UInt32 length = pairs.size();
 	for (UInt32 i = 0; i < length; ++i) {
