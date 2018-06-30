@@ -92,6 +92,7 @@ void NymphSocketListener::run() {
 				// TODO: Set a maximum number of loops/timeout? Reset when 
 				// receiving data, timeout when poll times out N times?
 				binMsg = new string((const char*) buff, received);
+				binMsg->reserve(length);
 				int unread = length - received;
 				while (1) {
 					if (socket->poll(timeout, Net::Socket::SELECT_READ)) {
@@ -100,17 +101,20 @@ void NymphSocketListener::run() {
 						if (received == 0) {
 							// Remote disconnnected. Socket should be discarded.
 							NYMPH_LOG_INFORMATION("Received remote disconnected notice. Terminating listener thread.");
+							delete[] buff1;
 							break;
 						}
 						else if (received != unread) {
-							*binMsg += string((const char*) buff1, received);
+							binMsg->append((const char*) buff1, received);
+							delete[] buff1;
 							unread -= received;
 							NYMPH_LOG_WARNING("Incomplete message: " + NumberFormatter::format(unread) + "/" + NumberFormatter::format(length) + " unread.");
 							continue;
 						}
 						
 						// Full message was read. Continue with processing.
-						*binMsg += string((const char*) buff1, received);
+						binMsg->append((const char*) buff1, received);
+						delete[] buff1;
 						break;
 					} // if
 				} //while
@@ -120,7 +124,7 @@ void NymphSocketListener::run() {
 				binMsg = new string(((const char*) buff), length);
 			}
 			
-			delete buff;
+			delete[] buff;
 			
 			// Parse the string into an NymphMessage instance.
 			NymphMessage* msg = new NymphMessage(*binMsg);
