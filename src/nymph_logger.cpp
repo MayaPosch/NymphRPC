@@ -140,5 +140,6 @@ Logger& NymphLogger::logger() {
 
 // Returns a reference to the logger instance using the provided name.
 Logger& NymphLogger::logger(string &name) {
+	// TODO: cache the returned logger for future calls.
 	return Logger::get(name);
 }

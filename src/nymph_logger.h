@@ -36,35 +36,35 @@ enum NymphLogLevels {
 
 
 #define NYMPH_LOG_FATAL(msg) \
-	if (NymphLogger::logger(loggerName).fatal()) { \
+	if (NymphLogger::priority >= Message::PRIO_FATAL) { \
 		NymphLogger::logger(loggerName).fatal(msg, __FILE__, __LINE__);\
 	} 
 #define NYMPH_LOG_CRITICAL(msg) \
-	if (NymphLogger::logger(loggerName).critical()) { \
+	if (NymphLogger::priority >= Message::PRIO_CRITICAL) { \
 		NymphLogger::logger(loggerName).critical(msg, __FILE__, __LINE__);\
 	}
 #define NYMPH_LOG_ERROR(msg) \
-	if (NymphLogger::logger(loggerName).error()) { \
+	if (NymphLogger::priority >= Message::PRIO_ERROR) { \
 		NymphLogger::logger(loggerName).error(msg, __FILE__, __LINE__);\
 	}
 #define NYMPH_LOG_WARNING(msg) \
-	if (NymphLogger::logger(loggerName).warning()) { \
+	if (NymphLogger::priority >= Message::PRIO_WARNING) { \
 		NymphLogger::logger(loggerName).warning(msg, __FILE__, __LINE__);\
 	}
 #define NYMPH_LOG_NOTICE(msg) \
-	if (NymphLogger::logger(loggerName).fatal()) { \
-		NymphLogger::logger(loggerName).fatal(msg, __FILE__, __LINE__);\
+	if (NymphLogger::priority >= Message::PRIO_NOTICE) { \
+		NymphLogger::logger(loggerName).notice(msg, __FILE__, __LINE__);\
 	}
 #define NYMPH_LOG_INFORMATION(msg) \
-	if (NymphLogger::logger(loggerName).information()) { \
+	if (NymphLogger::priority >= Message::PRIO_INFORMATION) { \
 		NymphLogger::logger(loggerName).information(msg, __FILE__, __LINE__);\
 	}
 #define NYMPH_LOG_DEBUG(msg) \
-	if (NymphLogger::logger(loggerName).debug()) { \
+	if (NymphLogger::priority >= Message::PRIO_DEBUG) { \
 		NymphLogger::logger(loggerName).debug(msg, __FILE__, __LINE__);\
 	}
 #define NYMPH_LOG_TRACE(msg) \
-	if (NymphLogger::logger(loggerName).trace()) { \
+	if (NymphLogger::priority >= Message::PRIO_TRACE) { \
 		NymphLogger::logger(loggerName).trace(msg, __FILE__, __LINE__);\
 	}
 
@@ -89,9 +89,10 @@ public:
 
 
 class NymphLogger {
-	static Poco::Message::Priority priority;
 	//static Poco::Logger* loggerRef;
 public:
+	static Poco::Message::Priority priority;
+	
 	static void setLoggerFunction(logFnc function);
 	static void setLogLevel(Poco::Message::Priority priority);
 	static Poco::Logger& logger();
