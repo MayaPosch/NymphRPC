@@ -35,6 +35,30 @@ using namespace Poco;
 
 // >>> UTILITY METHODS <<<
 //
+inline UInt8 getUInt8(string &binary, int &index) {
+	return (UInt8) binary[index++];
+}
+
+
+inline UInt16 getUInt16(string &binary, int &index) {
+	UInt16 val = (UInt16) binary[index];
+	index += 2;
+	return val;
+}
+
+
+inline UInt32 getUInt32(string &binary, int &index) {
+	UInt32 val = (UInt32) binary[index];
+	index += 4;
+	return val;
+}
+
+
+inline UInt64 getUInt64(string &binary, int &index) {
+	UInt64 val = (UInt64) binary[index];
+	index += 8;
+	return val;
+}
 
 
 // >>> NYMPH ARRAY <<<
@@ -96,6 +120,8 @@ bool NymphArray::deserialize(string &binary, int &index) {
 	index += 8;
 	
 	NYMPH_LOG_DEBUG("Array size: " + NumberFormatter::format(numElements) + " elements.");
+	
+	values.reserve(numElements);
 	
 	// Now parse the elements.
 	UInt8 typecode = 0;
@@ -283,23 +309,27 @@ bool NymphString::deserialize(string &binary, int &index) {
 	UInt64 l = 0;
 	switch (typecode) {
 		 case NYMPH_TYPE_UINT8: {   
-			NymphUint8 v(binary, index);
-			l = v.getValue();
+			//NymphUint8 v(binary, index);
+			//l = v.getValue();
+			l = getUInt8(binary, index);
 		 }
             break;
 		case NYMPH_TYPE_UINT16: {
-			NymphUint16 v(binary, index);
-			l = v.getValue();
+			//NymphUint16 v(binary, index);
+			//l = v.getValue();
+			l = getUInt16(binary, index);
 		}
 			break;
 		case NYMPH_TYPE_UINT32: {
-			NymphUint32 v(binary, index);
-			l = v.getValue();
+			//NymphUint32 v(binary, index);
+			//l = v.getValue();
+			l = getUInt32(binary, index);
 		}
 			break;
 		case NYMPH_TYPE_UINT64: {
-			NymphUint64 v(binary, index);
-			l = v.getValue();
+			//NymphUint64 v(binary, index);
+			//l = v.getValue();
+			l = getUInt64(binary, index);
 		}
 			break;
 		default:
