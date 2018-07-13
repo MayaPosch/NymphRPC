@@ -279,27 +279,19 @@ bool NymphString::deserialize(string* binary, int &index) {
 	typecode = getUInt8(binary, index);
 	UInt64 l = 0;
 	switch (typecode) {
-		 case NYMPH_TYPE_UINT8: {   
-			//NymphUint8 v(binary, index);
-			//l = v.getValue();
+		 case NYMPH_TYPE_UINT8: {
 			l = getUInt8(binary, index);
 		 }
             break;
 		case NYMPH_TYPE_UINT16: {
-			//NymphUint16 v(binary, index);
-			//l = v.getValue();
 			l = getUInt16(binary, index);
 		}
 			break;
 		case NYMPH_TYPE_UINT32: {
-			//NymphUint32 v(binary, index);
-			//l = v.getValue();
 			l = getUInt32(binary, index);
 		}
 			break;
 		case NYMPH_TYPE_UINT64: {
-			//NymphUint64 v(binary, index);
-			//l = v.getValue();
 			l = getUInt64(binary, index);
 		}
 			break;

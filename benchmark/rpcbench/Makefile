@@ -9,7 +9,7 @@ RM = rm
 OUTPUT = rpcbench
 INCLUDE = -I ./
 LIB := -L ./ -lrpc -lpthread
-CFLAGS := $(INCLUDE) -std=c++11 -O1
+CFLAGS := $(INCLUDE) -std=c++11 -O1 -g3
 #SOURCES := $(wildcard *.cpp)
 SOURCES := rpcbench_fixture.cpp
 OBJECTS := $(addprefix obj/,$(notdir) $(SOURCES:.cpp=.o))
