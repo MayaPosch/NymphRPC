@@ -57,7 +57,7 @@ class NymphMessage {
 public:
 	NymphMessage();
 	NymphMessage(UInt32 methodId);
-	NymphMessage(string binmsg);
+	NymphMessage(string* binmsg);
 	~NymphMessage();
 	bool addValue(NymphType* value);
 	bool finish(string &output);

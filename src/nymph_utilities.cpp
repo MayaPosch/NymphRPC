@@ -100,7 +100,7 @@ NymphType* NymphUtilities::dynamicVarToNymphType(Dynamic::Var &object) {
 // --- PARSE VALUE ---
 // Parses the value section of a message's key/value pair. Determines the value
 // type and uses the appropriate NymphType to parse the value.
-bool NymphUtilities::parseValue(UInt8 typecode, string &binmsg, int &index, NymphType* &value) {
+bool NymphUtilities::parseValue(UInt8 typecode, string* binmsg, int &index, NymphType* &value) {
 	//NYMPH_LOG_DEBUG("parseValue called with typecode: " + NumberFormatter::formatHex(typecode) + ".");
 	
 	switch (typecode) {

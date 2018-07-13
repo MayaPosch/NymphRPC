@@ -55,7 +55,7 @@ NymphMessage::NymphMessage(UInt32 methodId) {
 
 
 // Deserialises a binary Nymph message.
-NymphMessage::NymphMessage(string binmsg) {
+NymphMessage::NymphMessage(string* binmsg) {
 	flags = 0;
 	state = 0; // no error
 	response = 0;
@@ -63,7 +63,7 @@ NymphMessage::NymphMessage(string binmsg) {
 	hasResult = false;
 	responseOwned = false;
 	loggerName = "NymphMessage";
-	UInt64 binLength = binmsg.length();
+	UInt64 binLength = binmsg->length();
 	
 	// The string we receive here is stripped of the Nymph header (0x4452474e, 'DRGN')
 	// as well as the length of the message.
@@ -73,9 +73,8 @@ NymphMessage::NymphMessage(string binmsg) {
 	methodId = 0;
 	
 	int index = 0;
-	version = *((UInt8*) &binmsg[index++]);
-	methodId = *((UInt32*) &binmsg[index]);
-	index += 4;
+	version = getUInt8(binmsg, index);
+	methodId = getUInt32(binmsg, index);
 	
 	NYMPH_LOG_DEBUG("Method ID: " + NumberFormatter::formatHex(methodId) + ".");
 	
@@ -89,22 +88,19 @@ NymphMessage::NymphMessage(string binmsg) {
 	}
 	
 	// Read the message flags.
-	flags = *((UInt32*) &binmsg[index]);
-	index += 4;
+	flags = getUInt32(binmsg, index);
 	
 	NYMPH_LOG_DEBUG("Message flags: 0x" + NumberFormatter::formatHex(flags));
 	
 	// Read the message ID & optionally the request message ID (if response).
-	messageId = *((UInt64*) &binmsg[index]);
-	index += 8;
+	messageId = getUInt64(binmsg, index);
 	
 	UInt8 typecode;
 	if (flags & NYMPH_MESSAGE_REPLY) {
-		responseId = *((UInt64*) &binmsg[index]);
-		index += 8;
+		responseId = getUInt64(binmsg, index);
 		
 		// Read in the response
-		typecode = *((UInt8*) &binmsg[index++]);
+		typecode = getUInt8(binmsg, index);
 		NymphUtilities::parseValue(typecode, binmsg, index, response);
 		
 		if (index >= binLength) {
@@ -113,24 +109,23 @@ NymphMessage::NymphMessage(string binmsg) {
 			return;
 		}
 		
-		if (binmsg[index] != NYMPH_TYPE_NONE) {
+		if ((*binmsg)[index] != NYMPH_TYPE_NONE) {
 			// We didn't reach the message end. 
 			// FIXME: handle this case, maybe do some pre-flight checks.
 		}
 	}
 	else if (flags & NYMPH_MESSAGE_EXCEPTION) {
-		responseId = *((UInt64*) &binmsg[index]);
-		index += 8;
+		responseId = getUInt64(binmsg, index);
 		
 		// Read in the exception (integer, string).
-		typecode = *((UInt8*) &binmsg[index++]);
+		typecode = getUInt8(binmsg, index);
 		NymphType* value;
 		NymphUtilities::parseValue(typecode, binmsg, index, value);
 		if (value->type() == NYMPH_UINT32) {
 			exception.id = ((NymphUint32*) value)->getValue();
 		}
 		
-		typecode = *((UInt8*) &binmsg[index++]);
+		typecode = getUInt8(binmsg, index);
 		NymphUtilities::parseValue(typecode, binmsg, index, value);
 		if (value->type() == NYMPH_STRING) {
 			exception.value = ((NymphString*) value)->getValue();
@@ -138,7 +133,7 @@ NymphMessage::NymphMessage(string binmsg) {
 	}
 	else if (flags & NYMPH_MESSAGE_CALLBACK) {
 		// Read in the name of the callback method.
-		typecode = *((UInt8*) &binmsg[index++]);
+		typecode = getUInt8(binmsg, index);
 		NymphType* value = 0;
 		NymphUtilities::parseValue(typecode, binmsg, index, value);
 		if (value && value->type() == NYMPH_STRING) {
@@ -148,7 +143,7 @@ NymphMessage::NymphMessage(string binmsg) {
 	else {		
 		// Read in the parameter values.
 		NymphType* value;
-		while (binmsg[index] != NYMPH_TYPE_NONE) {
+		while ((*binmsg)[index] != NYMPH_TYPE_NONE) {
 			if (index >= binLength) {
 				NYMPH_LOG_ERROR("Reached end of message without terminator found.");
 				NYMPH_LOG_ERROR("Message is likely corrupt.");
@@ -158,7 +153,7 @@ NymphMessage::NymphMessage(string binmsg) {
 				break;
 			}
 			
-			typecode = *((UInt8*) &binmsg[index++]);
+			typecode = getUInt8(binmsg, index);
 			NymphUtilities::parseValue(typecode, binmsg, index, value);
 			values.push_back(value);
 		}

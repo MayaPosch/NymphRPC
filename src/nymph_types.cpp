@@ -33,34 +33,6 @@ using namespace std;
 using namespace Poco;
 
 
-// >>> UTILITY METHODS <<<
-//
-inline UInt8 getUInt8(string &binary, int &index) {
-	return (UInt8) binary[index++];
-}
-
-
-inline UInt16 getUInt16(string &binary, int &index) {
-	UInt16 val = (UInt16) binary[index];
-	index += 2;
-	return val;
-}
-
-
-inline UInt32 getUInt32(string &binary, int &index) {
-	UInt32 val = (UInt32) binary[index];
-	index += 4;
-	return val;
-}
-
-
-inline UInt64 getUInt64(string &binary, int &index) {
-	UInt64 val = (UInt64) binary[index];
-	index += 8;
-	return val;
-}
-
-
 // >>> NYMPH ARRAY <<<
 // 
 
@@ -108,7 +80,7 @@ string NymphArray::serialize() {
 
 
 // --- DESERIALIZE ---
-bool NymphArray::deserialize(string &binary, int &index) {
+bool NymphArray::deserialize(string* binary, int &index) {
 	string loggerName = "NymphTypes";
 	//NYMPH_LOG_DEBUG("NYMPH_TYPE_ARRAY");
 	// An ARRAY type consists out of a length (UInt64),
@@ -116,8 +88,7 @@ bool NymphArray::deserialize(string &binary, int &index) {
 	// typecode.
 	
 	// Size of the array, in number of elements.
-	UInt64 numElements = ((UInt64) binary[index]);
-	index += 8;
+	UInt64 numElements = getUInt64(binary, index);
 	
 	NYMPH_LOG_DEBUG("Array size: " + NumberFormatter::format(numElements) + " elements.");
 	
@@ -127,7 +98,7 @@ bool NymphArray::deserialize(string &binary, int &index) {
 	UInt8 typecode = 0;
 	for (UInt64 i = 0; i < numElements; ++i) {
 		NYMPH_LOG_TRACE("Parsing array element " + NumberFormatter::format(i) + " of " + NumberFormatter::format(numElements) + " - Index: " + NumberFormatter::format(index) + ".");
-		typecode = ((UInt8) binary[index++]);
+		typecode = getUInt8(binary, index);
 		NymphType* elVal = 0;
 		NymphUtilities::parseValue(typecode, binary, index, elVal);
 		if (elVal) {
@@ -136,7 +107,7 @@ bool NymphArray::deserialize(string &binary, int &index) {
 		}
 	}
 	
-	typecode = ((UInt8) binary[index++]);
+	typecode = getUInt8(binary, index);
 	if (typecode != NYMPH_TYPE_NONE) {
 		NYMPH_LOG_ERROR("Array terminator was not found where expected.");
 	}
@@ -160,7 +131,7 @@ bool NymphArray::deserialize(string &binary, int &index) {
 
 NymphBoolean::NymphBoolean(string value) {
 	int index = 0;
-	deserialize(value, index);
+	deserialize(&value, index);
 }
 
 
@@ -194,10 +165,10 @@ string NymphBoolean::serialize() {
 // --- DESERIALIZE ---
 // Input is a single-character string. Read it and convert it to the proper
 // boolean value.
-bool NymphBoolean::deserialize(string &binary, int &index) {
+bool NymphBoolean::deserialize(string* binary, int &index) {
 	isEmpty = false;
-	if (binary.length() < 1) { return false; }
-	unsigned char ch = binary[index];
+	if (binary->length() < 1) { return false; }
+	unsigned char ch = (*binary)[index];
 	if (ch == NYMPH_TYPE_BOOLEAN_FALSE) { value = false; }
 	else if (ch == NYMPH_TYPE_BOOLEAN_TRUE) { value = true; }
 	else { return false; }
@@ -302,10 +273,10 @@ string NymphString::serialize() {
 
 
 // --- DESERIALIZE ---
-bool NymphString::deserialize(string &binary, int &index) {
+bool NymphString::deserialize(string* binary, int &index) {
 	string loggerName = "NymphTypes";
 	UInt8 typecode = 0;
-	typecode = ((UInt8) binary[index++]);
+	typecode = getUInt8(binary, index);
 	UInt64 l = 0;
 	switch (typecode) {
 		 case NYMPH_TYPE_UINT8: {   
@@ -337,7 +308,7 @@ bool NymphString::deserialize(string &binary, int &index) {
 			return false;
 	}
 	
-	value = binary.substr(index, l);
+	value = binary->substr(index, l);
 	index += l;
 	
 	NYMPH_LOG_DEBUG("String value: " + value + ".");
@@ -384,8 +355,8 @@ string NymphDouble::serialize() {
 
 
 // --- DESERIALIZE ---
-bool NymphDouble::deserialize(string &binary, int &index) {
-	value = *((double*) &binary[index]);
+bool NymphDouble::deserialize(string* binary, int &index) {
+	value = *((double*) &((*binary)[index]));
 	index += 8;
 	return true;
 }
@@ -419,8 +390,8 @@ string NymphFloat::serialize() {
 
 
 // --- DESERIALIZE ---
-bool NymphFloat::deserialize(string &binary, int &index) {
-	value = *((float*) &binary[index]);
+bool NymphFloat::deserialize(string* binary, int &index) {
+	value = *((float*) &((*binary)[index]));
 	index += 4;
 	return true;
 }
@@ -453,8 +424,8 @@ string NymphUint8::serialize() {
 
 
 // --- DESERIALIZE ---
-bool NymphUint8::deserialize(string &binary, int &index) {
-	value = (UInt8) binary[index++];	
+bool NymphUint8::deserialize(string* binary, int &index) {
+	value = getUInt8(binary, index);
 	return true;
 }
 
@@ -482,8 +453,8 @@ string NymphSint8::serialize() {
 
 
 // --- DESERIALIZE ---
-bool NymphSint8::deserialize(string &binary, int &index) {
-	value = (Int8) binary[index++];
+bool NymphSint8::deserialize(string* binary, int &index) {
+	value = getSInt8(binary, index);
 	return true;
 }
 
@@ -511,9 +482,8 @@ string NymphUint16::serialize() {
 
 
 // --- DESERIALIZE ---
-bool NymphUint16::deserialize(string &binary, int &index) {
-	value = *((UInt16*) &binary[index]);
-	index += 2;
+bool NymphUint16::deserialize(string* binary, int &index) {
+	value = getUInt16(binary, index);
 	return true;
 }
 
@@ -541,9 +511,8 @@ string NymphSint16::serialize() {
 
 
 // --- DESERIALIZE ---
-bool NymphSint16::deserialize(string &binary, int &index) {
-	value = *((Int16*) &binary[index]);
-	index += 2;
+bool NymphSint16::deserialize(string* binary, int &index) {
+	value = getSInt16(binary, index);
 	return true;
 }
 
@@ -571,9 +540,8 @@ string NymphUint32::serialize() {
 
 
 // --- DESERIALIZE ---
-bool NymphUint32::deserialize(string &binary, int &index) {
-	value = *((UInt32*) &binary[index]);
-	index += 4;
+bool NymphUint32::deserialize(string* binary, int &index) {
+	value = getUInt32(binary, index);
 	return true;
 }
 
@@ -601,9 +569,8 @@ string NymphSint32::serialize() {
 
 
 // --- DESERIALIZE ---
-bool NymphSint32::deserialize(string &binary, int &index) {
-	value = *((Int32*) &binary[index]);
-	index += 4;
+bool NymphSint32::deserialize(string* binary, int &index) {
+	value = getSInt32(binary, index);
 	return true;
 }
 
@@ -631,9 +598,8 @@ string NymphUint64::serialize() {
 
 
 // --- DESERIALIZE ---
-bool NymphUint64::deserialize(string &binary, int &index) {
-	value = *((UInt64*) &binary[index]);
-	index += 8;
+bool NymphUint64::deserialize(string* binary, int &index) {
+	value = getUInt64(binary, index);
 	return true;
 }
 
@@ -661,9 +627,8 @@ string NymphSint64::serialize() {
 
 
 // --- DESERIALIZE ---
-bool NymphSint64::deserialize(string &binary, int &index) {
-	value = *((Int64*) &binary[index]);
-	index += 8;
+bool NymphSint64::deserialize(string* binary, int &index) {
+	value = getSInt64(binary, index);
 	return true;
 }
 
@@ -702,15 +667,15 @@ string NymphStruct::serialize() {
 
 
 // --- DESERIALIZE ---
-bool NymphStruct::deserialize(string &binary, int &index) {
+bool NymphStruct::deserialize(string* binary, int &index) {
 	// Read pairs until NONE type has been found.
 	// FIXME: check that we're not running out of bytes to read.
-	while (binary[index] != NYMPH_TYPE_NONE) {
-		if (binary[index] != NYMPH_TYPE_STRING) { return false; }
-		UInt8 typecode = binary[index++];
+	while ((*binary)[index] != NYMPH_TYPE_NONE) {
+		if ((*binary)[index] != NYMPH_TYPE_STRING) { return false; }
+		UInt8 typecode = getUInt8(binary, index);
 		NymphPair p;
 		if (!NymphUtilities::parseValue(typecode, binary, index, p.key)) { return false; }
-		typecode = binary[index++];
+		typecode = getUInt8(binary, index);
 		if (!NymphUtilities::parseValue(typecode, binary, index, p.value)) { return false; }
 	}
 	

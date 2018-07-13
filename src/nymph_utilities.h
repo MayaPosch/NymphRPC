@@ -36,7 +36,7 @@ public:
 	//static UInt32 createHash(string name);
 	static Int64 getMessageId();
 	static NymphType* dynamicVarToNymphType(Dynamic::Var &object);
-	static bool parseValue(UInt8 typecode, string &binmsg, int &index, NymphType* &value);
+	static bool parseValue(UInt8 typecode, string* binmsg, int &index, NymphType* &value);
 };
 
 #endif

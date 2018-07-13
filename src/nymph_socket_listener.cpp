@@ -127,7 +127,7 @@ void NymphSocketListener::run() {
 			delete[] buff;
 			
 			// Parse the string into an NymphMessage instance.
-			NymphMessage* msg = new NymphMessage(*binMsg);
+			NymphMessage* msg = new NymphMessage(binMsg);
 			delete binMsg;
 			
 			// The 'In Reply To' message ID in this message is now used to notify

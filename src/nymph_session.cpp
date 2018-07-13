@@ -130,7 +130,7 @@ void NymphSession::run() {
 			delete[] buff;
 			
 			// Parse the string into an NymphMessage instance.
-			NymphMessage* msg = new NymphMessage(*binMsg);
+			NymphMessage* msg = new NymphMessage(binMsg);
 			delete binMsg;
 			if (msg->getState() != 0) {
 				// Error during the parsing of the message. Abort.
