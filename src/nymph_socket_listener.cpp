@@ -18,6 +18,8 @@
 
 #include <Poco/NumberFormatter.h>
 
+using namespace Poco;
+
 
 // --- CONSTRUCTOR ---
 NymphSocketListener::NymphSocketListener(NymphSocket socket, Condition* cnd, Mutex* mtx) {

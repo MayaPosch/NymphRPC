@@ -37,10 +37,10 @@ class NymphRemoteServer {
 	static int lastHandle;
 	static long timeout;
 	static string loggerName;
-	static UInt32 nextMethodId;
+	static uint32_t nextMethodId;
 	
 	static map<string, NymphMethod>& methods();
-	static map<UInt32, NymphMethod*>& methodsIds();
+	static map<uint32_t, NymphMethod*>& methodsIds();
 	static Poco::Mutex& methodsMutex();
 	
 	static bool registerMethod(string name, NymphMethod method);
@@ -56,7 +56,7 @@ public:
 	static bool disconnect(int handle, string &result);
 	static bool callMethod(int handle, string name, vector<NymphType*> &values, 
 										NymphType* &returnvalue, string &result);
-	static bool callMethodId(int handle, UInt32 id, vector<NymphType*> &values, NymphType* &returnvalue, string &result);
+	static bool callMethodId(int handle, uint32_t id, vector<NymphType*> &values, NymphType* &returnvalue, string &result);
 	static bool removeMethod(string name);
 	
 	static bool registerCallback(string name, NymphCallbackMethod method, void* data);

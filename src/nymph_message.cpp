@@ -42,7 +42,7 @@ NymphMessage::NymphMessage() {
 }
 
 
-NymphMessage::NymphMessage(UInt32 methodId) {
+NymphMessage::NymphMessage(uint32_t methodId) {
 	flags = 0;
 	state = 0; // no error
 	response = 0;
@@ -63,13 +63,13 @@ NymphMessage::NymphMessage(string* binmsg) {
 	hasResult = false;
 	responseOwned = false;
 	loggerName = "NymphMessage";
-	UInt64 binLength = binmsg->length();
+	uint64_t binLength = binmsg->length();
 	
 	// The string we receive here is stripped of the Nymph header (0x4452474e, 'DRGN')
 	// as well as the length of the message.
 	// First we get the Nymph protocol version (0x00), then the command index number 
 	// (<uint32>).
-	UInt8 version = 0;
+	uint8_t version = 0;
 	methodId = 0;
 	
 	int index = 0;
@@ -95,7 +95,7 @@ NymphMessage::NymphMessage(string* binmsg) {
 	// Read the message ID & optionally the request message ID (if response).
 	messageId = getUInt64(binmsg, index);
 	
-	UInt8 typecode;
+	uint8_t typecode;
 	if (flags & NYMPH_MESSAGE_REPLY) {
 		responseId = getUInt64(binmsg, index);
 		
@@ -164,8 +164,8 @@ NymphMessage::NymphMessage(string* binmsg) {
 // --- DECONSTRUCTOR ---
 // Delete all values stored in this message since we have taken ownership.
 NymphMessage::~NymphMessage() {
-	UInt64 l = values.size();
-	for (UInt64 i = 0; i < l; ++i) {
+	uint64_t l = values.size();
+	for (uint64_t i = 0; i < l; ++i) {
 		if (values[i]) {
 			delete values[i];
 		}
@@ -191,14 +191,14 @@ bool NymphMessage::addValue(NymphType* value) {
 // --- FINISH ---
 // Finish the header contents, merge with contents. Make result available.
 bool NymphMessage::finish(string &output) {
-	UInt8 nymphNone = NYMPH_TYPE_NONE;
+	uint8_t nymphNone = NYMPH_TYPE_NONE;
 	
 	NYMPH_LOG_DEBUG("Serialising message with flags: 0x" + NumberFormatter::formatHex(flags));
 	
 	// Header section.
-	UInt32 signature = 0x4452474e; // 'DRGN'
-	UInt32 length = 0; // Filled in later.
-	UInt8 version = 0x00;
+	uint32_t signature = 0x4452474e; // 'DRGN'
+	uint32_t length = 0; // Filled in later.
+	uint8_t version = 0x00;
 	
 	// Content
 	string content;
@@ -233,7 +233,7 @@ bool NymphMessage::finish(string &output) {
 	// 
 	// For a response message, add another 8 bytes to the length. (incl. exceptions).
 	// For a callback message, add 1 byte + callback name length.
-	length = (UInt32) (content.length() + 18);
+	length = (uint32_t) (content.length() + 18);
 	if (flags & NYMPH_MESSAGE_REPLY) { length += 8; }
 	if (flags & NYMPH_MESSAGE_EXCEPTION) { length += 8; }
 	else if (flags & NYMPH_MESSAGE_CALLBACK) {
@@ -276,7 +276,7 @@ bool NymphMessage::finish(string &output) {
 
 // --- SET IN REPLY TO ---
 // Set the message ID we're responding to with this message. Set the 'reply' bitflag, too.
-void NymphMessage::setInReplyTo(UInt64 msgId) {
+void NymphMessage::setInReplyTo(uint64_t msgId) {
 	
 	//NYMPH_LOG_DEBUG("Current message flags: 0x" + NumberFormatter::formatHex(flags));
 	
@@ -326,4 +326,5 @@ bool NymphMessage::setException(int exceptionId, string value) {
 bool NymphMessage::setCallback(string name) {
 	flags |= NYMPH_MESSAGE_CALLBACK;
 	callbackName = name;
+	return true;
 }

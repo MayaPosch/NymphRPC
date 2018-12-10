@@ -23,8 +23,8 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <cstdint>
 
-using namespace Poco;
 using namespace std;
 
 
@@ -37,7 +37,7 @@ enum NymphInternalTypes {
 	NYMPH_TYPE_SINT8			= 0x05,
     NYMPH_TYPE_UINT16        	= 0x06,
 	NYMPH_TYPE_SINT16			= 0x07,
-    NYMPH_TYPE_UINT32        	= 0x08,
+    NYMPH_TYPE_UINT32       	= 0x08,
 	NYMPH_TYPE_SINT32			= 0x09,
     NYMPH_TYPE_UINT64        	= 0x0a,
 	NYMPH_TYPE_SINT64			= 0x0b,
@@ -78,53 +78,53 @@ enum NymphTypes {
 
 // >>> UTILITY METHODS <<<
 //
-inline UInt8 getUInt8(string* binary, int &index) {
-	return (UInt8) (*binary)[index++];
+inline uint8_t getUInt8(string* binary, int &index) {
+	return (uint8_t) (*binary)[index++];
 }
 
 
-inline UInt16 getUInt16(string* binary, int &index) {
-	UInt16 val = *((UInt16*) &((*binary)[index]));
+inline uint16_t getUInt16(string* binary, int &index) {
+	uint16_t val = *((uint16_t*) &((*binary)[index]));
 	index += 2;
 	return val;
 }
 
 
-inline UInt32 getUInt32(string* binary, int &index) {
-	UInt32 val = *((UInt32*) &((*binary)[index]));
+inline uint32_t getUInt32(string* binary, int &index) {
+	uint32_t val = *((uint32_t*) &((*binary)[index]));
 	index += 4;
 	return val;
 }
 
 
-inline UInt64 getUInt64(string* binary, int &index) {
-	UInt64 val = *((UInt64*) &((*binary)[index]));
+inline uint64_t getUInt64(string* binary, int &index) {
+	uint64_t val = *((uint64_t*) &((*binary)[index]));
 	index += 8;
 	return val;
 }
 
 
-inline Int8 getSInt8(string* binary, int &index) {
-	return (Int8) (*binary)[index++];
+inline int8_t getSInt8(string* binary, int &index) {
+	return (int8_t) (*binary)[index++];
 }
 
 
-inline Int16 getSInt16(string* binary, int &index) {
-	Int16 val = *((Int16*) &((*binary)[index]));
+inline int16_t getSInt16(string* binary, int &index) {
+	int16_t val = *((int16_t*) &((*binary)[index]));
 	index += 2;
 	return val;
 }
 
 
-inline Int32 getSInt32(string* binary, int &index) {
-	Int32 val = *((Int32*) &((*binary)[index]));
+inline int32_t getSInt32(string* binary, int &index) {
+	int32_t val = *((int32_t*) &((*binary)[index]));
 	index += 4;
 	return val;
 }
 
 
-inline Int64 getSInt64(string* binary, int &index) {
-	Int64 val = *((Int64*) &((*binary)[index]));
+inline int64_t getSInt64(string* binary, int &index) {
+	int64_t val = *((int64_t*) &((*binary)[index]));
 	index += 8;
 	return val;
 }
@@ -140,7 +140,7 @@ public:
 	virtual string serialize() = 0;
 	virtual bool deserialize(string* binary, int &index) = 0;
 	virtual bool empty() = 0;
-	virtual UInt32 binarySize() = 0;
+	virtual uint32_t binarySize() = 0;
 };
 
 
@@ -160,14 +160,14 @@ public:
 	string serialize() { return string(); }
 	bool deserialize(string* binary, int &index) { return true; }
 	bool empty() { return true; }
-	UInt32 binarySize() { return 0; }
+	uint32_t binarySize() { return 0; }
 };
 
 
 class NymphArray : public NymphType {
 	vector<NymphType*> values;
 	bool isEmpty;
-	UInt32 binSize; // For pre-allocating.
+	uint32_t binSize; // For pre-allocating.
 	
 public:
 	NymphArray() { isEmpty = true; binSize = 0; }
@@ -179,7 +179,7 @@ public:
 	string serialize();
 	bool deserialize(string* binary, int &index);
 	bool empty() { return isEmpty; }
-	UInt32 binarySize() { return (10 + binSize); }
+	uint32_t binarySize() { return (10 + binSize); }
 };
 
 
@@ -198,151 +198,151 @@ public:
 	string serialize();
 	bool deserialize(string* binary, int &index);
 	bool empty() { return isEmpty; }
-	UInt32 binarySize() { return 1; }
+	uint32_t binarySize() { return 1; }
 };
 
 
 class NymphUint8 : public NymphType {
-	UInt8 value;
+	uint8_t value;
 	bool isEmpty;
 	
 public:
-	NymphUint8(UInt8 value) { this->value = value; }
+	NymphUint8(uint8_t value) { this->value = value; }
 	NymphUint8(string* value, int &index) { deserialize(value, index); }
 	NymphTypes type() { return NYMPH_UINT8; }
 	string toString(bool quotes = false);
-	void setValue(UInt8 value) { this->value = value; isEmpty = false; }
-	UInt8 getValue() { return value; }
+	void setValue(uint8_t value) { this->value = value; isEmpty = false; }
+	uint8_t getValue() { return value; }
 	string serialize();
 	bool deserialize(string* binary, int &index);
 	bool empty() { return isEmpty; }
-	UInt32 binarySize() { return 2; }
+	uint32_t binarySize() { return 2; }
 };
 
 
 class NymphSint8 : public NymphType {
-	Int8 value;
+	int8_t value;
 	bool isEmpty;
 	
 public:
-	NymphSint8(Int8 value) { this->value = value; }
+	NymphSint8(int8_t value) { this->value = value; }
 	NymphSint8(string* value, int &index) { deserialize(value, index); }
 	NymphTypes type() { return NYMPH_SINT8; }
 	string toString(bool quotes = false);
-	void setValue(Int8 value);
-	Int8 getValue() { return value; }
+	void setValue(int8_t value);
+	int8_t getValue() { return value; }
 	string serialize();
 	bool deserialize(string* binary, int &index);
 	bool empty() { return isEmpty; }
-	UInt32 binarySize() { return 2; }
+	uint32_t binarySize() { return 2; }
 };
 
 
 class NymphUint16 : public NymphType {
-	UInt16 value;
+	uint16_t value;
 	bool isEmpty;
 	
 public:
-	NymphUint16(UInt16 value) { this->value = value; }
+	NymphUint16(uint16_t value) { this->value = value; }
 	NymphUint16(string* value, int &index) { deserialize(value, index); }
 	NymphTypes type() { return NYMPH_UINT16; }
 	string toString(bool quotes = false);
-	void setValue(UInt16 value) { this->value = value; isEmpty = false; }
-	UInt16 getValue() { return value; }
+	void setValue(uint16_t value) { this->value = value; isEmpty = false; }
+	uint16_t getValue() { return value; }
 	string serialize();
 	bool deserialize(string* binary, int &index);
 	bool empty() { return isEmpty; }
-	UInt32 binarySize() { return 3; }
+	uint32_t binarySize() { return 3; }
 };
 
 
 class NymphSint16 : public NymphType {
-	Int16 value;
+	int16_t value;
 	bool isEmpty;
 	
 public:
-	NymphSint16(Int16 value) { this->value = value; }
+	NymphSint16(int16_t value) { this->value = value; }
 	NymphSint16(string* value, int &index) { deserialize(value, index); }
 	NymphTypes type() { return NYMPH_SINT16; }
 	string toString(bool quotes = false);
-	void setValue(Int16 value) { this->value = value; isEmpty = false; }
-	Int16 getValue() { return value; }
+	void setValue(int16_t value) { this->value = value; isEmpty = false; }
+	int16_t getValue() { return value; }
 	string serialize();
 	bool deserialize(string* binary, int &index);
 	bool empty() { return isEmpty; }
-	UInt32 binarySize() { return 3; }
+	uint32_t binarySize() { return 3; }
 };
 
 
 class NymphUint32 : public NymphType {
-	UInt32 value;
+	uint32_t value;
 	bool isEmpty;
 	
 public:
-	NymphUint32(UInt32 value) { this->value = value; }
+	NymphUint32(uint32_t value) { this->value = value; }
 	NymphUint32(string* value, int &index) { deserialize(value, index); }
 	NymphTypes type() { return NYMPH_UINT32; }
 	string toString(bool quotes = false);
-	void setValue(UInt32 value) { this->value = value; isEmpty = false; }
-	UInt32 getValue() { return value; }
+	void setValue(uint32_t value) { this->value = value; isEmpty = false; }
+	uint32_t getValue() { return value; }
 	string serialize();
 	bool deserialize(string* binary, int &index);
 	bool empty() { return isEmpty; }
-	UInt32 binarySize() { return 5; }
+	uint32_t binarySize() { return 5; }
 };
 
 
 class NymphSint32 : public NymphType {
-	Int32 value;
+	int32_t value;
 	bool isEmpty;
 	
 public:
-	NymphSint32(Int32 value) { this->value = value; }
+	NymphSint32(int32_t value) { this->value = value; }
 	NymphSint32(string* value, int &index) { deserialize(value, index); }
 	NymphTypes type() { return NYMPH_SINT32; }
 	string toString(bool quotes = false);
-	void setValue(Int32 value) { this->value = value; isEmpty = false; }
-	Int32 getValue() { return value; }
+	void setValue(int32_t value) { this->value = value; isEmpty = false; }
+	int32_t getValue() { return value; }
 	string serialize();
 	bool deserialize(string* binary, int &index);
 	bool empty() { return isEmpty; }
-	UInt32 binarySize() { return 5; }
+	uint32_t binarySize() { return 5; }
 };
 
 
 class NymphUint64 : public NymphType {
-	UInt64 value;
+	uint64_t value;
 	bool isEmpty;
 	
 public:
-	NymphUint64(UInt64 value) { this->value = value; }
+	NymphUint64(uint64_t value) { this->value = value; }
 	NymphUint64(string* value, int &index) { deserialize(value, index); }
 	NymphTypes type() { return NYMPH_UINT64; }
 	string toString(bool quotes = false);
-	void setValue(Int64 value) { this->value = value; isEmpty = false; }
-	UInt64 getValue() { return value; }
+	void setValue(int64_t value) { this->value = value; isEmpty = false; }
+	uint64_t getValue() { return value; }
 	string serialize();
 	bool deserialize(string* binary, int &index);
 	bool empty() { return isEmpty; }
-	UInt32 binarySize() { return 9; }
+	uint32_t binarySize() { return 9; }
 };
 
 
 class NymphSint64 : public NymphType {
-	Int64 value;
+	int64_t value;
 	bool isEmpty;
 	
 public:
-	NymphSint64(Int64 value) { this->value = value; }
+	NymphSint64(int64_t value) { this->value = value; }
 	NymphSint64(string* value, int &index) { deserialize(value, index); }
 	NymphTypes type() { return NYMPH_SINT64; }
 	string toString(bool quotes = false);
-	void setValue(Int64 value) { this->value = value; isEmpty = false; }
-	Int64 getValue() { return value; }
+	void setValue(int64_t value) { this->value = value; isEmpty = false; }
+	int64_t getValue() { return value; }
 	string serialize();
 	bool deserialize(string* binary, int &index);
 	bool empty() { return isEmpty; }
-	UInt32 binarySize() { return 9; }
+	uint32_t binarySize() { return 9; }
 };
 
 
@@ -360,7 +360,7 @@ public:
 	bool empty() { return isEmpty; }
 	void setValue(double value) { this->value = value; }
 	double getValue() { return value; }
-	UInt32 binarySize() { return 9; }
+	uint32_t binarySize() { return 9; }
 };
 
 
@@ -378,7 +378,7 @@ public:
 	bool empty() { return isEmpty; }
 	void setValue(float value) { this->value = value; }
 	float getValue() { return value; }
-	UInt32 binarySize() { return 5; }
+	uint32_t binarySize() { return 5; }
 };
 
 
@@ -387,7 +387,7 @@ class NymphString : public NymphType {
 	string value;
 	bool emptyString;
 	bool isEmpty;
-	UInt32 binSize;
+	uint32_t binSize;
 	
 public:
 	NymphString() { isEmpty = true; emptyString = true; binSize = 0; }
@@ -401,14 +401,14 @@ public:
 	void setValue(string value);
 	string getValue() { return value; }
 	void setEmptyString(bool val = true) { isEmpty = false; emptyString = val; }
-	UInt32 binarySize() { return binSize; }
+	uint32_t binarySize() { return binSize; }
 };
 
 
 class NymphStruct : public NymphType {
 	vector<NymphPair> pairs;
 	bool isEmpty;
-	UInt32 binSize; // For pre-allocating.
+	uint32_t binSize; // For pre-allocating.
 	
 public:
 	NymphStruct() { isEmpty = true; binSize = 0; }
@@ -417,7 +417,7 @@ public:
 	string serialize();
 	bool deserialize(string* binary, int &index);
 	bool empty() { return isEmpty; }
-	UInt32 binarySize() { return binSize; }
+	uint32_t binarySize() { return binSize; }
 };
 
 

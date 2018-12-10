@@ -19,6 +19,8 @@
 
 #include <Poco/Net/NetException.h>
 
+using namespace Poco;
+
 
 // Static initialisations.
 string NymphServer::loggerName = "NymphServer";

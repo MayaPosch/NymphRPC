@@ -36,35 +36,35 @@ enum NymphLogLevels {
 
 
 #define NYMPH_LOG_FATAL(msg) \
-	if (NymphLogger::priority >= Message::PRIO_FATAL) { \
+	if (NymphLogger::priority >= Poco::Message::PRIO_FATAL) { \
 		NymphLogger::logger(loggerName).fatal(msg, __FILE__, __LINE__);\
 	} 
 #define NYMPH_LOG_CRITICAL(msg) \
-	if (NymphLogger::priority >= Message::PRIO_CRITICAL) { \
+	if (NymphLogger::priority >= Poco::Message::PRIO_CRITICAL) { \
 		NymphLogger::logger(loggerName).critical(msg, __FILE__, __LINE__);\
 	}
 #define NYMPH_LOG_ERROR(msg) \
-	if (NymphLogger::priority >= Message::PRIO_ERROR) { \
+	if (NymphLogger::priority >= Poco::Message::PRIO_ERROR) { \
 		NymphLogger::logger(loggerName).error(msg, __FILE__, __LINE__);\
 	}
 #define NYMPH_LOG_WARNING(msg) \
-	if (NymphLogger::priority >= Message::PRIO_WARNING) { \
+	if (NymphLogger::priority >= Poco::Message::PRIO_WARNING) { \
 		NymphLogger::logger(loggerName).warning(msg, __FILE__, __LINE__);\
 	}
 #define NYMPH_LOG_NOTICE(msg) \
-	if (NymphLogger::priority >= Message::PRIO_NOTICE) { \
+	if (NymphLogger::priority >= Poco::Message::PRIO_NOTICE) { \
 		NymphLogger::logger(loggerName).notice(msg, __FILE__, __LINE__);\
 	}
 #define NYMPH_LOG_INFORMATION(msg) \
-	if (NymphLogger::priority >= Message::PRIO_INFORMATION) { \
+	if (NymphLogger::priority >= Poco::Message::PRIO_INFORMATION) { \
 		NymphLogger::logger(loggerName).information(msg, __FILE__, __LINE__);\
 	}
 #define NYMPH_LOG_DEBUG(msg) \
-	if (NymphLogger::priority >= Message::PRIO_DEBUG) { \
+	if (NymphLogger::priority >= Poco::Message::PRIO_DEBUG) { \
 		NymphLogger::logger(loggerName).debug(msg, __FILE__, __LINE__);\
 	}
 #define NYMPH_LOG_TRACE(msg) \
-	if (NymphLogger::priority >= Message::PRIO_TRACE) { \
+	if (NymphLogger::priority >= Poco::Message::PRIO_TRACE) { \
 		NymphLogger::logger(loggerName).trace(msg, __FILE__, __LINE__);\
 	}
 

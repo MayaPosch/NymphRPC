@@ -24,19 +24,18 @@
 
 #include <string>
 
-using namespace Poco;
 using namespace std;
 
 class NymphUtilities {
-	static Int64 messageId;
-	static Mutex idMutex;	
+	static int64_t messageId;
+	static Poco::Mutex idMutex;	
 	static string loggerName;
 	
 public:
 	//static UInt32 createHash(string name);
-	static Int64 getMessageId();
-	static NymphType* dynamicVarToNymphType(Dynamic::Var &object);
-	static bool parseValue(UInt8 typecode, string* binmsg, int &index, NymphType* &value);
+	static int64_t getMessageId();
+	static NymphType* dynamicVarToNymphType(Poco::Dynamic::Var &object);
+	static bool parseValue(uint8_t typecode, string* binmsg, int &index, NymphType* &value);
 };
 
 #endif

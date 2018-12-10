@@ -18,6 +18,8 @@
 #include "nymph_message.h"
 #include "remote_client.h"
 
+using namespace Poco;
+
 
 // Static initialisations.
 int NymphSession::lastSessionHandle = 0;

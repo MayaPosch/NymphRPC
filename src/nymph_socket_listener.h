@@ -24,8 +24,6 @@
 #include <Poco/Semaphore.h>
 #include <Poco/Condition.h>
 
-using namespace Poco;
-
 #include <map>
 #include <string>
 
@@ -34,8 +32,8 @@ using namespace std;
 // TYPES
 
 struct NymphSocket {
-	Net::StreamSocket* socket;	// Pointer to the socket instance.
-	Semaphore* semaphore;		// Signals when it's safe to delete the socket.
+	Poco::Net::StreamSocket* socket;	// Pointer to the socket instance.
+	Poco::Semaphore* semaphore;		// Signals when it's safe to delete the socket.
 	void* data;					// User data.
 	int handle;					// The Nymph internal socket handle.
 };
@@ -43,9 +41,9 @@ struct NymphSocket {
 
 struct NymphRequest {
 	int handle;
-	UInt64 messageId;
-	Mutex mutex;
-	Condition condition;
+	uint64_t messageId;
+	Poco::Mutex mutex;
+	Poco::Condition condition;
 	NymphType* response;
 	bool exception;
 	NymphException exceptionData;
@@ -58,20 +56,20 @@ class NymphSocketListener : public Poco::Runnable {
 	string loggerName;
 	bool listen;
 	NymphSocket nymphSocket;
-	Net::StreamSocket* socket;
-	map<UInt64, NymphRequest*> messages;
-	Mutex messagesMutex;
+	Poco::Net::StreamSocket* socket;
+	map<uint64_t, NymphRequest*> messages;
+	Poco::Mutex messagesMutex;
 	bool init;
-	Condition* readyCond;
-	Mutex* readyMutex;
+	Poco::Condition* readyCond;
+	Poco::Mutex* readyMutex;
 	
 public:
-	NymphSocketListener(NymphSocket socket, Condition* cond, Mutex* mtx);
+	NymphSocketListener(NymphSocket socket, Poco::Condition* cond, Poco::Mutex* mtx);
 	~NymphSocketListener();
 	void run();
 	void stop();
 	bool addMessage(NymphRequest* &request);
-	bool removeMessage(UInt64 messageId);
+	bool removeMessage(uint64_t messageId);
 };
 
 #endif

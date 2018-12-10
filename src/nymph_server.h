@@ -23,12 +23,10 @@ using namespace std;
 
 #include <Poco/Net/TCPServer.h>
 
-using namespace Poco;
-
 
 class NymphServer {
 	static string loggerName;
-	static Net::TCPServer* server;
+	static Poco::Net::TCPServer* server;
 	
 public:
 	static bool running;

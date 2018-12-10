@@ -24,17 +24,15 @@ using namespace std;
 #include <Poco/Net/TCPServerConnection.h>
 #include <Poco/Mutex.h>
 
-using namespace Poco;
 
-
-class NymphSession : public Net::TCPServerConnection {
+class NymphSession : public Poco::Net::TCPServerConnection {
 	string loggerName;
 	int handle;
 	static int lastSessionHandle;
-	static Mutex handleMutex;
+	static Poco::Mutex handleMutex;
 	
 public:
-	NymphSession(const Net::StreamSocket& socket);
+	NymphSession(const Poco::Net::StreamSocket& socket);
 	void run();
 	bool send(string& msg, string &result);
 };

@@ -41,11 +41,11 @@ class NymphRemoteClient {
 	static string loggerName;
 	static bool synced;
 	static string serializedMethods;
-	static UInt32 nextMethodId;
+	static uint32_t nextMethodId;
 	
 	static map<string, NymphMethod>& callbacks();
 	static map<string, NymphMethod>& methods();
-	static map<UInt32, NymphMethod*>& methodsIds();
+	static map<uint32_t, NymphMethod*>& methodsIds();
 	
 	static NymphMessage* syncMethods(int session, NymphMessage* msg, void* data);
 	
@@ -55,7 +55,7 @@ public:
 	static bool start(int port = 4004);
 	static bool shutdown();
 	static bool registerMethod(string name, NymphMethod method);
-	static bool callMethodCallback(int handle, UInt32 methodId, NymphMessage* msg, NymphMessage* &response);
+	static bool callMethodCallback(int handle, uint32_t methodId, NymphMessage* msg, NymphMessage* &response);
 	static bool removeMethod(string name);
 	
 	static bool registerCallback(string name, NymphMethod method);

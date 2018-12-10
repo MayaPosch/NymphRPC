@@ -25,8 +25,6 @@ using namespace std;
 
 #include <Poco/Mutex.h>
 
-using namespace Poco;
-
 #include "nymph_socket_listener.h"
 
 
@@ -47,11 +45,11 @@ struct NymphCallback {
 
 class NymphListener {
 	static map<int, NymphSocketListener*> listeners;
-	static Mutex listenersMutex;
+	static Poco::Mutex listenersMutex;
 	static string loggerName;
 	
 	static map<string, NymphCallback>& callbacks();
-	static Mutex& callbacksMutex();
+	static Poco::Mutex& callbacksMutex();
 	
 public:
 	static void stop();
@@ -59,7 +57,7 @@ public:
 	static bool addConnection(int handle, NymphSocket socket);
 	static bool removeConnection(int handle);
 	static bool addMessage(NymphRequest* &request);
-	static bool removeMessage(int handle, Int64 messageId);
+	static bool removeMessage(int handle, int64_t messageId);
 	static bool addCallback(NymphCallback callback);
 	static bool callCallback(NymphMessage* msg, void* data);
 	static bool removeCallback(string name);

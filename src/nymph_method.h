@@ -28,7 +28,6 @@
 #include <vector>
 #include <string>
 
-using namespace Poco;
 using namespace std;
 
 
@@ -43,7 +42,7 @@ class NymphMethod {
 	friend class NymphRemoteServer;
 	
 	string name;
-	UInt32 id;
+	uint32_t id;
 	vector<NymphTypes> parameters;
 	NymphMethodCallback callback;
 	NymphTypes returnType;
@@ -51,17 +50,17 @@ class NymphMethod {
 	string serialized;
 	bool isCallback;
 	
-	void setId(UInt32 id);
+	void setId(uint32_t id);
 	
 public:
 	NymphMethod(string name, vector<NymphTypes> parameters, NymphTypes retType);
 	void setCallback(NymphMethodCallback callback);
 	NymphMessage* callCallback(int handle, NymphMessage* msg);
-	bool call(Net::StreamSocket* socket, NymphRequest* &request, vector<NymphType*> &values, string &result);
+	bool call(Poco::Net::StreamSocket* socket, NymphRequest* &request, vector<NymphType*> &values, string &result);
 	bool call(NymphSession* session, vector<NymphType*> &values, string &result);
-	UInt32 getId() { return id; }
+	uint32_t getId() { return id; }
 	string getSerialized() { return serialized; }
-	bool enableCallback(bool state = true) { isCallback = state; }
+	bool enableCallback(bool state = true) { isCallback = state; return true; }
 };
 
 #endif

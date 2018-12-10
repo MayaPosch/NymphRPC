@@ -19,8 +19,6 @@
 
 #include <Poco/Poco.h>
 
-using namespace Poco;
-
 #include <vector>
 
 using namespace std;
@@ -34,19 +32,19 @@ enum {
 
 
 struct NymphException {
-	UInt32 id;
+	uint32_t id;
 	string value;
 };
 
 
 class NymphMessage {
 	vector<NymphType*> values;
-	UInt32 command;
-	UInt32 flags;
-	UInt32 methodId;
+	uint32_t command;
+	uint32_t flags;
+	uint32_t methodId;
 	int state;
-	UInt64 messageId;
-	UInt64 responseId;
+	uint64_t messageId;
+	uint64_t responseId;
 	NymphException exception;
 	bool hasResult;
 	bool responseOwned;
@@ -56,20 +54,20 @@ class NymphMessage {
 	
 public:
 	NymphMessage();
-	NymphMessage(UInt32 methodId);
+	NymphMessage(uint32_t methodId);
 	NymphMessage(string* binmsg);
 	~NymphMessage();
 	bool addValue(NymphType* value);
 	bool finish(string &output);
 	int getState() { return state; }
-	void setInReplyTo(UInt64 msgId);
+	void setInReplyTo(uint64_t msgId);
 	bool isCallback() { return flags & NYMPH_MESSAGE_CALLBACK; }
-	UInt64 getResponseId() { return responseId; }
-	UInt64 getMessageId() { return messageId; }
+	uint64_t getResponseId() { return responseId; }
+	uint64_t getMessageId() { return messageId; }
 	void setResultValue(NymphType* value);
 	NymphType* getResponse() { return response; responseOwned = false; }
 	vector<NymphType*> parameters() { return values; }
-	UInt32 getMethodId() { return methodId; }
+	uint32_t getMethodId() { return methodId; }
 	NymphMessage* getReplyMessage();
 	NymphException getException() { return exception; }
 	string getCallbackName() { return callbackName; }

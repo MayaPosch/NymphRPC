@@ -17,6 +17,8 @@
 #include <Poco/Net/NetException.h>
 #include <Poco/NumberFormatter.h>
 
+using namespace Poco;
+
 #include "remote_server.h"
 #include "nymph_utilities.h"
 
