@@ -21,6 +21,8 @@
 
 using namespace Poco;
 
+using namespace std;
+
 
 // Static initialisations.
 string NymphServer::loggerName = "NymphServer";

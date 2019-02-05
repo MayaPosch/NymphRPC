@@ -19,13 +19,11 @@
 
 #include <string>
 
-using namespace std;
-
 #include <Poco/Net/TCPServer.h>
 
 
 class NymphServer {
-	static string loggerName;
+	static std::string loggerName;
 	static Poco::Net::TCPServer* server;
 	
 public:
