@@ -15,7 +15,15 @@ AR = ar
 OUTPUT = libnymphrpc.a
 INCLUDE = -I src
 #-DPOCO_WIN32_UTF8
-CFLAGS := $(INCLUDE) -g3 -std=c++11 -U__STRICT_ANSI__ -O1
+CFLAGS := $(INCLUDE) -g3 -std=c++11 -O1
+
+# Check for MinGW and patch up POCO
+# The OS variable is only set on Windows.
+ifdef OS
+	CFLAGS := $(CFLAGS) -U__STRICT_ANSI__
+	LIBS += -lws2_32
+endif
+
 SOURCES := $(wildcard src/*.cpp)
 OBJECTS := $(addprefix obj/,$(notdir) $(SOURCES:.cpp=.o))
 

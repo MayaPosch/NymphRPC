@@ -9,7 +9,15 @@ RM = rm
 OUTPUT = nymph_client
 INCLUDE = -I $(TOP)/src
 LIB := -L ../../lib -lnymphrpc -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON
-CFLAGS := $(INCLUDE) -std=c++11 -U__STRICT_ANSI__ -g3
+CFLAGS := $(INCLUDE) -std=c++11 -g3
+
+# Check for MinGW and patch up POCO
+# The OS variable is only set on Windows.
+ifdef OS
+	CFLAGS := $(CFLAGS) -U__STRICT_ANSI__
+	#LIBS += -lws2_32
+endif
+
 SOURCES := $(wildcard *.cpp)
 OBJECTS := $(addprefix obj/,$(notdir) $(SOURCES:.cpp=.o))
 

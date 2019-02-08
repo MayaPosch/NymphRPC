@@ -24,6 +24,7 @@
 
 class NymphServer {
 	static std::string loggerName;
+	static Poco::Net::ServerSocket ss;
 	static Poco::Net::TCPServer* server;
 	
 public:
