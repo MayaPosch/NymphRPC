@@ -5,7 +5,9 @@
 -- 2018/09/24, Maya Posch
 
 package nymph is
-
---
+	-- public
+	
+private
+	--
 
 end nymph;
