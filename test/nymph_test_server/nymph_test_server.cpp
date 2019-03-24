@@ -32,11 +32,9 @@ using namespace Poco;
 
 Condition gCon;
 Mutex gMutex;
-//volatile sig_atomic_t gSignalTrigger = 0;
 
 
 void signal_handler(int signal) {
-	//gSignalTrigger = 1;
 	gCon.signal();
 }
 
@@ -94,7 +92,7 @@ NymphMessage* helloCallback(int session, NymphMessage* msg, void* data) {
 
 int main() {
 	// Initialise the server instance.
-	cout << "Initialising server...\n";
+	cout << "Initialising server..." << std::endl;
 	long timeout = 5000; // 5 seconds.
 	NymphRemoteClient::init(logFunction, NYMPH_LOG_LEVEL_TRACE, timeout);
 	
@@ -117,7 +115,6 @@ int main() {
 	NymphRemoteClient::start(4004);
 	
 	// Loop until the SIGINT signal has been received.
-	//while (gSignalTrigger == 0) { }
 	gMutex.lock();
 	gCon.wait(gMutex);
 	
