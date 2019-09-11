@@ -140,10 +140,20 @@ NymphMessage::NymphMessage(string* binmsg) {
 			callbackName = ((NymphString*) value)->getValue();
 		}
 	}
-	else {		
+	else {
+		if (!(index < binLength)) {
+			// TODO: set 'corrupt' flag.
+			NYMPH_LOG_ERROR("Index is beyond message bounds. Corrupted message.");
+			return;
+		}
+		
 		// Read in the parameter values.
 		NymphType* value;
-		while ((*binmsg)[index] != NYMPH_TYPE_NONE) {
+		while (index < binLength && (*binmsg)[index] != NYMPH_TYPE_NONE) {			
+			typecode = getUInt8(binmsg, index);
+			NymphUtilities::parseValue(typecode, binmsg, index, value);
+			values.push_back(value);
+			
 			if (index >= binLength) {
 				NYMPH_LOG_ERROR("Reached end of message without terminator found.");
 				NYMPH_LOG_ERROR("Message is likely corrupt.");
@@ -152,10 +162,6 @@ NymphMessage::NymphMessage(string* binmsg) {
 				
 				break;
 			}
-			
-			typecode = getUInt8(binmsg, index);
-			NymphUtilities::parseValue(typecode, binmsg, index, value);
-			values.push_back(value);
 		}
 	}
 }

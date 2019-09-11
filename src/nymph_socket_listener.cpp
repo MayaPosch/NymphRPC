@@ -15,6 +15,8 @@
 #include "nymph_socket_listener.h"
 #include "nymph_logger.h"
 #include "nymph_listener.h"
+#include "dispatcher.h"
+#include "callback_request.h"
 
 using namespace std;
 
@@ -141,14 +143,10 @@ void NymphSocketListener::run() {
 			if (msg->isCallback()) {
 				NYMPH_LOG_INFORMATION("Callback received. Trying to find registered method.");
 				
-				if (!NymphListener::callCallback(msg, nymphSocket.data)) {
-					NYMPH_LOG_ERROR("Calling callback failed. Skipping message.");
-					delete msg;
-					continue;
-				}
-				
-				NYMPH_LOG_INFORMATION("Calling callback succeeded.");
-				delete msg;
+				// Dispatch a request to handle this callback.
+				CallbackRequest* req = new CallbackRequest;
+				req->setMessage(msg);
+				Dispatcher::addRequest(req);
 				continue; // We're done with this request.
 			}
 			

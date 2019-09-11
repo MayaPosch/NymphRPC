@@ -24,6 +24,8 @@ using namespace Poco;
 
 using namespace std;
 
+#include "dispatcher.h"
+
 
 // Static initialisations
 map<int, Poco::Net::StreamSocket*> NymphRemoteServer::sockets;
@@ -69,7 +71,10 @@ Poco::Mutex& NymphRemoteServer::methodsMutex() {
 // NYMPH_LOG_LEVEL_TRACE
 bool NymphRemoteServer::init(logFnc logger, int level, long timeout) {
 	NymphRemoteServer::timeout = timeout;
-	setLogger(logger, level);	
+	setLogger(logger, level);
+	
+	// Start the dispatcher runtime.
+	Dispatcher::init(10); // 10 worker threads.
 	
 	// Register built-in synchronisation method ('nymphsync').
 	vector<NymphTypes> parameters;

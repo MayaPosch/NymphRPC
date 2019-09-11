@@ -13,6 +13,8 @@
 #include "remote_client.h"
 #include "nymph_server.h"
 
+#include "dispatcher.h"
+
 
 #include <Poco/Net/NetException.h>
 #include <Poco/NumberFormatter.h>
@@ -92,6 +94,8 @@ bool NymphRemoteClient::init(logFnc logger, int level, long timeout) {
 	NymphRemoteClient::timeout = timeout;
 	setLogger(logger, level);
 	
+	// Start the dispatcher runtime.
+	Dispatcher::init(10); // 10 worker threads.
 	
 	// Register built-in synchronisation method ('nymphsync').
 	vector<NymphTypes> parameters;

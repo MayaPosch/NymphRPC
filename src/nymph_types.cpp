@@ -253,7 +253,7 @@ string NymphString::serialize() {
 			out.append(((const char*) &strType), 1);
 			typecode = NYMPH_TYPE_UINT32;			
 			out.append(((const char*) &typecode), 1);
-			uint8_t l = length;
+			uint32_t l = length;
 			out.append(((const char*) &l), 4);
 		}
 		else {
@@ -261,7 +261,7 @@ string NymphString::serialize() {
 			out.append(((const char*) &strType), 1);
 			typecode = NYMPH_TYPE_UINT64;			
 			out.append(((const char*) &typecode), 1);
-			uint8_t l = length;
+			uint64_t l = length;
 			out.append(((const char*) &l), 8);
 		}
 		
@@ -645,10 +645,10 @@ string NymphStruct::serialize() {
 	uint8_t typecode = NYMPH_TYPE_STRUCT;
 	out.append(((const char*) &typecode), 1);
 	
-	uint32_t length = pairs.size();
-	for (uint32_t i = 0; i < length; ++i) {
-		out += pairs[i].key->serialize();
-		out += pairs[i].value->serialize();
+	std::map<std::string, NymphPair>::const_iterator it;
+	for (it = pairs.begin(); it != pairs.end(); it++) {
+		out += it->second.key->serialize();
+		out += it->second.value->serialize();
 	}
 	
 	typecode = NYMPH_TYPE_NONE;
@@ -669,8 +669,31 @@ bool NymphStruct::deserialize(string* binary, int &index) {
 		if (!NymphUtilities::parseValue(typecode, binary, index, p.key)) { return false; }
 		typecode = getUInt8(binary, index);
 		if (!NymphUtilities::parseValue(typecode, binary, index, p.value)) { return false; }
+		
+		pairs.insert(std::pair<std::string, NymphPair>(((NymphString*) p.key)->getValue(), p));
 	}
 	
+	return true;
+}
+
+
+// --- ADD PAIR ---
+void NymphStruct::addPair(std::string key, NymphType* value) {
+	NymphPair p;
+	p.key = new NymphString(key);
+	p.value = value;
+	pairs.insert(std::pair<std::string, NymphPair>(key, p));
+}
+
+
+// --- GET VALUE ---
+bool NymphStruct::getValue(std::string key, NymphType* &value) {
+	std::map<std::string, NymphPair>::const_iterator it;
+	it = pairs.find(key);
+	if (it == pairs.end()) { return false; }
+	
+	// Found the key, assign value to reference.
+	value = it->second.key;
 	return true;
 }
 

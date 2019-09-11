@@ -404,7 +404,7 @@ public:
 
 
 class NymphStruct : public NymphType {
-	std::vector<NymphPair> pairs;
+	std::map<std::string, NymphPair> pairs;
 	bool isEmpty;
 	uint32_t binSize; // For pre-allocating.
 	
@@ -415,6 +415,8 @@ public:
 	std::string serialize();
 	bool deserialize(std::string* binary, int &index);
 	bool empty() { return isEmpty; }
+	void addPair(std::string key, NymphType* value);
+	bool getValue(std::string key, NymphType* &value);
 	uint32_t binarySize() { return binSize; }
 };
 

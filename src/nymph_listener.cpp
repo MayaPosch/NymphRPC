@@ -16,6 +16,8 @@
 #include "nymph_listener.h"
 #include "nymph_logger.h"
 
+#include "dispatcher.h"
+
 #include <iostream>
 #include <cstdlib>
 
