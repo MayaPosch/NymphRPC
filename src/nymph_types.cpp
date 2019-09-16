@@ -660,6 +660,8 @@ string NymphStruct::serialize() {
 
 // --- DESERIALIZE ---
 bool NymphStruct::deserialize(string* binary, int &index) {
+	string loggerName = "NymphTypes";
+	
 	// Read pairs until NONE type has been found.
 	// FIXME: check that we're not running out of bytes to read.
 	while ((*binary)[index] != NYMPH_TYPE_NONE) {
@@ -693,7 +695,131 @@ bool NymphStruct::getValue(std::string key, NymphType* &value) {
 	if (it == pairs.end()) { return false; }
 	
 	// Found the key, assign value to reference.
-	value = it->second.key;
+	value = it->second.value;
+	return true;
+}
+
+
+// >>> NYMPH BLOB <<<
+NymphBlob::NymphBlob(string value) {
+	this->value = value;
+	isEmpty = false;
+	binSize = 0;
+} 
+
+// --- TO STRING ---
+string NymphBlob::toString(bool quotes) {
+	string out = "";
+	if (quotes) { out += "\""; }
+	out += value;
+	if (quotes) { out += "\""; }
+	
+	return out;
+}
+
+
+// --- SET VALUE ---
+void NymphBlob::setValue(string value) { 
+	this->value = value; 
+	isEmpty = false; 
+	
+	uint64_t length = value.length();
+	if (length <= 0xFF) { binSize = 3 + length; }
+	else if (length <= 0xFFFF) { binSize = 4 + length; }
+	else if (length <= 0xFFFFFFFF) { binSize = 6 + length; }
+	else { binSize = 10 + length; }
+}
+
+
+// ---- SERIALIZE ---
+string NymphBlob::serialize() {
+	string out;
+	uint8_t strType;
+	
+	strType = NYMPH_TYPE_BLOB;
+	uint64_t length = value.length();
+	uint8_t typecode = 0;
+	if (length <= 0xFF) {
+		out.reserve(3 + value.length());
+		out.append(((const char*) &strType), 1);
+		typecode = NYMPH_TYPE_UINT8;			
+		out.append(((const char*) &typecode), 1);
+		uint8_t l = length;
+		out.append(((const char*) &l), 1);
+	}
+	else if (length <= 0xFFFF) {
+		out.reserve(4 + value.length());
+		out.append(((const char*) &strType), 1);
+		typecode = NYMPH_TYPE_UINT16;			
+		out.append(((const char*) &typecode), 1);
+		uint16_t l = length;
+		out.append(((const char*) &l), 2);
+	}
+	else if (length <= 0xFFFFFFFF) {
+		out.reserve(6 + value.length());
+		out.append(((const char*) &strType), 1);
+		typecode = NYMPH_TYPE_UINT32;			
+		out.append(((const char*) &typecode), 1);
+		uint32_t l = length;
+		out.append(((const char*) &l), 4);
+	}
+	else {
+		out.reserve(10 + value.length());
+		out.append(((const char*) &strType), 1);
+		typecode = NYMPH_TYPE_UINT64;			
+		out.append(((const char*) &typecode), 1);
+		uint64_t l = length;
+		out.append(((const char*) &l), 8);
+	}
+	
+	out += value;
+	
+	return out;
+}
+
+
+// --- DESERIALIZE ---
+bool NymphBlob::deserialize(string* binary, int &index) {
+	string loggerName = "NymphTypes";
+	uint8_t typecode = 0;
+	typecode = getUInt8(binary, index);
+	uint64_t l = 0;
+	switch (typecode) {
+		 case NYMPH_TYPE_UINT8: {
+			l = getUInt8(binary, index);
+		 }
+            break;
+		case NYMPH_TYPE_UINT16: {
+			l = getUInt16(binary, index);
+		}
+			break;
+		case NYMPH_TYPE_UINT32: {
+			l = getUInt32(binary, index);
+		}
+			break;
+		case NYMPH_TYPE_UINT64: {
+			l = getUInt64(binary, index);
+		}
+			break;
+		default:
+			NYMPH_LOG_ERROR("Not a valid integer type for blob length.");
+			return false;
+	}
+	
+	value = binary->substr(index, l);
+	index += l;
+	
+	NYMPH_LOG_DEBUG("Blob size: " + NumberFormatter::format(l) + ".");
+	
+	isEmpty = false;
+	
+	// Set size of the serialised message.
+	uint64_t length = value.length();
+	if (length <= 0xFF) { binSize = 3 + length; }
+	else if (length <= 0xFFFF) { binSize = 4 + length; }
+	else if (length <= 0xFFFFFFFF) { binSize = 6 + length; }
+	else { binSize = 10 + length; }
+	
 	return true;
 }
 

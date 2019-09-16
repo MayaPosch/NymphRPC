@@ -45,7 +45,8 @@ enum NymphInternalTypes {
     NYMPH_TYPE_EMPTY_STRING  	= 0x0f,
     NYMPH_TYPE_STRING        	= 0x10,
     NYMPH_TYPE_STRUCT        	= 0x11,
-    NYMPH_TYPE_VOID           	= 0x12
+    NYMPH_TYPE_VOID           	= 0x12,
+	NYMPH_TYPE_BLOB				= 0x13
 };
 
 
@@ -70,6 +71,7 @@ enum NymphTypes {
 	NYMPH_SHORT,
 	NYMPH_STRING,
 	NYMPH_STRUCT,
+	NYMPH_BLOB,
 	NYMPH_ANY
 };
 
@@ -380,7 +382,6 @@ public:
 };
 
 
-
 class NymphString : public NymphType {
 	std::string value;
 	bool emptyString;
@@ -417,6 +418,26 @@ public:
 	bool empty() { return isEmpty; }
 	void addPair(std::string key, NymphType* value);
 	bool getValue(std::string key, NymphType* &value);
+	uint32_t binarySize() { return binSize; }
+};
+
+
+class NymphBlob : public NymphType {
+	std::string value;
+	bool isEmpty;
+	uint32_t binSize;
+	
+public:
+	NymphBlob() { isEmpty = true; binSize = 0; }
+	NymphBlob(std::string value);
+	NymphBlob(std::string* value, int &index) { deserialize(value, index); }
+	NymphTypes type() { return NYMPH_BLOB; }
+	std::string toString(bool quotes = false);
+	std::string serialize();
+	bool deserialize(std::string* binary, int &index);
+	bool empty() { return isEmpty; }
+	void setValue(std::string value);
+	std::string getValue() { return value; }
 	uint32_t binarySize() { return binSize; }
 };
 

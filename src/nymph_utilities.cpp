@@ -170,6 +170,10 @@ bool NymphUtilities::parseValue(UInt8 typecode, string* binmsg, int &index, Nymp
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_STRING");
 			value = new NymphString(binmsg, index);
             break;
+        case NYMPH_TYPE_BLOB:
+			NYMPH_LOG_DEBUG("NYMPH_TYPE_BLOB");
+			value = new NymphBlob(binmsg, index);
+            break;
         case NYMPH_TYPE_ARRAY: {
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_ARRAY");
 			value = new NymphArray;
