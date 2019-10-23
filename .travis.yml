@@ -1,0 +1,58 @@
+language: c
+sudo: require
+  
+matrix:
+    include:
+        - os: linux
+            dist: xenial
+            arch: amd64
+            env:
+                - CC=gcc CXX=g++ CXX_COMPILER=g++ C_COMPILER=gcc ARCH=amd64
+        - os: linux
+            dist: xenial
+            arch: arm64
+            env:
+                - CC=gcc CXX=g++ CXX_COMPILER=g++ C_COMPILER=gcc ARCH=arm64
+
+
+install:
+    - sudo apt-get -y --allow-unauthenticated install libssl-dev libcurl4-openssl-dev
+
+script:
+    # POCO
+    - wget https://github.com/pocoproject/poco/archive/poco-1.9.4-release.tar.gz
+    - tar -xf poco-*-release.tar.gz
+    - cd poco-poco-*-release
+    - mkdir cmake_build
+    - cd cmake_build
+    - export POCO_OPTS="-DENABLE_DATA_MYSQL=off -DENABLE_DATA_ODBC=off -DENABLE_DATA_SQLITE=off"
+    - export POCO_OPTS="$POCO_OPTS -DENABLE_MONGODB=off -DENABLE_PAGECOMPILER=off"
+    - export POCO_OPTS="$POCO_OPTS -DENABLE_PAGECOMPILER_FILE2PAGE=off -DENABLE_PDF=off -DENABLE_XML=off -DENABLE_ZIP=off"
+    - cmake -DCMAKE_INSTALL_PREFIX=/usr -D CMAKE_CXX_COMPILER=`which ${CXX_COMPILER}` -DCMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS" -DCMAKE_EXE_LINKER_FLAGS="$CMAKE_EXE_LINKER_FLAGS" $POCO_OPTS  ..
+    - sudo make install
+    - cd ../..
+    # NymphRPC
+    - git clone https://github.com/MayaPosch/NymphRPC
+    - make -C NymphRPC/ lib
+    - mkdir -p outdir/usr/local/include/nymph
+    - mkdir -p outdir/usr/local/lib
+    - cp NympRPC/lib/libnymphrpc.a outdir/usr/local/lib/.
+    - cp NymphRPC/src/*.h outdir/usr/include/nymph/.
+    - tar -cvzf NymphRPC_$ARCH_Linux.tar.gz outdir/usr
+    
+# deploy:
+  # provider: releases
+  # api_key: $GITHUB_TOKEN
+  # file: NymphRPC_$ARCH_Linux.tar.gz
+  # skip_cleanup: true
+  # prerelease: true
+  # overwrite: true
+  
+after_success:
+    - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+    - bash upload.sh NymphRPC_*.tar.gz
+  
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)/
