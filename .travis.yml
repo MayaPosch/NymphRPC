@@ -3,16 +3,16 @@ sudo: require
   
 matrix:
     include:
-        - os: linux
-            dist: xenial
-            arch: amd64
-            env:
-                - CC=gcc CXX=g++ CXX_COMPILER=g++ C_COMPILER=gcc ARCH=amd64
-        - os: linux
-            dist: xenial
-            arch: arm64
-            env:
-                - CC=gcc CXX=g++ CXX_COMPILER=g++ C_COMPILER=gcc ARCH=arm64
+    - os: linux
+        dist: xenial
+        arch: amd64
+        env:
+            - CC=gcc CXX=g++ CXX_COMPILER=g++ C_COMPILER=gcc ARCH=amd64
+    - os: linux
+        dist: xenial
+        arch: arm64
+        env:
+            - CC=gcc CXX=g++ CXX_COMPILER=g++ C_COMPILER=gcc ARCH=arm64
 
 
 install:
