@@ -26,13 +26,14 @@
 
 
 class CallbackRequest : public AbstractRequest {
+	uint32_t session;
 	NymphMessage* msg;
 	void* data;
 	std::string loggerName;
 	
 public:
 	CallbackRequest() { loggerName = "CallbackRequest"; }
-	void setMessage(NymphMessage* msg, void* data) { this->msg = msg; this->data = data; }
+	void setMessage(uint32_t session, NymphMessage* msg, void* data);
 	void process();
 	void finish();
 };

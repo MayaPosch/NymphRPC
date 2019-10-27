@@ -28,10 +28,10 @@ using namespace std;
 
 
 // Static initialisations
-map<int, Poco::Net::StreamSocket*> NymphRemoteServer::sockets;
-map<int, Poco::Semaphore*> NymphRemoteServer::socketSemaphores;
+map<uint32_t, Poco::Net::StreamSocket*> NymphRemoteServer::sockets;
+map<uint32_t, Poco::Semaphore*> NymphRemoteServer::socketSemaphores;
 Poco::Mutex NymphRemoteServer::socketsMutex;
-int NymphRemoteServer::lastHandle = 0;
+uint32_t NymphRemoteServer::lastHandle = 0;
 long NymphRemoteServer::timeout = 3000;
 string NymphRemoteServer::loggerName = "NymphRemoteServer";
 UInt32 NymphRemoteServer::nextMethodId = 0;
@@ -88,7 +88,7 @@ bool NymphRemoteServer::init(logFnc logger, int level, long timeout) {
 // --- SYNC ---
 // Synchronises the function list on the client with that of the server.
 // Automatically called once upon connecting to a new Nymph server instance.
-bool NymphRemoteServer::sync(int handle, string &result) {
+bool NymphRemoteServer::sync(uint32_t handle, string &result) {
 	// Send a message to the server with function ID 0 ('sync'), then wait for
 	// the response.
 	NYMPH_LOG_DEBUG("Sync: calling remote server...");
@@ -205,7 +205,7 @@ void NymphRemoteServer::setLogger(logFnc logger, int level) {
 // Shutdown the runtime. Close any open connections and clean up resources.
 bool NymphRemoteServer::shutdown() {
 	socketsMutex.lock();
-	map<int, Poco::Net::StreamSocket*>::iterator it;
+	map<uint32_t, Poco::Net::StreamSocket*>::iterator it;
 	for (it = sockets.begin(); it != sockets.end(); ++it) {
 		// Remove socket from listener.
 		NymphListener::removeConnection(it->first);
@@ -226,21 +226,21 @@ bool NymphRemoteServer::shutdown() {
 // --- CONNECT ---
 // Create a new connection with the remote Nymph server and return a handle for
 // the connection.
-bool NymphRemoteServer::connect(string host, int port, int &handle, void* data, 
+bool NymphRemoteServer::connect(string host, int port, uint32_t &handle, void* data, 
 															string &result) {
 	Poco::Net::SocketAddress sa(host, port);
 	return connect(sa, handle, data, result);
 }
 
 
-bool NymphRemoteServer::connect(string url, int &handle, void* data, 
+bool NymphRemoteServer::connect(string url, uint32_t &handle, void* data, 
 															string &result) {
 	Poco::Net::SocketAddress sa(url);
 	return connect(sa, handle, data, result);
 }
 
 
-bool NymphRemoteServer::connect(Poco::Net::SocketAddress sa, int &handle, 
+bool NymphRemoteServer::connect(Poco::Net::SocketAddress sa, uint32_t &handle, 
 												void* data, string &result) {
 	Poco::Net::StreamSocket* socket;
 	try {
@@ -265,11 +265,11 @@ bool NymphRemoteServer::connect(Poco::Net::SocketAddress sa, int &handle,
 	}
 	
 	socketsMutex.lock();
-	sockets.insert(pair<int, Poco::Net::StreamSocket*>(lastHandle, socket));
+	sockets.insert(pair<uint32_t, Poco::Net::StreamSocket*>(lastHandle, socket));
 	NymphSocket ns;
 	ns.socket = socket;
 	ns.semaphore = new Semaphore(0, 1);
-	socketSemaphores.insert(pair<int, Poco::Semaphore*>(lastHandle, ns.semaphore));
+	socketSemaphores.insert(pair<uint32_t, Poco::Semaphore*>(lastHandle, ns.semaphore));
 	ns.data = data;
 	ns.handle = lastHandle;
 	NymphListener::addConnection(lastHandle, ns);
@@ -288,9 +288,9 @@ bool NymphRemoteServer::connect(Poco::Net::SocketAddress sa, int &handle,
 
 
 // --- DISCONNECT ---
-bool NymphRemoteServer::disconnect(int handle, string &result) {
-	map<int, Poco::Net::StreamSocket*>::iterator it;
-	map<int, Poco::Semaphore*>::iterator sit;
+bool NymphRemoteServer::disconnect(uint32_t handle, string &result) {
+	map<uint32_t, Poco::Net::StreamSocket*>::iterator it;
+	map<uint32_t, Poco::Semaphore*>::iterator sit;
 	socketsMutex.lock();
 	it = sockets.find(handle);
 	if (it == sockets.end()) { 
@@ -348,9 +348,9 @@ bool NymphRemoteServer::registerMethod(string name, NymphMethod method) {
 
 
 // --- CALL METHOD ---
-bool NymphRemoteServer::callMethod(int handle, string name, vector<NymphType*> &values,
+bool NymphRemoteServer::callMethod(uint32_t handle, string name, vector<NymphType*> &values,
 										NymphType* &returnvalue, string &result) {
-	map<int, Poco::Net::StreamSocket*>::iterator it;
+	map<uint32_t, Poco::Net::StreamSocket*>::iterator it;
 	socketsMutex.lock();
 	it = sockets.find(handle);
 	if (it == sockets.end()) { 
@@ -431,8 +431,8 @@ bool NymphRemoteServer::callMethod(int handle, string name, vector<NymphType*> &
 
 
 // --- CALL METHOD ID ---
-bool NymphRemoteServer::callMethodId(int handle, UInt32 id, vector<NymphType*> &values, NymphType* &returnvalue, string &result) {
-	map<int, Poco::Net::StreamSocket*>::iterator it;
+bool NymphRemoteServer::callMethodId(uint32_t handle, UInt32 id, vector<NymphType*> &values, NymphType* &returnvalue, string &result) {
+	map<uint32_t, Poco::Net::StreamSocket*>::iterator it;
 	socketsMutex.lock();
 	it = sockets.find(handle);
 	if (it == sockets.end()) { 

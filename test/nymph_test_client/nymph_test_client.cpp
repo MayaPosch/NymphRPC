@@ -42,7 +42,7 @@ void logFunction(int level, string logStr) {
 // This callback will be called once by the server and then discarded. This is
 // useful for one-off events, but can also be used for callbacks during the 
 // life-time of the client.
-void callbackFunction(NymphMessage* msg, void* data) {
+void callbackFunction(uint32_t session, NymphMessage* msg, void* data) {
 	cout << "Client callback function called.\n";
 	
 	// Remove the callback.
@@ -59,7 +59,7 @@ int main() {
 	NymphRemoteServer::init(logFunction, NYMPH_LOG_LEVEL_TRACE, timeout);
 	
 	// Connect to the remote server.
-	int handle;
+	uint32_t handle;
 	string result;
 	if (!NymphRemoteServer::connect("localhost", 4004, handle, 0, result)) {
 		cout << "Connecting to remote server failed: " << result << endl;

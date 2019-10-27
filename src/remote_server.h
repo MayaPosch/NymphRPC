@@ -29,10 +29,10 @@
 
 
 class NymphRemoteServer {
-	static std::map<int, Poco::Net::StreamSocket*> sockets;
-	static std::map<int, Poco::Semaphore*> socketSemaphores;
+	static std::map<uint32_t, Poco::Net::StreamSocket*> sockets;
+	static std::map<uint32_t, Poco::Semaphore*> socketSemaphores;
 	static Poco::Mutex socketsMutex;
-	static int lastHandle;
+	static uint32_t lastHandle;
 	static long timeout;
 	static std::string loggerName;
 	static uint32_t nextMethodId;
@@ -45,16 +45,16 @@ class NymphRemoteServer {
 	
 public:
 	static bool init(logFnc logger, int level = NYMPH_LOG_LEVEL_TRACE, long timeout = 3000);
-	static bool sync(int handle, std::string &result);
+	static bool sync(uint32_t handle, std::string &result);
 	static void setLogger(logFnc logger, int level);
 	static bool shutdown();
-	static bool connect(std::string host, int port, int &handle, void* data, std::string &result);
-	static bool connect(std::string url, int &handle, void* data, std::string &result);
-	static bool connect(Poco::Net::SocketAddress sa, int &handle, void* data, std::string &result);
-	static bool disconnect(int handle, std::string &result);
-	static bool callMethod(int handle, std::string name, std::vector<NymphType*> &values, 
+	static bool connect(std::string host, int port, uint32_t &handle, void* data, std::string &result);
+	static bool connect(std::string url, uint32_t &handle, void* data, std::string &result);
+	static bool connect(Poco::Net::SocketAddress sa, uint32_t &handle, void* data, std::string &result);
+	static bool disconnect(uint32_t handle, std::string &result);
+	static bool callMethod(uint32_t handle, std::string name, std::vector<NymphType*> &values, 
 										NymphType* &returnvalue, std::string &result);
-	static bool callMethodId(int handle, uint32_t id, std::vector<NymphType*> &values, NymphType* &returnvalue, std::string &result);
+	static bool callMethodId(uint32_t handle, uint32_t id, std::vector<NymphType*> &values, NymphType* &returnvalue, std::string &result);
 	static bool removeMethod(std::string name);
 	
 	static bool registerCallback(std::string name, NymphCallbackMethod method, void* data);

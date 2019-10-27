@@ -32,8 +32,8 @@
 struct NymphSocket {
 	Poco::Net::StreamSocket* socket;	// Pointer to the socket instance.
 	Poco::Semaphore* semaphore;		// Signals when it's safe to delete the socket.
-	void* data;					// User data.
-	int handle;					// The Nymph internal socket handle.
+	void* data;						// User data.
+	uint32_t handle;				// The Nymph internal socket handle.
 };
 
 

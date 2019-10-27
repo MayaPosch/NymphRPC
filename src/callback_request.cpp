@@ -16,9 +16,17 @@
 #include "nymph_logger.h"
 
 
+// --- SET MESSAGE ---
+void CallbackRequest::setMessage(uint32_t session, NymphMessage* msg, void* data) { 
+	this->session = session;
+	this->msg = msg;
+	this->data = data; 
+}
+
+
 // --- PROCESS ---
 void CallbackRequest::process() {
-	if (!NymphListener::callCallback(msg, data)) {
+	if (!NymphListener::callCallback(session, msg, data)) {
 		//NYMPH_LOG_ERROR("Calling callback failed. Skipping message.");
 		delete msg;
 	}

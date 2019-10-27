@@ -175,7 +175,7 @@ bool NymphListener::addCallback(NymphCallback callback) {
 
 
 // --- CALL CALLBACK ---
-bool NymphListener::callCallback(NymphMessage* msg, void* data) {
+bool NymphListener::callCallback(uint32_t session, NymphMessage* msg, void* data) {
 	static map<string, NymphCallback> &callbacksStatic = NymphListener::callbacks();
 	static Mutex& callbacksMutexStatic = NymphListener::callbacksMutex();
 	map<string, NymphCallback>::iterator cit;
@@ -193,8 +193,8 @@ bool NymphListener::callCallback(NymphMessage* msg, void* data) {
 	
 	// We found a matching callback. Call it.
 	// Use the provided data, else the default data.
-	if (data) { (cit->second.method)(msg, data); }
-	else { (cit->second.method)(msg, cit->second.data); }
+	if (data) { (cit->second.method)(session, msg, data); }
+	else { (cit->second.method)(session, msg, cit->second.data); }
 	callbacksMutexStatic.unlock();
 	
 	return true;

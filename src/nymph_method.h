@@ -27,12 +27,14 @@
 
 #include <vector>
 #include <string>
+#include <functional>
 
 
 class NymphRemoteClient;
 
 
-typedef NymphMessage* (*NymphMethodCallback)(int session, NymphMessage* msg, void* data);
+//typedef NymphMessage* (*NymphMethodCallback)(int session, NymphMessage* msg, void* data);
+typedef std::function<NymphMessage*(int, NymphMessage*, void*)> NymphMethodCallback;
 
 
 class NymphMethod {

@@ -145,7 +145,7 @@ void NymphSocketListener::run() {
 				
 				// Dispatch a request to handle this callback.
 				CallbackRequest* req = new CallbackRequest;
-				req->setMessage(msg, nymphSocket.data);
+				req->setMessage(nymphSocket.handle, msg, nymphSocket.data);
 				Dispatcher::addRequest(req);
 				continue; // We're done with this request.
 			}

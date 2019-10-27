@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <string>
+#include <functional>
 
 #include <Poco/Mutex.h>
 
@@ -28,7 +29,8 @@
 
 // TYPES
 
-typedef void (*NymphCallbackMethod)(NymphMessage* msg, void* data);
+//typedef void (*NymphCallbackMethod)(uint32_t session, NymphMessage* msg, void* data);
+typedef std::function<void(uint32_t, NymphMessage*, void*)> NymphCallbackMethod;
 
 
 struct NymphCallback {
@@ -57,7 +59,7 @@ public:
 	static bool addMessage(NymphRequest* &request);
 	static bool removeMessage(int handle, int64_t messageId);
 	static bool addCallback(NymphCallback callback);
-	static bool callCallback(NymphMessage* msg, void* data);
+	static bool callCallback(uint32_t session, NymphMessage* msg, void* data);
 	static bool removeCallback(std::string name);
 };
 
