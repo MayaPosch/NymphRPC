@@ -15,7 +15,9 @@ CFLAGS := $(INCLUDE) -std=c++11 -g3
 # The OS variable is only set on Windows.
 ifdef OS
 	CFLAGS := $(CFLAGS) -U__STRICT_ANSI__
-	#LIBS += -lws2_32
+	#LIB += -lws2_32
+else
+	LIB += -pthread
 endif
 
 SOURCES := $(wildcard *.cpp)

@@ -22,6 +22,8 @@ CFLAGS := $(INCLUDE) -g3 -std=c++11 -O0
 ifdef OS
 	CFLAGS := $(CFLAGS) -U__STRICT_ANSI__
 	LIBS += -lws2_32
+else
+	LIBS += -pthread
 endif
 
 SOURCES := $(wildcard src/*.cpp)

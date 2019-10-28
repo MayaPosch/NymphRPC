@@ -13,6 +13,15 @@ CFLAGS := $(INCLUDE) -std=c++11 -U__STRICT_ANSI__ -g3
 SOURCES := $(wildcard *.cpp)
 OBJECTS := $(addprefix obj/,$(notdir) $(SOURCES:.cpp=.o))
 
+# Check for MinGW and patch up POCO
+# The OS variable is only set on Windows.
+ifdef OS
+	CFLAGS := $(CFLAGS) -U__STRICT_ANSI__
+	#LIB += -lws2_32
+else
+	LIB += -pthread
+endif
+
 all: makedir $(OBJECTS) bin/$(OUTPUT)
 
 makedir:
