@@ -7,15 +7,30 @@
 
 export TOP := $(CURDIR)
 
+ifdef ANDROID
+TOOLCHAIN_PREFIX := arm-linux-androideabi-
+ifdef OS
+TOOLCHAIN_POSTFIX := .cmd
+endif
+GCC = $(TOOLCHAIN_PREFIX)g++$(TOOLCHAIN_POSTFIX)
+MAKEDIR = mkdir -p
+RM = rm
+AR = $(TOOLCHAIN_PREFIX)ar
+else
 GCC = g++
 MAKEDIR = mkdir -p
 RM = rm
 AR = ar
+endif
 
 OUTPUT = libnymphrpc.a
 INCLUDE = -I src
 #-DPOCO_WIN32_UTF8
 CFLAGS := $(INCLUDE) -g3 -std=c++11 -O0
+
+ifdef ANDROID
+CFLAGS += -fPIC
+endif
 
 # Check for MinGW and patch up POCO
 # The OS variable is only set on Windows.
