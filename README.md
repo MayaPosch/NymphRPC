@@ -14,7 +14,7 @@ In addition to the current C++ implementation, an Ada and C version of the libra
 
 ## Building ##
 
-NymphRPC's C++ port is based around the POCO library (see [http://wwww.pocoproject.org/](http://wwww.pocoproject.org/ "POCO Project") ). It is recommended to download the full source from the website and compile it using the instructions to obtain the current version of POCO instead of an ancient one from a Linux distro repository.
+NymphRPC's C++ port is based around the POCO library (see [https://pocoproject.org/](https://pocoproject.org/ "POCO Project") ). It is recommended to download the full source from the website and compile it using the instructions to obtain the current version of POCO instead of an ancient one from a Linux distro repository.
 
 With the common C++ build tools installed (g++, make, etc.) and the optional OpenSSL dependency, building NymphRPC is done using:
 
