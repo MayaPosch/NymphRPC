@@ -35,7 +35,7 @@ endif
 # Check for MinGW and patch up POCO
 # The OS variable is only set on Windows.
 ifdef OS
-	CFLAGS := $(CFLAGS) -U__STRICT_ANSI__
+	CFLAGS := $(CFLAGS) -U__STRICT_ANSI__ -DPOCO_WIN32_UTF8
 	LIBS += -lws2_32
 else
 	LIBS += -pthread

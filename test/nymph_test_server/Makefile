@@ -16,7 +16,7 @@ OBJECTS := $(addprefix obj/,$(notdir) $(SOURCES:.cpp=.o))
 # Check for MinGW and patch up POCO
 # The OS variable is only set on Windows.
 ifdef OS
-	CFLAGS := $(CFLAGS) -U__STRICT_ANSI__
+	CFLAGS := $(CFLAGS) -U__STRICT_ANSI__ -DPOCO_WIN32_UTF8
 	#LIB += -lws2_32
 else
 	LIB += -pthread
@@ -31,7 +31,7 @@ makedir:
 obj/%.o: %.cpp
 	$(GCC) -c -o $@ $< $(CFLAGS)
 	
-bin/$(OUTPUT):
+bin/$(OUTPUT): $(OBJECTS)
 	$(GCC) -o $@ $(OBJECTS) $(LIB)
 
 clean:
