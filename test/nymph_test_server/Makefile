@@ -22,7 +22,7 @@ else
 	LIB += -pthread
 endif
 
-all: makedir $(OBJECTS) bin/$(OUTPUT)
+all: makedir bin/$(OUTPUT)
 
 makedir:
 	$(MAKEDIR) obj

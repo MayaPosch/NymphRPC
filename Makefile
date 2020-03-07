@@ -46,7 +46,7 @@ OBJECTS := $(addprefix obj/,$(notdir) $(SOURCES:.cpp=.o))
 
 all: lib test
 
-lib: makedir $(OBJECTS) lib/$(OUTPUT)
+lib: makedir lib/$(OUTPUT)
 	
 obj/%.o: %.cpp
 	$(GCC) -c -o $@ $< $(CFLAGS)

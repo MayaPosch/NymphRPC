@@ -23,7 +23,7 @@ endif
 SOURCES := $(wildcard *.cpp)
 OBJECTS := $(addprefix obj/,$(notdir) $(SOURCES:.cpp=.o))
 
-all: makedir $(OBJECTS) bin/$(OUTPUT)
+all: makedir bin/$(OUTPUT)
 
 makedir:
 	$(MAKEDIR) obj
