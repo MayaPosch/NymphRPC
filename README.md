@@ -10,15 +10,15 @@ NymphRPC is a compact, C++-based Remote Procedure Call (RPC) library. One can lo
 
 ## Planned ports ##
 
-In addition to the current C++ implementation, an Ada and C version of the library are also planned.
+In addition to the current C++ implementation, an Ada version of the library is also planned.
 
 ## Building ##
 
-NymphRPC's C++ port is based around the POCO library (see [https://pocoproject.org/](https://pocoproject.org/ "POCO Project") ). It is recommended to download the full source from the website and compile it using the instructions to obtain the current version of POCO instead of an ancient one from a Linux distro repository.
+NymphRPC's C++ version is based around the POCO library (see [https://pocoproject.org/](https://pocoproject.org/ "POCO Project") ). Version 1.5+ is required.
 
 With the common C++ build tools installed (g++, make, etc.) and the optional OpenSSL dependency, building NymphRPC is done using:
 
-`make lib` - Build just the library. Found under `lib`.
+`make lib` - Build just the library. Found under `lib`.This builds both a static and shared library.
 
 `make test-client` - Build the test client.
 
@@ -38,5 +38,5 @@ With the common C++ build tools installed (g++, make, etc.) and the optional Ope
 
 ## Installing ##
 
-Installing the resulting `libnymphrpc` library has to be done by hand, currently. On Linux one would copy `libnymphrpc.a` to `/usr/lib/` or similar, and the header files to `/usr/include` or similar. Consult the documentation for your OS and development tools for more detailed instructions.
+Installing the resulting `libnymphrpc` library has to be done by hand, currently. On Linux one would copy the static library `libnymphrpc.a` and/or the `libnymphrpc.so` shared library file to `/usr/lib`, and the header files to `/usr/include` or similar. Consult the documentation for your OS and development tools for more detailed instructions.
 
