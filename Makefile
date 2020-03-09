@@ -23,10 +23,12 @@ RM = rm
 AR = ar
 endif
 
-OUTPUT = libnymphrpc.a
+OUTPUT = libnymphrpc
+VERSION = 0.1
 INCLUDE = -I src
-#-DPOCO_WIN32_UTF8
+LIBS := -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON 
 CFLAGS := $(INCLUDE) -g3 -std=c++11 -O0
+SHARED_FLAGS := -fPIC -shared -Wl,-soname,$(OUTPUT).so.$(VERSION)
 
 ifdef ANDROID
 CFLAGS += -fPIC
@@ -42,23 +44,30 @@ else
 endif
 
 SOURCES := $(wildcard src/*.cpp)
-OBJECTS := $(addprefix obj/,$(notdir) $(SOURCES:.cpp=.o))
+OBJECTS := $(addprefix obj/static/,$(notdir) $(SOURCES:.cpp=.o))
+SHARED_OBJECTS := $(addprefix obj/shared/,$(notdir) $(SOURCES:.cpp=.o))
 
 all: lib test
 
-lib: makedir lib/$(OUTPUT)
+lib: makedir lib/$(OUTPUT).a lib/$(OUTPUT).so
 	
-obj/%.o: %.cpp
+obj/static/%.o: %.cpp
 	$(GCC) -c -o $@ $< $(CFLAGS)
 	
-lib/$(OUTPUT): $(OBJECTS)
+obj/shared/%.o: %.cpp
+	$(GCC) -c -o $@ $< $(SHARED_FLAGS) $(CFLAGS) $(LIBS)
+	
+lib/$(OUTPUT).a: $(OBJECTS)
 	-rm -f $@
 	$(AR) rcs $@ $^
 	
+lib/$(OUTPUT).so: $(SHARED_OBJECTS)
+	$(GCC) -o $@ $(CFLAGS) $(SHARED_FLAGS) $(SHARED_OBJECTS) $(LIBS)
+	
 makedir:
 	$(MAKEDIR) lib
-	$(MAKEDIR) obj
-	$(MAKEDIR) obj/src
+	$(MAKEDIR) obj/static/src
+	$(MAKEDIR) obj/shared/src
 	
 test: test-client test-server
 	
@@ -73,7 +82,7 @@ clean: clean-lib clean-test
 clean-test: clean-test-client clean-test-server
 
 clean-lib:
-	$(RM) $(OBJECTS)
+	$(RM) $(OBJECTS) $(SHARED_OBJECTS)
 	
 clean-test-client:
 	$(MAKE) -C ./test/nymph_test_client clean
