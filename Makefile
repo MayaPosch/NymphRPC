@@ -37,8 +37,10 @@ endif
 # Check for MinGW and patch up POCO
 # The OS variable is only set on Windows.
 ifdef OS
+ifndef ANDROID
 	CFLAGS := $(CFLAGS) -U__STRICT_ANSI__ -DPOCO_WIN32_UTF8
 	LIBS += -lws2_32
+endif
 else
 	LIBS += -pthread
 endif
