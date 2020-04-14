@@ -263,6 +263,10 @@ bool NymphRemoteServer::connect(Poco::Net::SocketAddress sa, uint32_t &handle,
 		result = "Net exception: " + ex.displayText();
 		return false;
 	}
+	catch (Poco::TimeoutException &ex) {
+		result = "Connect timed out: " + ex.displayText();
+		return false;
+	}
 	
 	socketsMutex.lock();
 	sockets.insert(pair<uint32_t, Poco::Net::StreamSocket*>(lastHandle, socket));
