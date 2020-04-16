@@ -628,6 +628,16 @@ bool NymphSint64::deserialize(string* binary, int &index) {
 // >>> NYMPH STRUCT <<<
 // A struct type is a collection of key/value pairs.
 
+// --- DECONSTRUCTOR ---
+NymphStruct::~NymphStruct() {
+	std::map<std::string, NymphPair>::iterator it;
+	for (it = pairs.begin(); it != pairs.end(); ++it) {
+		delete it->second.key;
+		delete it->second.value;
+	}
+}
+
+
 // --- TO STRING ---
 string NymphStruct::toString(bool quotes) {
 	string out = "";
@@ -637,6 +647,7 @@ string NymphStruct::toString(bool quotes) {
 	
 	return out;
 }
+
 
 // ---- SERIALIZE ---
 string NymphStruct::serialize() {

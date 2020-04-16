@@ -411,6 +411,7 @@ class NymphStruct : public NymphType {
 	
 public:
 	NymphStruct() { isEmpty = true; binSize = 0; }
+	~NymphStruct();
 	NymphTypes type() { return NYMPH_STRUCT; }
 	std::string toString(bool quotes = false);
 	std::string serialize();
