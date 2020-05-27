@@ -9,13 +9,33 @@ export TOP := $(CURDIR)
 
 ifdef ANDROID
 TOOLCHAIN_PREFIX := arm-linux-androideabi-
+ARCH := android-armv7/
 ifdef OS
 TOOLCHAIN_POSTFIX := .cmd
 endif
-GCC = $(TOOLCHAIN_PREFIX)g++$(TOOLCHAIN_POSTFIX)
+else ifdef ANDROID64
+TOOLCHAIN_PREFIX := aarch64-linux-android-
+ARCH := android-aarch64/
+ifdef OS
+TOOLCHAIN_POSTFIX := .cmd
+endif
+endif
+
+ifdef ANDROID
+GCC := $(TOOLCHAIN_PREFIX)g++$(TOOLCHAIN_POSTFIX)
 MAKEDIR = mkdir -p
 RM = rm
 AR = $(TOOLCHAIN_PREFIX)ar
+else ifdef ANDROID64
+GCC := aarch64-linux-android21-clang++$(TOOLCHAIN_POSTFIX)
+MAKEDIR = mkdir -p
+RM = rm
+AR = $(TOOLCHAIN_PREFIX)ar
+else ifdef WASM
+GCC = emc++
+MAKEDIR = mkdir -p
+RM = rm
+AR = ar 
 else
 GCC = g++
 MAKEDIR = mkdir -p
@@ -38,8 +58,10 @@ endif
 # The OS variable is only set on Windows.
 ifdef OS
 ifndef ANDROID
+ifndef ANDROID64
 	CFLAGS := $(CFLAGS) -U__STRICT_ANSI__ -DPOCO_WIN32_UTF8
 	LIBS += -lws2_32
+endif
 endif
 else
 	LIBS += -pthread
