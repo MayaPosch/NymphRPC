@@ -97,7 +97,7 @@ bool NymphArray::deserialize(string* binary, int &index) {
 	// Now parse the elements.
 	uint8_t typecode = 0;
 	for (uint64_t i = 0; i < numElements; ++i) {
-		NYMPH_LOG_TRACE("Parsing array element " + NumberFormatter::format(i) + " of " + NumberFormatter::format(numElements) + " - Index: " + NumberFormatter::format(index) + ".");
+		NYMPH_LOG_TRACE("Parsing array index " + NumberFormatter::format(i) + " of " + NumberFormatter::format(numElements) + " elements - Index: " + NumberFormatter::format(index) + ".");
 		typecode = getUInt8(binary, index);
 		NymphType* elVal = 0;
 		NymphUtilities::parseValue(typecode, binary, index, elVal);
@@ -685,6 +685,9 @@ bool NymphStruct::deserialize(string* binary, int &index) {
 		
 		pairs.insert(std::pair<std::string, NymphPair>(((NymphString*) p.key)->getValue(), p));
 	}
+	
+	// Skip the terminator.
+	index++;
 	
 	return true;
 }
