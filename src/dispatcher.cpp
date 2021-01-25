@@ -50,12 +50,14 @@ bool Dispatcher::init(int workers) {
 bool Dispatcher::stop() {
 	for (int i = 0; i < allWorkers.size(); ++i) {
 		allWorkers[i]->stop();
+		delete allWorkers[i];
 	}
 	
 	cout << "Stopped workers.\n";
 	
 	for (int j = 0; j < threads.size(); ++j) {
 		threads[j]->join();
+		delete threads[j];
 		
 		cout << "Joined threads.\n";
 	}

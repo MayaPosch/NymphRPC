@@ -166,6 +166,7 @@ bool NymphRemoteClient::start(int port) {
 // Shutdown the runtime. Close any open connections and clean up resources.
 bool NymphRemoteClient::shutdown() {
 	NymphServer::stop();
+	Dispatcher::stop();
 	return true;
 }
 
