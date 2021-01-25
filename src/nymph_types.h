@@ -134,7 +134,7 @@ class NymphType {
 	//
 	
 public:
-	virtual ~NymphType() {}
+	virtual ~NymphType();
 	virtual NymphTypes type() = 0;
 	virtual std::string toString(bool quotes = false) = 0;
 	virtual std::string serialize() = 0;
