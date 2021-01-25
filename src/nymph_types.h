@@ -134,7 +134,7 @@ class NymphType {
 	//
 	
 public:
-	virtual ~NymphType();
+	virtual ~NymphType() = 0;
 	virtual NymphTypes type() = 0;
 	virtual std::string toString(bool quotes = false) = 0;
 	virtual std::string serialize() = 0;
@@ -143,6 +143,7 @@ public:
 	virtual uint32_t binarySize() = 0;
 };
 
+inline NymphType::~NymphType() {}
 
 class NymphString;
 
