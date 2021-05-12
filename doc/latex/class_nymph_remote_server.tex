@@ -1,0 +1,50 @@
+\hypertarget{class_nymph_remote_server}{}\doxysection{Nymph\+Remote\+Server Class Reference}
+\label{class_nymph_remote_server}\index{NymphRemoteServer@{NymphRemoteServer}}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_nymph_remote_server_a4fcd1a2f2a95b528ededffeb3280fb1e}\label{class_nymph_remote_server_a4fcd1a2f2a95b528ededffeb3280fb1e}} 
+static bool {\bfseries init} (log\+Fnc logger, int level=NYMPH\+\_\+\+LOG\+\_\+\+LEVEL\+\_\+\+TRACE, long timeout=3000)
+\item 
+\mbox{\Hypertarget{class_nymph_remote_server_aa2e8c9b4baa4369b6b7dbc3984fae88e}\label{class_nymph_remote_server_aa2e8c9b4baa4369b6b7dbc3984fae88e}} 
+static bool {\bfseries sync} (uint32\+\_\+t handle, std\+::string \&result)
+\item 
+\mbox{\Hypertarget{class_nymph_remote_server_ac7e50d457da1ee0768d28728a1e01dca}\label{class_nymph_remote_server_ac7e50d457da1ee0768d28728a1e01dca}} 
+static void {\bfseries set\+Logger} (log\+Fnc logger, int level)
+\item 
+\mbox{\Hypertarget{class_nymph_remote_server_a93c7d8f7aa42d19db9fb84bb0bfeadfe}\label{class_nymph_remote_server_a93c7d8f7aa42d19db9fb84bb0bfeadfe}} 
+static bool {\bfseries shutdown} ()
+\item 
+\mbox{\Hypertarget{class_nymph_remote_server_a7e528f8a20801429686beb14341187e0}\label{class_nymph_remote_server_a7e528f8a20801429686beb14341187e0}} 
+static bool {\bfseries connect} (std\+::string host, int port, uint32\+\_\+t \&handle, void $\ast$data, std\+::string \&result)
+\item 
+\mbox{\Hypertarget{class_nymph_remote_server_a2c1d2676fce1fdf66c106cd1b0379156}\label{class_nymph_remote_server_a2c1d2676fce1fdf66c106cd1b0379156}} 
+static bool {\bfseries connect} (std\+::string url, uint32\+\_\+t \&handle, void $\ast$data, std\+::string \&result)
+\item 
+\mbox{\Hypertarget{class_nymph_remote_server_a2cb35bb620c3c36745b054aa8027e392}\label{class_nymph_remote_server_a2cb35bb620c3c36745b054aa8027e392}} 
+static bool {\bfseries connect} (Poco\+::\+Net\+::\+Socket\+Address sa, uint32\+\_\+t \&handle, void $\ast$data, std\+::string \&result)
+\item 
+\mbox{\Hypertarget{class_nymph_remote_server_a99593f1e998383a4b1944c852aa9a82f}\label{class_nymph_remote_server_a99593f1e998383a4b1944c852aa9a82f}} 
+static bool {\bfseries disconnect} (uint32\+\_\+t handle, std\+::string \&result)
+\item 
+\mbox{\Hypertarget{class_nymph_remote_server_ae09dbe1418a399457195774698242258}\label{class_nymph_remote_server_ae09dbe1418a399457195774698242258}} 
+static bool {\bfseries call\+Method} (uint32\+\_\+t handle, std\+::string name, std\+::vector$<$ \mbox{\hyperlink{class_nymph_type}{Nymph\+Type}} $\ast$ $>$ \&values, \mbox{\hyperlink{class_nymph_type}{Nymph\+Type}} $\ast$\&returnvalue, std\+::string \&result)
+\item 
+\mbox{\Hypertarget{class_nymph_remote_server_ad454df862657c70b59dff289bc48bab8}\label{class_nymph_remote_server_ad454df862657c70b59dff289bc48bab8}} 
+static bool {\bfseries call\+Method\+Id} (uint32\+\_\+t handle, uint32\+\_\+t id, std\+::vector$<$ \mbox{\hyperlink{class_nymph_type}{Nymph\+Type}} $\ast$ $>$ \&values, \mbox{\hyperlink{class_nymph_type}{Nymph\+Type}} $\ast$\&returnvalue, std\+::string \&result)
+\item 
+\mbox{\Hypertarget{class_nymph_remote_server_af6bcd97e18737fa68039fce824435954}\label{class_nymph_remote_server_af6bcd97e18737fa68039fce824435954}} 
+static bool {\bfseries remove\+Method} (std\+::string name)
+\item 
+\mbox{\Hypertarget{class_nymph_remote_server_a503dfb25d2f0e1156bd86d796ac61e5d}\label{class_nymph_remote_server_a503dfb25d2f0e1156bd86d796ac61e5d}} 
+static bool {\bfseries register\+Callback} (std\+::string name, Nymph\+Callback\+Method method, void $\ast$data)
+\item 
+\mbox{\Hypertarget{class_nymph_remote_server_aa81b9f74ddcfd55dde51ed928c474b98}\label{class_nymph_remote_server_aa81b9f74ddcfd55dde51ed928c474b98}} 
+static bool {\bfseries remove\+Callback} (std\+::string name)
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/remote\+\_\+server.\+h\item 
+src/remote\+\_\+server.\+cpp\end{DoxyCompactItemize}

@@ -1,0 +1,44 @@
+\hypertarget{class_nymph_method}{}\doxysection{Nymph\+Method Class Reference}
+\label{class_nymph_method}\index{NymphMethod@{NymphMethod}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_nymph_method_aa5def4713a7870a2c8c3eebc338b3b33}\label{class_nymph_method_aa5def4713a7870a2c8c3eebc338b3b33}} 
+{\bfseries Nymph\+Method} (std\+::string name, std\+::vector$<$ Nymph\+Types $>$ parameters, Nymph\+Types ret\+Type)
+\item 
+\mbox{\Hypertarget{class_nymph_method_af09f943e23a419b8bc97a00d63b24f7c}\label{class_nymph_method_af09f943e23a419b8bc97a00d63b24f7c}} 
+void {\bfseries set\+Callback} (Nymph\+Method\+Callback callback)
+\item 
+\mbox{\Hypertarget{class_nymph_method_a9c19d772a586f7e001076ee56a347afe}\label{class_nymph_method_a9c19d772a586f7e001076ee56a347afe}} 
+\mbox{\hyperlink{class_nymph_message}{Nymph\+Message}} $\ast$ {\bfseries call\+Callback} (int handle, \mbox{\hyperlink{class_nymph_message}{Nymph\+Message}} $\ast$msg)
+\item 
+\mbox{\Hypertarget{class_nymph_method_ac9f8e420be56b2938e13bada69c62a4b}\label{class_nymph_method_ac9f8e420be56b2938e13bada69c62a4b}} 
+bool {\bfseries call} (Poco\+::\+Net\+::\+Stream\+Socket $\ast$socket, \mbox{\hyperlink{struct_nymph_request}{Nymph\+Request}} $\ast$\&request, std\+::vector$<$ \mbox{\hyperlink{class_nymph_type}{Nymph\+Type}} $\ast$ $>$ \&values, std\+::string \&result)
+\item 
+\mbox{\Hypertarget{class_nymph_method_aa706cbd1eed5d8fc378f2b9243d4582d}\label{class_nymph_method_aa706cbd1eed5d8fc378f2b9243d4582d}} 
+bool {\bfseries call} (\mbox{\hyperlink{class_nymph_session}{Nymph\+Session}} $\ast$session, std\+::vector$<$ \mbox{\hyperlink{class_nymph_type}{Nymph\+Type}} $\ast$ $>$ \&values, std\+::string \&result)
+\item 
+\mbox{\Hypertarget{class_nymph_method_a4add9fab4fbb99260a6bfc1f49858714}\label{class_nymph_method_a4add9fab4fbb99260a6bfc1f49858714}} 
+uint32\+\_\+t {\bfseries get\+Id} ()
+\item 
+\mbox{\Hypertarget{class_nymph_method_a838169a6e54fb5a7b0533ea77bce485d}\label{class_nymph_method_a838169a6e54fb5a7b0533ea77bce485d}} 
+std\+::string {\bfseries get\+Serialized} ()
+\item 
+\mbox{\Hypertarget{class_nymph_method_a94e5168749514708d6be6e5c57a08921}\label{class_nymph_method_a94e5168749514708d6be6e5c57a08921}} 
+bool {\bfseries enable\+Callback} (bool state=true)
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_nymph_method_a2a3d75c35119c796dbfbf8ba13fc1cec}\label{class_nymph_method_a2a3d75c35119c796dbfbf8ba13fc1cec}} 
+class {\bfseries Nymph\+Remote\+Client}
+\item 
+\mbox{\Hypertarget{class_nymph_method_afcf33c6ca592fd4bfc5c3c91f9ecedba}\label{class_nymph_method_afcf33c6ca592fd4bfc5c3c91f9ecedba}} 
+class {\bfseries Nymph\+Remote\+Server}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/nymph\+\_\+method.\+h\item 
+src/nymph\+\_\+method.\+cpp\end{DoxyCompactItemize}
