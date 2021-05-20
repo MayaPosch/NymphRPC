@@ -33,7 +33,6 @@
 class NymphRemoteClient;
 
 
-//typedef NymphMessage* (*NymphMethodCallback)(int session, NymphMessage* msg, void* data);
 typedef std::function<NymphMessage*(int, NymphMessage*, void*)> NymphMethodCallback;
 
 
@@ -50,14 +49,13 @@ class NymphMethod {
 	std::string serialized;
 	bool isCallback;
 	
-	void setId(uint32_t id);
-	
 public:
 	NymphMethod(std::string name, std::vector<NymphTypes> parameters, NymphTypes retType);
 	void setCallback(NymphMethodCallback callback);
 	NymphMessage* callCallback(int handle, NymphMessage* msg);
 	bool call(Poco::Net::StreamSocket* socket, NymphRequest* &request, std::vector<NymphType*> &values, std::string &result);
 	bool call(NymphSession* session, std::vector<NymphType*> &values, std::string &result);
+	void setId(uint32_t id);
 	uint32_t getId() { return id; }
 	std::string getSerialized() { return serialized; }
 	bool enableCallback(bool state = true) { isCallback = state; return true; }
