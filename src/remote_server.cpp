@@ -491,6 +491,7 @@ bool NymphRemoteServer::disconnect(uint32_t handle, string &result) {
 	
 	// Delete instance.
 	delete it->second;
+	instances.erase(it);
 	
 	// Remove socket from listener.
 	NymphListener::removeConnection(handle);
