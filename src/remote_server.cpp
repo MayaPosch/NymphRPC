@@ -324,17 +324,32 @@ bool NymphServerInstance::removeMethod(std::string name) {
 
 // --- DISCONNECT ---
 bool NymphServerInstance::disconnect(std::string& result) {
-	// TODO: try/catch.
 	// Shutdown socket. Set the semaphore once done to signal that the socket's 
 	// listener thread that it's safe to delete the socket.
-	socket->shutdown();
-	socket->close();
+	bool res = true;
+	try {
+		socket->shutdown();
+		socket->close();
+	}
+	catch (Poco::Net::NetException &ex) {
+		result = "Net exception: " + ex.displayText();
+		res = false;
+	}
+	catch (Poco::TimeoutException &ex) {
+		result = "Connect timed out: " + ex.displayText();
+		res = false;
+	}
+	catch (...) {
+		result = "Caught unknown exception.";
+		res = false;
+	}
+	
 	socketSemaphore->set();
 	
 	// Remove socket from listener.
 	NymphListener::removeConnection(handle);
 	
-	return true;
+	return res;
 }
 // ---
 
