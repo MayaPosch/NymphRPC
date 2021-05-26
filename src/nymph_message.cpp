@@ -76,7 +76,7 @@ NymphMessage::NymphMessage(string* binmsg) {
 	version = getUInt8(binmsg, index);
 	methodId = getUInt32(binmsg, index);
 	
-	NYMPH_LOG_DEBUG("Method ID: " + NumberFormatter::formatHex(methodId) + ".");
+	NYMPH_LOG_DEBUG("Method ID: " + NumberFormatter::format(methodId) + ".");
 	
 	
 	if (version != 0x00) {

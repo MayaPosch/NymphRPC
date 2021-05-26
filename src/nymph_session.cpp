@@ -75,7 +75,7 @@ void NymphSession::run() {
 			UInt32 signature = *((UInt32*) &headerBuff[0]);
 			if (signature != 0x4452474e) { // 'DRGN' ASCII in LE format.
 				// TODO: handle invalid header.
-				NYMPH_LOG_ERROR("Invalid header: " + NumberFormatter::formatHex(signature));
+				NYMPH_LOG_ERROR("Invalid header: 0x" + NumberFormatter::formatHex(signature));
 				
 				continue;
 			}
@@ -83,7 +83,7 @@ void NymphSession::run() {
 			UInt32 length = 0;
 			length = *((UInt32*) &headerBuff[4]);
 			
-			NYMPH_LOG_DEBUG("Message length: 0x" + NumberFormatter::formatHex(length));
+			NYMPH_LOG_DEBUG("Message length: " + NumberFormatter::format(length) + " bytes.");
 			
 			char* buff = new char[length];
 			
@@ -145,11 +145,11 @@ void NymphSession::run() {
 			// The message hash is now used to find the appropriate callback to
 			// call.
 			Int64 msgId = msg->getMessageId();
-			NYMPH_LOG_DEBUG("Calling method callback for message ID: 0x" + NumberFormatter::formatHex(msgId));
+			NYMPH_LOG_DEBUG("Calling method callback for message ID: " + NumberFormatter::format(msgId));
 			UInt32 id = msg->getMethodId();
 			NymphMessage* response = 0;
 			if (!NymphRemoteClient::callMethodCallback(handle, id, msg, response)) {
-				NYMPH_LOG_ERROR("Calling callback for message 0x" + NumberFormatter::formatHex(msgId) + " failed. Skipping message.");
+				NYMPH_LOG_ERROR("Calling callback for message " + NumberFormatter::format(msgId) + " failed. Skipping message.");
 				delete msg;
 				continue;
 			}

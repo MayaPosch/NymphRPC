@@ -120,13 +120,13 @@ bool NymphListener::removeConnection(int handle) {
 
 // --- ADD MESSAGE ---
 bool NymphListener::addMessage(NymphRequest* &request) {
-	NYMPH_LOG_INFORMATION("Adding request for message ID: " + NumberFormatter::formatHex(request->messageId) + ".");
+	NYMPH_LOG_INFORMATION("Adding request for message ID: " + NumberFormatter::format(request->messageId) + ".");
 	
 	listenersMutex.lock();
 	map<int, NymphSocketListener*>::iterator it;
 	it = listeners.find(request->handle);
 	if (it == listeners.end()) {
-		NYMPH_LOG_ERROR("Handle " + NumberFormatter::format(request->handle) + " not found. Dropping message ID " + NumberFormatter::formatHex(request->messageId));
+		NYMPH_LOG_ERROR("Handle " + NumberFormatter::format(request->handle) + " not found. Dropping message ID " + NumberFormatter::format(request->messageId));
 		listenersMutex.unlock();
 		return false;
 	}
@@ -140,13 +140,13 @@ bool NymphListener::addMessage(NymphRequest* &request) {
 
 // --- REMOVE MESSAGE ---
 bool NymphListener::removeMessage(int handle, Int64 messageId) {
-	NYMPH_LOG_INFORMATION("Removing request for message ID: " + NumberFormatter::formatHex(messageId) + ".");
+	NYMPH_LOG_INFORMATION("Removing request for message ID: " + NumberFormatter::format(messageId) + ".");
 	
 	listenersMutex.lock();
 	map<int, NymphSocketListener*>::iterator it;
 	it = listeners.find(handle);
 	if (it == listeners.end()) {
-		NYMPH_LOG_ERROR("Handle " + NumberFormatter::format(handle) + " not found. Dropping message ID " + NumberFormatter::formatHex(messageId));
+		NYMPH_LOG_ERROR("Handle " + NumberFormatter::format(handle) + " not found. Dropping message ID " + NumberFormatter::format(messageId));
 		listenersMutex.unlock();
 		return false;
 	}

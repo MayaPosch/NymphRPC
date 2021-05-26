@@ -251,7 +251,7 @@ bool NymphServerInstance::callMethod(std::string name, std::vector<NymphType*> &
 
 // --- CALL METHOD ID ---
 bool NymphServerInstance::callMethodId(uint32_t id, std::vector<NymphType*> &values, NymphType* &returnvalue, std::string &result) {
-	NYMPH_LOG_DEBUG("Called method ID: " + NumberFormatter::formatHex(id));
+	NYMPH_LOG_DEBUG("Called method ID: " + NumberFormatter::format(id));
 	
 	// Get the method.
 	methodsMutex.lock();

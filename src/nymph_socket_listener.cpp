@@ -71,7 +71,7 @@ void NymphSocketListener::run() {
 			UInt32 signature = *((UInt32*) &headerBuff[0]);
 			if (signature != 0x4452474e) { // 'DRGN' ASCII in LE format.
 				// TODO: handle invalid header.
-				NYMPH_LOG_ERROR("Invalid header: " + NumberFormatter::formatHex(signature));
+				NYMPH_LOG_ERROR("Invalid header: 0x" + NumberFormatter::formatHex(signature));
 				
 				continue;
 			}
@@ -82,7 +82,7 @@ void NymphSocketListener::run() {
 				length = length | ((UInt8) headerBuff[k] << ((7 - k) * 8));
 			} */
 			
-			NYMPH_LOG_DEBUG("Message length: 0x" + NumberFormatter::formatHex(length));
+			NYMPH_LOG_DEBUG("Message length: " + NumberFormatter::format(length) + " bytes.");
 			
 			char* buff = new char[length];
 			
@@ -126,7 +126,7 @@ void NymphSocketListener::run() {
 				} //while
 			}
 			else { 
-				NYMPH_LOG_DEBUG("Read 0x" + NumberFormatter::formatHex(received) + " bytes.");
+				NYMPH_LOG_DEBUG("Read " + NumberFormatter::format(received) + " bytes.");
 				binMsg = new string(((const char*) buff), length);
 			}
 			
@@ -150,14 +150,14 @@ void NymphSocketListener::run() {
 				continue; // We're done with this request.
 			}
 			
-			NYMPH_LOG_DEBUG("Found message ID: 0x" + NumberFormatter::formatHex(msgId) + ".");
+			NYMPH_LOG_DEBUG("Found message ID: " + NumberFormatter::format(msgId) + ".");
 			
 			messagesMutex.lock();
 			map<UInt64, NymphRequest*>::iterator it;
 			it = messages.find(msgId);
 			if (it == messages.end()) {
 				// Message ID not found.
-				NYMPH_LOG_ERROR("Message ID 0x" + NumberFormatter::formatHex(msgId) + " not found.");
+				NYMPH_LOG_ERROR("Message ID " + NumberFormatter::format(msgId) + " not found.");
 				messagesMutex.unlock();
 				delete msg;
 				continue;
@@ -175,7 +175,7 @@ void NymphSocketListener::run() {
 			req->condition.signal();
 			req->mutex.unlock();
 			
-			NYMPH_LOG_INFORMATION("Signalled condition for message ID " + NumberFormatter::formatHex(msgId) + ".");
+			NYMPH_LOG_INFORMATION("Signalled condition for message ID " + NumberFormatter::format(msgId) + ".");
 			
 			messagesMutex.unlock();
 			delete msg;
