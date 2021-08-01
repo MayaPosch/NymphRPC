@@ -113,10 +113,10 @@ makedir:
 	
 test: test-client test-server
 	
-test-client:
+test-client: lib
 	$(MAKE) -C ./test/nymph_test_client
 	
-test-server:
+test-server: lib
 	$(MAKE) -C ./test/nymph_test_server
 
 clean: clean-lib clean-test
