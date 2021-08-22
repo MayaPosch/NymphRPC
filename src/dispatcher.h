@@ -25,6 +25,7 @@
 
 
 class Dispatcher {
+	static int poolSize;
 	static std::queue<AbstractRequest*> requests;
 	static std::queue<Worker*> workers;
 	static std::mutex requestsMutex;

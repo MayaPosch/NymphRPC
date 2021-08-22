@@ -21,6 +21,7 @@ using namespace std;
 
 
 // Static initialisations.
+int Dispatcher::poolSize = 0;
 queue<AbstractRequest*> Dispatcher::requests;
 queue<Worker*> Dispatcher::workers;
 mutex Dispatcher::requestsMutex;
@@ -30,16 +31,9 @@ vector<thread*> Dispatcher::threads;
 
 
 // --- INIT ---
-// Start the number of requested worker threads.
+// Set the maximum pool size.
 bool Dispatcher::init(int workers) {
-	thread* t = 0;
-	Worker* w = 0;
-	for (int i = 0; i < workers; ++i) {
-		w = new Worker;
-		allWorkers.push_back(w);
-		t = new thread(&Worker::run, w);
-		threads.push_back(t);
-	}
+	poolSize = workers;
 	
 	return true;
 }
@@ -81,6 +75,17 @@ void Dispatcher::addRequest(AbstractRequest* request) {
 		unique_lock<mutex> lock(*mtx);
 		cv->notify_one();
 		workers.pop();
+		workersMutex.unlock();
+	}
+	else if (threads.size() < poolSize) {
+		// Create new worker thread.
+		thread* t = 0;
+		Worker* w = 0;
+		w = new Worker;
+		w->setRequest(request);
+		allWorkers.push_back(w);
+		t = new thread(&Worker::run, w);
+		threads.push_back(t);
 		workersMutex.unlock();
 	}
 	else {
