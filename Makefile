@@ -59,14 +59,30 @@ RM = rm
 AR = ar
 endif
 
+
 OUTPUT = libnymphrpc
 VERSION = 0.1
+
+
+# Use -soname on Linux/BSD, -install_name on Darwin (MacOS).
+SONAME = -soname
+LIBNAME = $(OUTPUT).so.$(VERSION)
+ifeq ($(shell uname -s),Darwin)
+	SONAME = -install_name
+	LIBNAME = $(OUTPUT).0.dylib
+endif
+
+
 INCLUDE = -I src
 LIBS := -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON 
 CFLAGS := $(INCLUDE) -g3 -std=c++11 -O0
-SHARED_FLAGS := -fPIC -shared -Wl,-soname,$(OUTPUT).so.$(VERSION)
+SHARED_FLAGS := -fPIC -shared -Wl,$(SONAME),$(LIBNAME)
 
 ifdef ANDROID
+CFLAGS += -fPIC
+else ifdef ANDROID64
+#CFLAGS += -fPIC
+else ifdef ANDROIDX86
 CFLAGS += -fPIC
 endif
 
@@ -84,6 +100,7 @@ endif
 else
 	LIBS += -pthread
 endif
+
 
 SOURCES := $(wildcard src/*.cpp)
 OBJECTS := $(addprefix obj/static/,$(notdir) $(SOURCES:.cpp=.o))
