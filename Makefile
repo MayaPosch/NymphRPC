@@ -150,6 +150,10 @@ clean-test-server:
 	$(MAKE) -C ./test/nymph_test_server clean
 
 PREFIX ?= /usr
+ifdef OS
+# Assume 64-bit MSYS2
+PREFIX = /mingw64
+endif
 
 .PHONY: install
 install:
