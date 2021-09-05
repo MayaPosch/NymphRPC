@@ -35,6 +35,8 @@ vector<thread*> Dispatcher::threads;
 bool Dispatcher::init(int workers) {
 	poolSize = workers;
 	
+	std::cout << "Dispatcher: Setting max pool size to " << poolSize << " workers." << std::endl;
+	
 	return true;
 }
 
@@ -79,6 +81,7 @@ void Dispatcher::addRequest(AbstractRequest* request) {
 	}
 	else if (threads.size() < poolSize) {
 		// Create new worker thread.
+		std::cout << "Dispatcher: Creating new thread..." << std::endl;
 		thread* t = 0;
 		Worker* w = 0;
 		w = new Worker;
