@@ -159,12 +159,15 @@ endif
 install:
 	install -d $(DESTDIR)$(PREFIX)/lib/
 	install -m 644 lib/$(OUTPUT).a $(DESTDIR)$(PREFIX)/lib/
+ifndef OS
 	install -m 644 lib/$(OUTPUT).so.$(VERSION) $(DESTDIR)$(PREFIX)/lib/
+endif
 	install -d $(DESTDIR)$(PREFIX)/include/nymph
 	install -m 644 src/*.h $(DESTDIR)$(PREFIX)/include/nymph/
+ifndef OS
 	cd $(DESTDIR)$(PREFIX)/lib && \
 		if [ -f $(OUTPUT).so ]; then \
 			rm $(OUTPUT).so; \
 		fi && \
 		ln -s $(OUTPUT).so.$(VERSION) $(OUTPUT).so
-
+endif
