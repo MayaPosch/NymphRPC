@@ -31,6 +31,13 @@ TOOLCHAIN_POSTFIX := .cmd
 endif
 endif
 
+ifndef ARCH
+ARCH := $(shell g++ -dumpmachine)/
+endif
+
+USYS := $(shell uname -s)
+UMCH := $(shell uname -m)
+
 ifdef ANDROID
 #GCC := $(TOOLCHAIN_PREFIX)g++$(TOOLCHAIN_POSTFIX)
 GCC := armv7a-linux-androideabi$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
@@ -103,30 +110,30 @@ endif
 
 
 SOURCES := $(wildcard src/*.cpp)
-OBJECTS := $(addprefix obj/static/,$(notdir) $(SOURCES:.cpp=.o))
-SHARED_OBJECTS := $(addprefix obj/shared/,$(notdir) $(SOURCES:.cpp=.o))
+OBJECTS := $(addprefix obj/static/$(ARCH),$(notdir) $(SOURCES:.cpp=.o))
+SHARED_OBJECTS := $(addprefix obj/shared/$(ARCH),$(notdir) $(SOURCES:.cpp=.o))
 
 all: lib test
 
-lib: makedir lib/$(OUTPUT).a lib/$(OUTPUT).so.$(VERSION)
+lib: makedir lib/$(ARCH)$(OUTPUT).a lib/$(ARCH)$(OUTPUT).so.$(VERSION)
 	
-obj/static/%.o: %.cpp
+obj/static/$(ARCH)%.o: %.cpp
 	$(GCC) -c -o $@ $< $(CFLAGS)
 	
-obj/shared/%.o: %.cpp
+obj/shared/$(ARCH)%.o: %.cpp
 	$(GCC) -c -o $@ $< $(SHARED_FLAGS) $(CFLAGS) $(LIBS)
 	
-lib/$(OUTPUT).a: $(OBJECTS)
+lib/$(ARCH)$(OUTPUT).a: $(OBJECTS)
 	-rm -f $@
 	$(AR) rcs $@ $^
 	
-lib/$(OUTPUT).so.$(VERSION): $(SHARED_OBJECTS)
+lib/$(ARCH)$(OUTPUT).so.$(VERSION): $(SHARED_OBJECTS)
 	$(GCC) -o $@ $(CFLAGS) $(SHARED_FLAGS) $(SHARED_OBJECTS) $(LIBS)
 	
 makedir:
-	$(MAKEDIR) lib
-	$(MAKEDIR) obj/static/src
-	$(MAKEDIR) obj/shared/src
+	$(MAKEDIR) lib/$(ARCH)
+	$(MAKEDIR) obj/static/$(ARCH)src
+	$(MAKEDIR) obj/shared/$(ARCH)src
 	
 test: test-client test-server
 	
@@ -158,9 +165,9 @@ endif
 .PHONY: install
 install:
 	install -d $(DESTDIR)$(PREFIX)/lib/
-	install -m 644 lib/$(OUTPUT).a $(DESTDIR)$(PREFIX)/lib/
+	install -m 644 lib/$(ARCH)$(OUTPUT).a $(DESTDIR)$(PREFIX)/lib/
 ifndef OS
-	install -m 644 lib/$(OUTPUT).so.$(VERSION) $(DESTDIR)$(PREFIX)/lib/
+	install -m 644 lib/$(ARCH)$(OUTPUT).so.$(VERSION) $(DESTDIR)$(PREFIX)/lib/
 endif
 	install -d $(DESTDIR)$(PREFIX)/include/nymph
 	install -m 644 src/*.h $(DESTDIR)$(PREFIX)/include/nymph/
@@ -171,3 +178,6 @@ ifndef OS
 		fi && \
 		ln -s $(OUTPUT).so.$(VERSION) $(OUTPUT).so
 endif
+
+package:
+	tar -cvzf lib/$(OUTPUT)-$(VERSION)-$(USYS)-$(UMCH).tar.gz lib/$(ARCH)$(OUTPUT).*
