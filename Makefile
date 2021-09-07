@@ -180,4 +180,4 @@ ifndef OS
 endif
 
 package:
-	tar -cvzf lib/$(OUTPUT)-$(VERSION)-$(USYS)-$(UMCH).tar.gz lib/$(ARCH)$(OUTPUT).*
+	tar -C lib/$(ARCH) -cvzf lib/$(OUTPUT)-$(VERSION)-$(USYS)-$(UMCH).tar.gz $(OUTPUT).a $(OUTPUT).so.$(VERSION)
