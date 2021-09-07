@@ -113,7 +113,7 @@ SOURCES := $(wildcard src/*.cpp)
 OBJECTS := $(addprefix obj/static/$(ARCH),$(notdir) $(SOURCES:.cpp=.o))
 SHARED_OBJECTS := $(addprefix obj/shared/$(ARCH),$(notdir) $(SOURCES:.cpp=.o))
 
-all: lib test
+all: lib
 
 lib: makedir lib/$(ARCH)$(OUTPUT).a lib/$(ARCH)$(OUTPUT).so.$(VERSION)
 	
@@ -143,7 +143,7 @@ test-client: lib
 test-server: lib
 	$(MAKE) -C ./test/nymph_test_server
 
-clean: clean-lib clean-test
+clean: clean-lib
 
 clean-test: clean-test-client clean-test-server
 
