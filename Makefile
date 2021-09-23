@@ -115,7 +115,7 @@ SHARED_OBJECTS := $(addprefix obj/shared/$(ARCH),$(notdir) $(SOURCES:.cpp=.o))
 
 all: lib
 
-lib: makedir lib/$(ARCH)$(OUTPUT).a lib/$(ARCH)$(OUTPUT).so.$(VERSION)
+lib: makedir lib/$(ARCH)$(OUTPUT).a lib/$(ARCH)$(LIBNAME)
 	
 obj/static/$(ARCH)%.o: %.cpp
 	$(GCC) -c -o $@ $< $(CFLAGS)
@@ -127,7 +127,7 @@ lib/$(ARCH)$(OUTPUT).a: $(OBJECTS)
 	-rm -f $@
 	$(AR) rcs $@ $^
 	
-lib/$(ARCH)$(OUTPUT).so.$(VERSION): $(SHARED_OBJECTS)
+lib/$(ARCH)$(LIBNAME): $(SHARED_OBJECTS)
 	$(GCC) -o $@ $(CFLAGS) $(SHARED_FLAGS) $(SHARED_OBJECTS) $(LIBS)
 	
 makedir:
