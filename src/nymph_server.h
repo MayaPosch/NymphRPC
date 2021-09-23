@@ -18,6 +18,7 @@
 #define NYMPH_SERVER_H
 
 #include <string>
+#include <atomic>
 
 #include <Poco/Net/TCPServer.h>
 
@@ -28,7 +29,7 @@ class NymphServer {
 	static Poco::Net::TCPServer* server;
 	
 public:
-	static bool running;
+	static std::atomic<bool> running;
 	
 	static bool start(int port = 4004);
 	static bool stop();

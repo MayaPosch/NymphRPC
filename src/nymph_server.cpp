@@ -28,7 +28,7 @@ using namespace std;
 string NymphServer::loggerName = "NymphServer";
 Poco::Net::ServerSocket NymphServer::ss;
 Net::TCPServer* NymphServer::server;
-bool NymphServer::running;
+std::atomic<bool> NymphServer::running;
 
 
 // --- START ---
