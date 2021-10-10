@@ -51,6 +51,7 @@ class NymphMethod {
 	
 public:
 	NymphMethod(std::string name, std::vector<NymphTypes> parameters, NymphTypes retType);
+	NymphMethod(std::string name, std::vector<NymphTypes> parameters, NymphTypes retType, NymphMethodCallback cb);
 	void setCallback(NymphMethodCallback callback);
 	NymphMessage* callCallback(int handle, NymphMessage* msg);
 	bool call(Poco::Net::StreamSocket* socket, NymphRequest* &request, std::vector<NymphType*> &values, std::string &result);

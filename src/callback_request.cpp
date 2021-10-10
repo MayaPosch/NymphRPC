@@ -32,11 +32,11 @@ void CallbackRequest::process() {
 	}
 	
 	//NYMPH_LOG_INFORMATION("Calling callback succeeded.");
-	delete msg;
 }
 
 
 // --- FINISH ---
 void CallbackRequest::finish() {
-	//
+	// Call own destructor.
+	delete this;
 }

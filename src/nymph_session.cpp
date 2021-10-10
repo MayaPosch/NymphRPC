@@ -18,6 +18,8 @@
 #include "nymph_message.h"
 #include "remote_client.h"
 
+#include <Poco/NumberFormatter.h>
+
 using namespace Poco;
 
 using namespace std;
@@ -67,7 +69,7 @@ void NymphSession::run() {
 			}
 			else if (received < 8) {
 				// TODO: try to wait for more bytes.
-				NYMPH_LOG_WARNING("Received <8 bytes: " + NumberFormatter::format(received));
+				NYMPH_LOG_WARNING("Received <8 bytes: " + Poco::NumberFormatter::format(received));
 				
 				continue;
 			}
@@ -85,12 +87,11 @@ void NymphSession::run() {
 			
 			NYMPH_LOG_DEBUG("Message length: " + NumberFormatter::format(length) + " bytes.");
 			
-			char* buff = new char[length];
+			uint8_t* buff = new uint8_t[length];
 			
 			// Read the entire message into a string. This is then used to
 			// construct an NymphMessage instance.
 			received = socket.receiveBytes((void*) buff, length);
-			string* binMsg;
 			if (received != length) {
 				// Handle incomplete message.
 				NYMPH_LOG_WARNING("Incomplete message: " + NumberFormatter::format(received) + " of " + NumberFormatter::format(length));
@@ -98,52 +99,53 @@ void NymphSession::run() {
 				// Loop until the rest of the message has been received.
 				// TODO: Set a maximum number of loops/timeout? Reset when 
 				// receiving data, timeout when poll times out N times?
-				binMsg = new string((const char*) buff, received);
-				binMsg->reserve(length);
+				int buffIdx = received;
 				int unread = length - received;
 				while (1) {
 					if (socket.poll(timeout, Net::Socket::SELECT_READ)) {
-						char* buff1 = new char[unread];
-						received = socket.receiveBytes((void*) buff1, unread);
+						received = socket.receiveBytes((void*) (buff + buffIdx), unread);
 						if (received == 0) {
 							// Remote disconnnected. Socket should be discarded.
 							NYMPH_LOG_INFORMATION("Received remote disconnected notice. Terminating listener thread.");
-							delete[] buff1;
+							delete[] buff;
 							break;
 						}
 						else if (received != unread) {
-							binMsg->append((const char*) buff1, received);
-							delete[] buff1;
 							unread -= received;
+							buffIdx += received;
 							NYMPH_LOG_WARNING("Incomplete message: " + NumberFormatter::format(unread) + "/" + NumberFormatter::format(length) + " unread.");
 							continue;
 						}
 						
 						// Full message was read. Continue with processing.
-						binMsg->append((const char*) buff1, received);
-						delete[] buff1;
 						break;
 					} // if
 				} //while
 			}
 			else { 
 				NYMPH_LOG_DEBUG("Read " + NumberFormatter::format(received) + " bytes.");
-				binMsg = new string(((const char*) buff), length);
 			}
 			
-			delete[] buff;
-			
 			// Parse the string into an NymphMessage instance.
-			NymphMessage* msg = new NymphMessage(binMsg);
-			delete binMsg;
-			if (msg->getState() != 0) {
-				// Error during the parsing of the message. Abort.
-				NYMPH_LOG_ERROR("Failed to parse the binary message. Skipping...");
+			// Buffer ownership is transferred to the message.
+			NymphMessage* msg = new NymphMessage(buff, length);
+			
+			// Check for good state on message.
+			if (msg->isCorrupt()) {
+				// Handle corrupted message.
+				NYMPH_LOG_WARNING("Corrupted message. Discarding it.");
+				delete msg;
 				continue;
 			}
 			
-			// The message hash is now used to find the appropriate callback to
-			// call.
+			if (msg->getState() != 0) {
+				// Error during the parsing of the message. Abort.
+				NYMPH_LOG_ERROR("Failed to parse the binary message. Skipping...");
+				delete msg;
+				continue;
+			}
+			
+			// The message ID is now used to find the appropriate callback to call.
 			Int64 msgId = msg->getMessageId();
 			NYMPH_LOG_DEBUG("Calling method callback for message ID: " + NumberFormatter::format(msgId));
 			UInt32 id = msg->getMethodId();
@@ -162,21 +164,14 @@ void NymphSession::run() {
 			
 			NYMPH_LOG_INFORMATION("Calling method callback succeeded. Sending response.");
 			
-			// Send the response.
-			string responseStr;
-			if (!response->finish(responseStr)) {
-				NYMPH_LOG_ERROR("Finishing message failed.")
-				delete msg;
-				continue;
-			}
+			// Prepare the response.
+			response->serialize();
 			
-			// We don't need the message any more, just the response.
-			delete msg;
-			
+			// Send the message.
 			try {
-				int ret = socket.sendBytes(((const void*) responseStr.c_str()), 
-														responseStr.length());
-				if (ret != responseStr.length()) {
+				int ret = socket.sendBytes(((const void*) response->buffer()), 
+														response->buffer_size());
+				if (ret != response->buffer_size()) {
 					// Handle error.
 					NYMPH_LOG_ERROR("Failed to send message.");
 					delete response;
@@ -202,15 +197,15 @@ void NymphSession::run() {
 
 // --- SEND ---
 // Send data on the socket instance.
-bool NymphSession::send(string& msg, string& result) {
+bool NymphSession::send(uint8_t* msg, uint32_t length, std::string &result) {
 	Net::StreamSocket& socket = this->socket();
 	
 	// Send the message.
 	try {
-		int ret = socket.sendBytes(((const void*) msg.c_str()), msg.length());
-		if (ret != msg.length()) {
+		int ret = socket.sendBytes((const void*) msg, length);
+		if (ret != length) {
 			// Handle error.
-			result = "Failed to send messag.";		
+			result = "Failed to send message.";		
 			return false;
 		}
 		

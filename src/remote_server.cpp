@@ -76,23 +76,16 @@ bool NymphServerInstance::sync(std::string &result) {
 	NYMPH_LOG_DEBUG("Sync: calling remote server...");
 	vector<NymphType*> values;
 	NymphType* retval = 0;
-	//if (!callMethodId(handle, 0, values, retval, result)) {
 	if (!callMethod("nymphsync", values, retval, result)) {
 		NYMPH_LOG_DEBUG("Sync: failed to call remote sync method.");
 		return false;
 	}
 	
 	// Parse results.
-	// We should have received a NymphString instance containing the 
-	// serialised methods.
-	if (!retval || retval->type() != NYMPH_STRING) { 
-		NYMPH_LOG_ERROR("Invalid return value from remote for sync.");
-		return false; 
-	}
-	
 	NYMPH_LOG_DEBUG("Received sync response.");
 	
-	string binmsg = ((NymphString*) retval)->getValue();
+	std::string binmsg(retval->getChar(), retval->string_length());
+	
 	if (binmsg.length() < 11) { return false; }
 	UInt32 index = 0;
 	string signature = binmsg.substr(0, 7);
@@ -103,7 +96,7 @@ bool NymphServerInstance::sync(std::string &result) {
 	NYMPH_LOG_DEBUG("Received " + NumberFormatter::format(methodCount) + " methods.");
 	
 	if (signature != "METHODS") {
-		NYMPH_LOG_DEBUG("Sync: METHODS signature wasn't found.");
+		NYMPH_LOG_DEBUG("Sync: METHODS signature wasn't found. Got: " + signature);
 		return false; 
 	}
 	
@@ -162,6 +155,8 @@ bool NymphServerInstance::sync(std::string &result) {
 		addMethod(methodName, method);
 	}
 	
+	delete retval;
+	
 	return true;
 }
 
@@ -183,7 +178,7 @@ bool NymphServerInstance::addMethod(std::string name, NymphMethod method) {
 }
 
 
-// --- GET METHOD ---
+// --- CALL METHOD ---
 bool NymphServerInstance::callMethod(std::string name, std::vector<NymphType*> &values, 
 										NymphType* &returnvalue, std::string &result) {	
 	NYMPH_LOG_DEBUG("Called method: " + name);
@@ -197,8 +192,8 @@ bool NymphServerInstance::callMethod(std::string name, std::vector<NymphType*> &
 		methodsMutex.unlock();
 		
 		// Delete the values in the values vector since we own them.
-		std::vector<NymphType*>::iterator it;
-		for (it = values.begin(); it != values.end(); ++it) { delete (*it); }
+		/* std::vector<NymphType*>::iterator it;
+		for (it = values.begin(); it != values.end(); ++it) { delete (*it); } */
 		return false;
 	}
 	

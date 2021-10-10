@@ -20,6 +20,7 @@
 #include <Poco/Poco.h>
 
 #include <vector>
+#include <atomic>
 
 
 enum {
@@ -41,30 +42,42 @@ class NymphMessage {
 	uint32_t flags;
 	uint32_t methodId;
 	int state;
+	bool corrupt;
 	uint64_t messageId;
 	uint64_t responseId;
 	NymphException exception;
 	bool hasResult;
-	bool responseOwned;
 	std::string callbackName;
-	NymphType* response;
+	NymphType* response = 0;
 	std::string loggerName;
+	uint8_t* data_buffer;
+	uint32_t buffer_length;
+	bool responseOwned = true;
+	std::atomic<uint32_t> refCount = { 0 };
+	std::atomic<bool> deleted = { false };
 	
 public:
 	NymphMessage();
 	NymphMessage(uint32_t methodId);
-	NymphMessage(std::string* binmsg);
+	NymphMessage(uint8_t* binmsg, uint64_t bytes);
 	~NymphMessage();
 	bool addValue(NymphType* value);
-	bool finish(std::string &output);
+	bool addValues(std::vector<NymphType*> &values);
+	
+	void serialize();
+	uint8_t* buffer() { return data_buffer; }
+	uint32_t buffer_size() { return buffer_length; }
+	
 	int getState() { return state; }
+	bool isCorrupt() { return corrupt; }
+	
 	void setInReplyTo(uint64_t msgId);
 	bool isCallback() { return flags & NYMPH_MESSAGE_CALLBACK; }
 	uint64_t getResponseId() { return responseId; }
 	uint64_t getMessageId() { return messageId; }
 	void setResultValue(NymphType* value);
-	NymphType* getResponse() { return response; responseOwned = false; }
-	std::vector<NymphType*> parameters() { return values; }
+	NymphType* getResponse(bool take = false) { responseOwned = take; return response; }
+	std::vector<NymphType*>& parameters() { return values; }
 	uint32_t getMethodId() { return methodId; }
 	NymphMessage* getReplyMessage();
 	NymphException getException() { return exception; }
@@ -73,6 +86,10 @@ public:
 	bool isException() { return flags & NYMPH_MESSAGE_EXCEPTION; }
 	bool setException(int exceptionId, std::string value);
 	bool setCallback(std::string name);
+	
+	void addReferenceCount();
+	void decrementReferenceCount();
+	void discard();
 };
 
 #endif

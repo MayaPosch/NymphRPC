@@ -34,36 +34,41 @@ using namespace Poco;
 NymphMessage::NymphMessage() {
 	flags = 0;
 	state = 0;
-	response = 0;
 	responseId = 0;
 	hasResult = false;
-	responseOwned = false;
 	loggerName = "NymphMessage";
+	corrupt = false;
+	
+	data_buffer = 0;
+	buffer_length = 0;
 }
 
 
 NymphMessage::NymphMessage(uint32_t methodId) {
 	flags = 0;
 	state = 0; // no error
-	response = 0;
 	responseId = 0;
 	hasResult = false;
-	responseOwned = false;
 	this->methodId = methodId;
 	loggerName = "NymphMessage";
+	corrupt = false;
+	
+	data_buffer = 0;
+	buffer_length = 0;
 }
 
 
 // Deserialises a binary Nymph message.
-NymphMessage::NymphMessage(string* binmsg) {
+NymphMessage::NymphMessage(uint8_t* binmsg, uint64_t bytes) {
 	flags = 0;
 	state = 0; // no error
-	response = 0;
 	responseId = 0;
 	hasResult = false;
-	responseOwned = false;
+	corrupt = false;
+	
 	loggerName = "NymphMessage";
-	uint64_t binLength = binmsg->length();
+	data_buffer = binmsg;
+	buffer_length = bytes;
 	
 	// The string we receive here is stripped of the Nymph header (0x4452474e, 'DRGN')
 	// as well as the length of the message.
@@ -73,8 +78,10 @@ NymphMessage::NymphMessage(string* binmsg) {
 	methodId = 0;
 	
 	int index = 0;
-	version = getUInt8(binmsg, index);
-	methodId = getUInt32(binmsg, index);
+	version = *binmsg;
+	index++;
+	methodId = *((uint32_t*) (binmsg + index));
+	index += 4;
 	
 	NYMPH_LOG_DEBUG("Method ID: " + NumberFormatter::format(methodId) + ".");
 	
@@ -84,98 +91,110 @@ NymphMessage::NymphMessage(string* binmsg) {
 		NYMPH_LOG_ERROR("Wrong Nymph version: " + NumberFormatter::format(version) + ".");
 		
 		state = -1;
+		corrupt = true;
 		return;
 	}
 	
 	// Read the message flags.
-	flags = getUInt32(binmsg, index);
+	flags = *((uint32_t*) (binmsg + index));
+	index += 4;
 	
 	NYMPH_LOG_DEBUG("Message flags: 0x" + NumberFormatter::formatHex(flags));
 	
 	// Read the message ID & optionally the request message ID (if response).
-	messageId = getUInt64(binmsg, index);
+	messageId = *((uint64_t*) (binmsg + index));
+	index += 8;
 	
 	uint8_t typecode;
 	if (flags & NYMPH_MESSAGE_REPLY) {
-		responseId = getUInt64(binmsg, index);
+		responseId = *((uint64_t*) (binmsg + index));
+		index += 8;
 		
 		// Read in the response
-		typecode = getUInt8(binmsg, index);
-		NymphUtilities::parseValue(typecode, binmsg, index, response);
+		typecode = *(binmsg + index++);
+		response = new NymphType;
+		NymphUtilities::parseValue(typecode, binmsg, index, *response);
 		
-		if (index >= binLength) {
+		if (index >= bytes) {
 			// Out of bounds, abort.
 			NYMPH_LOG_ERROR("Message parsing index out of bounds. Abort.");
+			corrupt = true;
 			return;
 		}
 		
-		if ((*binmsg)[index] != NYMPH_TYPE_NONE) {
+		if (*(binmsg + index) != NYMPH_TYPE_NONE) {
 			// We didn't reach the message end. 
 			// FIXME: handle this case, maybe do some pre-flight checks.
+			corrupt = true;
+			return;
 		}
+		
+		response->linkWithMessage(this);
 	}
 	else if (flags & NYMPH_MESSAGE_EXCEPTION) {
-		responseId = getUInt64(binmsg, index);
+		responseId = *((uint64_t*) (binmsg + index));
 		
 		// Read in the exception (integer, string).
-		typecode = getUInt8(binmsg, index);
-		NymphType* value;
+		typecode = *(binmsg + index++);
+		NymphType value;
 		NymphUtilities::parseValue(typecode, binmsg, index, value);
-		if (value->type() == NYMPH_UINT32) {
-			exception.id = ((NymphUint32*) value)->getValue();
+		if (value.valuetype() == NYMPH_UINT32) {
+			exception.id = value.getUint32();
 		}
 		
-		typecode = getUInt8(binmsg, index);
+		typecode = *(binmsg + index++);
 		NymphUtilities::parseValue(typecode, binmsg, index, value);
-		if (value->type() == NYMPH_STRING) {
-			exception.value = ((NymphString*) value)->getValue();
+		if (value.valuetype() == NYMPH_STRING) {
+			exception.value = std::string(value.getChar(), value.string_length());
 		}
 	}
 	else if (flags & NYMPH_MESSAGE_CALLBACK) {
 		// Read in the name of the callback method.
-		typecode = getUInt8(binmsg, index);
-		NymphType* value = 0;
+		typecode = *(binmsg + index++);
+		NymphType value;
 		NymphUtilities::parseValue(typecode, binmsg, index, value);
-		if (value && value->type() == NYMPH_STRING) {
-			callbackName = ((NymphString*) value)->getValue();
+		if (value.valuetype() == NYMPH_STRING) {
+			callbackName = std::string(value.getChar(), value.string_length());
 		}
 		
 		// Read in the parameter values.
-		value = 0;
-		while (index < binLength && (*binmsg)[index] != NYMPH_TYPE_NONE) {		
-			typecode = getUInt8(binmsg, index);
-			NymphUtilities::parseValue(typecode, binmsg, index, value);
-			values.push_back(value);
+		while (index < bytes && *(binmsg + index) != NYMPH_TYPE_NONE) {		
+			typecode = *(binmsg + index++);
+			NymphType* val = new NymphType;
+			NymphUtilities::parseValue(typecode, binmsg, index, *val);
+			val->linkWithMessage(this);
+			values.push_back(val);
 			
-			if (index >= binLength) {
+			if (index >= bytes) {
 				NYMPH_LOG_ERROR("Reached end of message without terminator found.");
 				NYMPH_LOG_ERROR("Message is likely corrupt.");
 				
-				// TODO: set a 'corrupt' flag or such for the message.
+				corrupt = true;
 				
 				break;
 			}
 		}
 	}
 	else {
-		if (!(index < binLength)) {
-			// TODO: set 'corrupt' flag.
+		if (!(index < bytes)) {
 			NYMPH_LOG_ERROR("Index is beyond message bounds. Corrupted message.");
+			corrupt = true;
 			return;
 		}
 		
 		// Read in the parameter values.
-		NymphType* value;
-		while (index < binLength && (*binmsg)[index] != NYMPH_TYPE_NONE) {		
-			typecode = getUInt8(binmsg, index);
-			NymphUtilities::parseValue(typecode, binmsg, index, value);
-			values.push_back(value);
+		while (index < bytes && *(binmsg + index) != NYMPH_TYPE_NONE) {
+			typecode = *(binmsg + index++);
+			NymphType* val = new NymphType;
+			NymphUtilities::parseValue(typecode, binmsg, index, *val);
+			val->linkWithMessage(this);
+			values.push_back(val);
 			
-			if (index >= binLength) {
+			if (index >= bytes) {
 				NYMPH_LOG_ERROR("Reached end of message without terminator found.");
 				NYMPH_LOG_ERROR("Message is likely corrupt.");
 				
-				// TODO: set a 'corrupt' flag or such for the message.
+				corrupt = true;
 				
 				break;
 			}
@@ -187,11 +206,12 @@ NymphMessage::NymphMessage(string* binmsg) {
 // --- DECONSTRUCTOR ---
 // Delete all values stored in this message since we have taken ownership.
 NymphMessage::~NymphMessage() {
-	uint64_t l = values.size();
-	for (uint64_t i = 0; i < l; ++i) {
-		if (values[i]) {
-			delete values[i];
-		}
+	if (data_buffer && buffer_length > 0) {
+		delete[] data_buffer;
+	}
+	
+	for (int i = 0; i < values.size(); i++) {
+		delete values[i];
 	}
 	
 	if (responseOwned && response) {
@@ -207,43 +227,69 @@ NymphMessage::~NymphMessage() {
 bool NymphMessage::addValue(NymphType* value) {
 	values.push_back(value);
 	
+	// Add the binary size of the new value to the total count.
+	buffer_length += value->bytes();
+	
 	return true;
 }
 
 
-// --- FINISH ---
-// Finish the header contents, merge with contents. Make result available.
-bool NymphMessage::finish(string &output) {
+// --- ADD VALUES ---
+// Overwrite the internal values with the provided values.
+bool NymphMessage::addValues(std::vector<NymphType*> &values) {
+	this->values = values;
+	
+	// Reset and add the binary size of the new values to the total count.
+	buffer_length = 0;
+	for (int i = 0; i < values.size(); i++) {
+		buffer_length += values[i]->bytes();
+	}
+	
+	return true;
+}
+
+
+// --- SERIALIZE ---
+// Serialise the message's data and update the internal message data buffer.
+void NymphMessage::serialize() {
 	uint8_t nymphNone = NYMPH_TYPE_NONE;
 	
 	NYMPH_LOG_DEBUG("Serialising message with flags: 0x" + NumberFormatter::formatHex(flags));
 	
 	// Header section.
+	// * uint32		Signature => 'DRGN'
+	// * uint32		Length rest of message
+	// * uint8		Protocol version
+	// * uint32		Method ID
+	// * uint32		Flags
+	// * uint64		Message ID
+	//
+	// Reply message:
+	// * <header>
+	// * uint64		ReplyTo ID
+	// * ?			Serialised reply.
+	// * uint8		None
+	//
+	// Exception message:
+	// * <header>
+	// * uint64		ReplyTo ID
+	// * uint32		Exception ID
+	// * 
+	// * uint8		None
+	//
+	// Callback message:
+	// * <header>
+	// * uint8		String typecode
+	// * uint8-64	String length
+	// * ?			Callback name
+	// * ?			Serialised values.
+	// * uint8		None
+	//
+	// Regular message:
+	// * <header>
+	// * ?			Serialised values.
+	// * uint8		None
 	uint32_t signature = 0x4452474e; // 'DRGN'
-	uint32_t length = 0; // Filled in later.
-	uint8_t version = 0x00;
-	
-	// Content
-	string content;
-	if (flags & NYMPH_MESSAGE_REPLY) {
-		content = response->serialize();
-	}
-	else {
-		unsigned int valueLen = values.size();
-		for (unsigned int i = 0; i < valueLen; ++i) {
-			content += values[i]->serialize();
-		}
-	}
-	
-	// If the first message in a series, add a new messageId.
-	if (!(flags & NYMPH_MESSAGE_REPLY)) { messageId = NymphUtilities::getMessageId(); }
-	
-	// If the message is a callback, prepare it for serialisation.
-	string cbnStr;
-	if (flags & NYMPH_MESSAGE_CALLBACK) {
-		NymphString cbn(callbackName);
-		cbnStr = cbn.serialize();
-	}
 	
 	// Message length is always:
 	// * 1 byte from the header (version).
@@ -256,53 +302,82 @@ bool NymphMessage::finish(string &output) {
 	// 
 	// For a response message, add another 8 bytes to the length. (incl. exceptions).
 	// For a callback message, add 1 byte + callback name length.
-	length = (uint32_t) (content.length() + 18);
-	if (flags & NYMPH_MESSAGE_REPLY) { length += 8; }
-	if (flags & NYMPH_MESSAGE_EXCEPTION) { length += 8; }
+	//length = (uint32_t) (content.length() + 18);
+	uint32_t message_length = 18 + buffer_length;
+	if (flags & NYMPH_MESSAGE_REPLY) { message_length += 8; }
+	if (flags & NYMPH_MESSAGE_EXCEPTION) { message_length += 8; }
 	else if (flags & NYMPH_MESSAGE_CALLBACK) {
-		length += cbnStr.length();
+		NymphType cbn(&callbackName);
+		message_length +=  cbn.bytes();
 	}
 	
-	// Write the header contents.
+	NYMPH_LOG_DEBUG("Message with length: " + Poco::NumberFormatter::format(message_length));
+	
+	buffer_length = message_length + 8; // Add the size of the signature & version fields.
+	data_buffer = new uint8_t[buffer_length];
+	uint8_t* buf = data_buffer; // pointer to beginning.
+	
+	uint8_t version = 0x00;
+	
+	// If the first message in a series, add a new messageId.
+	if (!(flags & NYMPH_MESSAGE_REPLY)) { messageId = NymphUtilities::getMessageId(); }
+	
+	// Write header into buffer.
 	// FIXME: On a big-endian system all integers will be in the wrong byte order.
 	// TODO: add endianness-check. Currently assume LE.
-	string signatureStr, lengthStr, methodIdStr, msgIdStr;
-	string replyStr, flagsStr;
-	signatureStr = string(((const char*) &signature), 4);
-	lengthStr = string(((const char*) &length), 4);	
-	methodIdStr = string(((const char*) &methodId), 4);
-	flagsStr = string(((const char*) &flags), 4);
-	msgIdStr = string(((const char*) &messageId), 8);
-	if (flags & NYMPH_MESSAGE_REPLY || flags & NYMPH_MESSAGE_EXCEPTION) {
-		replyStr = string(((const char*) &responseId), 8);
-	}
+	*((uint32_t*) buf) = signature;
+	buf += 4;
+	*((uint32_t*) buf) = message_length;
+	buf += 4;
+	*buf = version;
+	buf++;
+	*((uint32_t*) buf) = methodId;
+	buf += 4;
+	*((uint32_t*) buf) = flags;
+	buf += 4;
+	*((uint64_t*) buf) = messageId;
+	buf += 8;
 	
-	output = signatureStr;
-	output += lengthStr;
-	output += string(((const char*) &version), 1);
-	output += methodIdStr;
-	output += flagsStr;
-	output += msgIdStr;
-	if (flags & NYMPH_MESSAGE_REPLY || flags & NYMPH_MESSAGE_EXCEPTION) {
-		output += replyStr;
+	
+	// Message types.
+	if (flags & NYMPH_MESSAGE_REPLY) {
+		*((uint64_t*) buf) = responseId;
+		buf += 8;
+		response->serialize(buf);
+	}
+	else if (flags & NYMPH_MESSAGE_EXCEPTION) {
+		*((uint64_t*) buf) = responseId;
+		buf += 8;
+		
+		*((uint32_t*) buf) = exception.id;
+		buf += 4;
+		
+		NymphType exstr(&exception.value);
+		exstr.serialize(buf);
 	}
 	else if (flags & NYMPH_MESSAGE_CALLBACK) {
-		output += cbnStr;
+		NymphType cbn(&callbackName);
+		cbn.serialize(buf);
+		
+		unsigned int valueLen = values.size();
+		for (unsigned int i = 0; i < valueLen; ++i) {
+			values[i]->serialize(buf);
+		}
+	}
+	else {
+		unsigned int valueLen = values.size();
+		for (unsigned int i = 0; i < valueLen; ++i) {
+			values[i]->serialize(buf);
+		}
 	}
 	
-	output += content;	
-	output += string(((const char*) &nymphNone), 1);
-	
-	return true;
+	*buf = nymphNone;
 }
 
 
 // --- SET IN REPLY TO ---
 // Set the message ID we're responding to with this message. Set the 'reply' bitflag, too.
 void NymphMessage::setInReplyTo(uint64_t msgId) {
-	
-	//NYMPH_LOG_DEBUG("Current message flags: 0x" + NumberFormatter::formatHex(flags));
-	
 	responseId = msgId;
 	messageId = msgId + 1;
 	
@@ -312,11 +387,11 @@ void NymphMessage::setInReplyTo(uint64_t msgId) {
 
 
 // --- SET RESULT VALUE ---
-// Sets the result value for a response message. Message takes ownership of value.
+// Sets the result value for a response message.
 void NymphMessage::setResultValue(NymphType* value) {
 	flags |= NYMPH_MESSAGE_REPLY;
 	response = value;
-	responseOwned = true;
+	buffer_length = response->bytes();
 }
 
 
@@ -337,8 +412,8 @@ NymphMessage* NymphMessage::getReplyMessage() {
 // The message instance takes ownership of the value.
 bool NymphMessage::setException(int exceptionId, string value) {
 	flags |= NYMPH_MESSAGE_EXCEPTION;
-	values.push_back(new NymphUint32(exceptionId));
-	values.push_back(new NymphString(value));
+	exception.id = exceptionId;
+	exception.value = value;
 	
 	return true;
 }
@@ -346,8 +421,40 @@ bool NymphMessage::setException(int exceptionId, string value) {
 
 // --- SET CALLBACK ---
 // Enable the status to that of a callback message (server->client).
-bool NymphMessage::setCallback(string name) {
+bool NymphMessage::setCallback(std::string name) {
 	flags |= NYMPH_MESSAGE_CALLBACK;
 	callbackName = name;
 	return true;
+}
+
+
+// --- ADD REFERENCE COUNT ---
+void NymphMessage::addReferenceCount() {
+	refCount++;
+	NYMPH_LOG_DEBUG("[" + Poco::NumberFormatter::format(messageId) + "] Holding " + Poco::NumberFormatter::format(refCount) + " references. (+1)");
+}
+
+
+// --- DECREMENT REFERENCE COUNT ---
+void NymphMessage::decrementReferenceCount() {
+	if (deleted) { return; }
+	
+	refCount--;
+	
+	NYMPH_LOG_DEBUG("[" + Poco::NumberFormatter::format(messageId) + "] Holding " + Poco::NumberFormatter::format(refCount) + " references. (-1)");
+	
+	if (refCount == 0) {
+		delete this;
+	}
+}
+
+
+// --- DISCARD ---
+void NymphMessage::discard() {
+	// The message will no longer be used by the handling function. Check that we can safely delete.
+	// This depends on whether a response or a value is currently being used.
+	
+	deleted = true;
+	
+	delete this;
 }

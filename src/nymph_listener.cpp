@@ -54,9 +54,13 @@ Mutex& NymphListener::callbacksMutex() {
 void NymphListener::stop() {
 	// Shut down all listening threads.
 	listenersMutex.lock();
-	for (int i = 0; i < listeners.size(); ++i) {
-		listeners[i]->stop();
+	std::map<int, NymphSocketListener*>::iterator it;
+	for (it = listeners.begin(); it != listeners.end(); ++it) {
+		it->second->stop();
+		delete it->second;
 	}
+	
+	listeners.clear(); 
 	
 	listenersMutex.unlock();
 }

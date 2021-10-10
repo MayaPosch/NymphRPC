@@ -1,13 +1,14 @@
 /*
 	nymph_socket_listener.h	- Declares the NymphRPC Socket Listener class.
 	
-	Revision 0
+	Revision 1
 	
 	Notes:
 			- 
 			
 	History:
 	2017/06/24, Maya Posch : Initial version.
+	2021/10/04, Maya Posch : Revised for new type system.
 	
 	(c) Nyanko.ws
 */
@@ -49,7 +50,7 @@ void NymphSocketListener::run() {
 	
 	NYMPH_LOG_INFORMATION("Start listening...");
 	
-	char headerBuff[8];
+	uint8_t headerBuff[8];
 	while (listen) {
 		if (socket->poll(timeout, Net::Socket::SELECT_READ)) {
 			// Attempt to receive the entire message.
@@ -78,63 +79,59 @@ void NymphSocketListener::run() {
 			
 			UInt32 length = 0;
 			length = *((UInt32*) &headerBuff[4]);
-			/* for (int k = 4; k < 8; ++k) {
-				length = length | ((UInt8) headerBuff[k] << ((7 - k) * 8));
-			} */
 			
 			NYMPH_LOG_DEBUG("Message length: " + NumberFormatter::format(length) + " bytes.");
 			
-			char* buff = new char[length];
+			uint8_t* buff = new uint8_t[length];
 			
 			// Read the entire message into a string which is then used to
 			// construct an NymphMessage instance.
 			received = socket->receiveBytes((void*) buff, length);
-			string* binMsg;
 			if (received != length) {
 				// Handle incomplete message.
-				NYMPH_LOG_WARNING("Incomplete message: " + NumberFormatter::format(received) + " of " + NumberFormatter::format(length));
+				NYMPH_LOG_DEBUG("Incomplete message: " + NumberFormatter::format(received) + " of " + NumberFormatter::format(length));
 				
 				// Loop until the rest of the message has been received.
 				// TODO: Set a maximum number of loops/timeout? Reset when 
 				// receiving data, timeout when poll times out N times?
-				binMsg = new string((const char*) buff, received);
-				binMsg->reserve(length);
+				int buffIdx = received;
 				int unread = length - received;
 				while (1) {
 					if (socket->poll(timeout, Net::Socket::SELECT_READ)) {
-						char* buff1 = new char[unread];
-						received = socket->receiveBytes((void*) buff1, unread);
+						received = socket->receiveBytes((void*) (buff + buffIdx), unread);
 						if (received == 0) {
 							// Remote disconnnected. Socket should be discarded.
 							NYMPH_LOG_INFORMATION("Received remote disconnected notice. Terminating listener thread.");
-							delete[] buff1;
+							delete[] buff;
 							break;
 						}
 						else if (received != unread) {
-							binMsg->append((const char*) buff1, received);
-							delete[] buff1;
 							unread -= received;
-							NYMPH_LOG_WARNING("Incomplete message: " + NumberFormatter::format(unread) + "/" + NumberFormatter::format(length) + " unread.");
+							buffIdx += received;
+							NYMPH_LOG_DEBUG("Incomplete message: " + NumberFormatter::format(unread) + "/" + NumberFormatter::format(length) + " unread.");
 							continue;
 						}
 						
 						// Full message was read. Continue with processing.
-						binMsg->append((const char*) buff1, received);
-						delete[] buff1;
 						break;
 					} // if
 				} //while
 			}
 			else { 
 				NYMPH_LOG_DEBUG("Read " + NumberFormatter::format(received) + " bytes.");
-				binMsg = new string(((const char*) buff), length);
 			}
 			
-			delete[] buff;
-			
 			// Parse the string into an NymphMessage instance.
-			NymphMessage* msg = new NymphMessage(binMsg);
-			delete binMsg;
+			// Buffer ownership is transferred to the message.
+			NymphMessage* msg = new NymphMessage(buff, length);
+			
+			// Check for good state on message.
+			if (msg->isCorrupt()) {
+				// Handle corrupted message.
+				NYMPH_LOG_WARNING("Corrupted message. Discarding it.");
+				delete msg;
+				continue;
+			}
 			
 			// The 'In Reply To' message ID in this message is now used to notify
 			// the waiting thread that a response has arrived, along with the
@@ -172,13 +169,13 @@ void NymphSocketListener::run() {
 				req->exceptionData = msg->getException();
 			}				
 			else { req->response = 0; }
+			
 			req->condition.signal();
 			req->mutex.unlock();
 			
 			NYMPH_LOG_INFORMATION("Signalled condition for message ID " + NumberFormatter::format(msgId) + ".");
 			
 			messagesMutex.unlock();
-			delete msg;
 		}
 		
 		// Check whether we're still initialising.

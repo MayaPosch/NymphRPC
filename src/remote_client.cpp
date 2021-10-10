@@ -82,8 +82,9 @@ NymphMessage* NymphRemoteClient::syncMethods(int session, NymphMessage* msg, voi
 	
 	// Prepare return message.
 	NymphMessage* returnMsg = msg->getReplyMessage();
-	NymphString* methodsStr = new NymphString(serializedMethods);
+	NymphType* methodsStr = new NymphType(&serializedMethods);
 	returnMsg->setResultValue(methodsStr);
+	msg->discard();
 	return returnMsg;
 }
 
@@ -205,6 +206,11 @@ bool NymphRemoteClient::callMethodCallback(int handle, UInt32 methodId, NymphMes
 	// Call the callback method.
 	response = it->second->callCallback(handle, msg);
 	methodsMutex.unlock();
+	
+	if (response == 0) {
+		return false; 
+	}
+	
 	return true;
 }
 

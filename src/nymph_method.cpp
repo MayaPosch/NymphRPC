@@ -52,6 +52,16 @@ NymphMethod::NymphMethod(string name, vector<NymphTypes> parameters, NymphTypes 
 }
 
 
+NymphMethod::NymphMethod(std::string name, std::vector<NymphTypes> parameters, NymphTypes retType, NymphMethodCallback cb) {
+	this->name = name;
+	this->parameters = parameters;
+	this->returnType = retType;
+	this->callback = cb;
+	this->isCallback = false;
+	loggerName = "NymphMethod";
+}
+
+
 // --- SET ID ---
 // Sets the ID for this method. This ID is used as reference between clients and
 // the server. 
@@ -90,7 +100,19 @@ void NymphMethod::setCallback(NymphMethodCallback callback) {
 // --- CALL CALLBACK ---
 NymphMessage* NymphMethod::callCallback(int handle, NymphMessage* msg) {
 	NYMPH_LOG_DEBUG("Calling callback for method: " + name);
-	return callback(handle, msg, 0);
+	
+	// TODO: validate the return type.
+	NymphMessage* response = callback(handle, msg, 0);
+	if (response->getResponse(true)->valuetype() != returnType) {
+		NYMPH_LOG_ERROR("Callback returned invalid return type. Expected " + 
+							Poco::NumberFormatter::format(returnType) + 
+							", but received: " +
+							Poco::NumberFormatter::format(response->getResponse()->valuetype()) + 
+							".");
+		return 0;
+	}
+	
+	return response;
 }
 
 
@@ -108,8 +130,8 @@ bool NymphMethod::call(Net::StreamSocket* socket, NymphRequest* &request, vector
 		result = "Provided value array length does not match method signature.";
 		
 		// Delete the values in the values vector since we own them.
-		vector<NymphType*>::iterator it;
-		for (it = values.begin(); it != values.end(); ++it) { delete (*it); }
+		//vector<NymphType>::iterator it;
+		//for (it = values.begin(); it != values.end(); ++it) { delete (*it); }
 		return false;
 	}
 	
@@ -119,20 +141,21 @@ bool NymphMethod::call(Net::StreamSocket* socket, NymphRequest* &request, vector
 	}
 	
 	for (int i = 0; i < vl; ++i) {
-		if (values[i]->type() != parameters[i] && parameters[i] != NYMPH_ANY) {
+		if (values[i]->valuetype() != parameters[i] && parameters[i] != NYMPH_ANY) {
 			stringstream ss;
 			ss << "Type mismatch on parameter " << i << " for method " << name << ". "
-				<< "Expected: " << parameters[i] << ", got: " << values[i]->type() << ".";
+				<< "Expected: " << parameters[i] << ", got: " << values[i]->valuetype() << ".";
 			result = ss.str();
 			return false;
 		}
 		
-		msg.addValue(values[i]);
+		//msg.addValue(values[i]);
 	}
 	
+	msg.addValues(values);
+	
 	// Obtain binary message.
-	string binmsg;
-	msg.finish(binmsg);
+	msg.serialize();
 	
 	// Finish the NymphRequest instance and add it to the listener.
 	request->messageId = msg.getMessageId();
@@ -140,10 +163,10 @@ bool NymphMethod::call(Net::StreamSocket* socket, NymphRequest* &request, vector
 	
 	// Send the message.
 	try {
-		int ret = socket->sendBytes(((const void*) binmsg.c_str()), binmsg.length());
-		if (ret != binmsg.length()) {
+		int ret = socket->sendBytes(((const void*) msg.buffer()), msg.buffer_size());
+		if (ret != msg.buffer_size()) {
 			// Handle error.
-			result = "Failed to send message: ";		
+			result = "Failed to send message: ";	
 			return false;
 		}
 		
@@ -169,9 +192,6 @@ bool NymphMethod::call(NymphSession* session, vector<NymphType*> &values, string
 	if (vl != pl) {
 		result = "Provided value array length does not match method signature.";
 		
-		// Delete the values in the values vector since we own them.
-		vector<NymphType*>::iterator it;
-		for (it = values.begin(); it != values.end(); ++it) { delete (*it); }
 		return false;
 	}
 	
@@ -181,23 +201,22 @@ bool NymphMethod::call(NymphSession* session, vector<NymphType*> &values, string
 	}
 	
 	for (int i = 0; i < vl; ++i) {
-		if (values[i]->type() != parameters[i] && parameters[i] != NYMPH_ANY) {
+		if (values[i]->valuetype() != parameters[i] && parameters[i] != NYMPH_ANY) {
 			stringstream ss;
 			ss << "Type mismatch on parameter " << i << " for method " << name << ". "
-				<< "Expected: " << parameters[i] << ", got: " << values[i]->type() << ".";
+				<< "Expected: " << parameters[i] << ", got: " << values[i]->valuetype() << ".";
 			result = ss.str();
 			return false;
 		}
 		
-		msg.addValue( values[i]);
+		msg.addValue(values[i]);
 	}
 	
 	// Obtain binary message.
-	string binmsg;
-	msg.finish(binmsg);
+	msg.serialize();
 	
 	// Send the message.
-	if (!session->send(binmsg, result)) { return false; }
+	if (!session->send(msg.buffer(), msg.buffer_size(), result)) { return false; }
 	
 	return true;
 }

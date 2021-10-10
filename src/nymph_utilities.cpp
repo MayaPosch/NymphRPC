@@ -46,159 +46,185 @@ Int64 NymphUtilities::getMessageId() {
 }
 
 
-// --- JSON OBJECT TO NYMPH TYPE ---
-NymphType* NymphUtilities::dynamicVarToNymphType(Dynamic::Var &object) {
-	if (object.isString()) {
-		NYMPH_LOG_INFORMATION("Converting JSON string to Nymph string.");
-		string out;
-		try { object.convert(out); }
-		catch (...) {
-			NYMPH_LOG_ERROR("Failed to convert dynamic variable to string.");
-			return 0;
-		}
-		
-		return (NymphType*) new NymphString(out);
-	} 
-	else if (object.isBoolean()) {
-		NYMPH_LOG_INFORMATION("Converting JSON boolean to Nymph boolean.");
-		bool out;
-		try { object.convert(out); }
-		catch (...) {
-			NYMPH_LOG_ERROR("Failed to convert dynamic variable to boolean.");
-			return 0;
-		}
-		
-		return (NymphType*) new NymphBoolean(out);
-	} 
-	else if (object.isInteger()) {
-		NYMPH_LOG_INFORMATION("Converting JSON integer to Nymph integer.");
-		Int32 out;
-		try { object.convert(out); }
-		catch (...) {
-			NYMPH_LOG_ERROR("Failed to convert dynamic variable to integer.");
-			return 0;
-		}
-		
-		return (NymphType*) new NymphUint32(out);
-	}  
-	else if (object.isNumeric()) {
-		NYMPH_LOG_INFORMATION("Converting JSON double to Nymph double.");
-		double out;
-		try { object.convert(out); }
-		catch (...) {
-			NYMPH_LOG_ERROR("Failed to convert dynamic variable to double.");
-			return 0;
-		}
-		
-		return (NymphType*) new NymphDouble(out);
-	}
-	
-	return 0;
-}
-
-
 // --- PARSE VALUE ---
 // Parses the value section of a message's key/value pair. Determines the value
 // type and uses the appropriate NymphType to parse the value.
-bool NymphUtilities::parseValue(UInt8 typecode, string* binmsg, int &index, NymphType* &value) {
+//bool NymphUtilities::parseValue(UInt8 typecode, string* binmsg, int &index, NymphType* &value) {
+bool NymphUtilities::parseValue(UInt8 typecode, uint8_t* binmsg, int &index, NymphType &value) {
 	//NYMPH_LOG_DEBUG("parseValue called with typecode: " + NumberFormatter::format(typecode) + ".");
 	
 	switch (typecode) {
         case NYMPH_TYPE_NULL:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_NONE");
-			value = 0;
+			//value = 0;
 			break;
         case NYMPH_TYPE_BOOLEAN_FALSE:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_BOOLEAN_FALSE");
-			value = new NymphBoolean(false);
+			value.setValue(false);
 			break;
         case NYMPH_TYPE_BOOLEAN_TRUE:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_BOOLEAN_TRUE");
-			value = new NymphBoolean(true);
+			value.setValue(true);
 			break;
 		case NYMPH_TYPE_FLOAT: {
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_FLOAT");
-			/* float v = 0;
-			for (int i = 0; i < 4; ++i) {
-				v = (UInt32) v | (((UInt8) binmsg[index++]) << ((3 - i) * 8));
-			} */
-			
-			value = new NymphFloat(binmsg, index);
+			value.setValue(*((float*) (binmsg + index)));
+			index += 4;
 			break;
 		}
 		case NYMPH_TYPE_DOUBLE:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_DOUBLE");
-			value = new NymphDouble(binmsg, index);
+			value.setValue(*((double*) (binmsg + index)));
+			index += 8;
 			break;
         case NYMPH_TYPE_UINT8:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_UINT8");
-            value = new NymphUint8(binmsg, index);
+			value.setValue(*((binmsg + index)));
+			index++;
             break;
 		case NYMPH_TYPE_SINT8:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_SINT8");
-			value = new NymphSint8(binmsg, index);
+			value.setValue(*((int8_t*) (binmsg + index)));
+			index++;
 			break;
 		case NYMPH_TYPE_UINT16:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_UINT16");
-			value = new NymphUint16(binmsg, index);
+			value.setValue(*((uint16_t*) (binmsg + index)));
+			index += 2;
 			break;
 		case NYMPH_TYPE_SINT16:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_SINT16");
-			value = new NymphSint16(binmsg, index);
+			value.setValue(*((int16_t*) (binmsg + index)));
+			index += 2;
 			break;
 		case NYMPH_TYPE_UINT32:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_UINT32");
-			value = new NymphUint32(binmsg, index);
+			value.setValue(*((uint32_t*) (binmsg + index)));
+			index += 4;
 			break;
 		case NYMPH_TYPE_SINT32:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_SINT32");
-			value = new NymphSint32(binmsg, index);
+			value.setValue(*((int32_t*) (binmsg + index)));
+			index += 4;
 			break;
 		case NYMPH_TYPE_UINT64:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_UINT64");
-			value = new NymphUint64(binmsg, index);
+			value.setValue(*((uint64_t*) (binmsg + index)));
+			index += 8;
 			break;
 		case NYMPH_TYPE_SINT64:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_SINT64");
-			value = new NymphSint64(binmsg, index);
+			value.setValue(*((int64_t*) (binmsg + index)));
+			index += 8;
 			break;
         case NYMPH_TYPE_EMPTY_STRING:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_EMPTY_STRING");
-			value = new NymphString(string());
+			value.setValue((char*) 0, 0);
 			break;
-        case NYMPH_TYPE_STRING:
+        case NYMPH_TYPE_STRING: {
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_STRING");
-			value = new NymphString(binmsg, index);
-            break;
-        case NYMPH_TYPE_BLOB:
-			NYMPH_LOG_DEBUG("NYMPH_TYPE_BLOB");
-			value = new NymphBlob(binmsg, index);
-            break;
-        case NYMPH_TYPE_ARRAY: {
-			NYMPH_LOG_DEBUG("NYMPH_TYPE_ARRAY");
-			value = new NymphArray;
-			value->deserialize(binmsg, index);
+			uint8_t tc = *(binmsg + index);
+			index++;
+			
+			uint64_t l = 0;
+			switch (tc) {
+				 case NYMPH_TYPE_UINT8: {
+					l = *(binmsg + index);
+					NYMPH_LOG_DEBUG("String uint8 length: " + NumberFormatter::format(l));
+					index++;
+				 }
+					break;
+				case NYMPH_TYPE_UINT16: {
+					l = *((uint16_t*) (binmsg + index));
+					NYMPH_LOG_DEBUG("String uint16 length: " + NumberFormatter::format(l));
+					index += 2;
+				}
+					break;
+				case NYMPH_TYPE_UINT32: {
+					l = *((uint32_t*) (binmsg + index));
+					NYMPH_LOG_DEBUG("String uint32 length: " + NumberFormatter::format(l));
+					index += 4;
+				}
+					break;
+				case NYMPH_TYPE_UINT64: {
+					l = *((uint64_t*) (binmsg + index));
+					NYMPH_LOG_DEBUG("String uint64 length: " + NumberFormatter::format(l));
+					index += 8;
+				}
+					break;
+				default:
+					NYMPH_LOG_ERROR("Not a valid integer type for string length.");
+					return false;
+			}
+			
+			value.setValue((char*) (binmsg + index), l);
+			index += l;
+			
+			//NYMPH_LOG_DEBUG("String value: " + value + ".");
             break;
 		}
-		case NYMPH_TYPE_STRUCT:
+        case NYMPH_TYPE_ARRAY: {
+			NYMPH_LOG_DEBUG("NYMPH_TYPE_ARRAY");
+			std::string loggerName = "NymphTypes";
+			uint64_t numElements = *((uint64_t*) (binmsg + index));
+			index += 8;
+			
+			NYMPH_LOG_DEBUG("Array size: " + NumberFormatter::format(numElements) + " elements.");
+			
+			// Create a vector and read the individual NymphTypes into it.
+			std::vector<NymphType*>* vec = new std::vector<NymphType*>();
+			vec->reserve(numElements);
+			
+			// Parse the elements.
+			uint8_t tc = 0;
+			for (uint64_t i = 0; i < numElements; ++i) {
+				NYMPH_LOG_TRACE("Parsing array index " + NumberFormatter::format(i) + " of " + NumberFormatter::format(numElements) + " elements - Index: " + NumberFormatter::format(index) + ".");
+				tc = *(binmsg + index++);
+				NymphType* elVal = new NymphType;
+				NymphUtilities::parseValue(tc, binmsg, index, *elVal);
+				vec->push_back(elVal);
+			}
+			
+			tc = *(binmsg + index++);
+			if (tc != NYMPH_TYPE_NONE) {
+				NYMPH_LOG_ERROR("Array terminator was not found where expected.");
+			}
+			
+			value.setValue(vec, true);
+			
+            break;
+		}
+		case NYMPH_TYPE_STRUCT: {
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_STRUCT");
-			value = new NymphStruct();
-			value->deserialize(binmsg, index);
+			
+			std::string loggerName = "NymphTypes";
+			
+			std::map<std::string, NymphPair>* pairs = new std::map<std::string, NymphPair>();
+	
+			// Read pairs until NONE type has been found.
+			// FIXME: check that we're not running out of bytes to read.
+			while (*(binmsg + index) != NYMPH_TYPE_NONE) {
+				if (*(binmsg + index) != NYMPH_TYPE_STRING) { return false; }
+				uint8_t tc = *(binmsg + index++);
+				NymphPair p;
+				p.key = new NymphType;
+				p.value = new NymphType;
+				if (!NymphUtilities::parseValue(tc, binmsg, index, *(p.key))) { return false; }
+				tc = *(binmsg + index++);
+				if (!NymphUtilities::parseValue(tc, binmsg, index, *(p.value))) { return false; }
+				
+				pairs->insert(std::pair<std::string, NymphPair>(std::string(p.key->getChar(), p.key->string_length()), p));
+			}
+			
+			// Skip the terminator.
+			index++;
+			
+			value.setValue(pairs, true);
+			
 			break;
+		}
         default:
 			NYMPH_LOG_DEBUG("Default case. And nothing happened.");
-		
-            // Assume it's a single byte value.
-			/* UInt8 v = 0;
-			if (typecode >= NYMPH_TYPE_MIN_TINY_INT || 
-					typecode <= NYMPH_TYPE_MAX_TINY_INT) {
-                // fits within range: interpret as value
-                v = (UInt8) typecode;
-            }
-			
-			NYMPH_LOG_DEBUG("Value: " + NumberFormatter::format(v) + ".");
-			
-			value = new NymphInt(v); */
     }
 	
 	return true;

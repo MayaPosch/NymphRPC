@@ -33,7 +33,8 @@ public:
 	//static UInt32 createHash(std::string name);
 	static int64_t getMessageId();
 	static NymphType* dynamicVarToNymphType(Poco::Dynamic::Var &object);
-	static bool parseValue(uint8_t typecode, std::string* binmsg, int &index, NymphType* &value);
+	//static bool parseValue(uint8_t typecode, std::string* binmsg, int &index, NymphType* &value);
+	static bool parseValue(uint8_t typecode, uint8_t* binmsg, int &index, NymphType &value);
 };
 
 #endif

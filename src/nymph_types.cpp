@@ -1,13 +1,14 @@
 /*
 	nymph_types.cpp	- Defines the NymphRPC data types.
 	
-	Revision 0
+	Revision 1
 	
 	Notes:
 			- 
 			
 	History:
 	2017/06/24, Maya Posch : Initial version.
+	2021/10/01, Maya Posch : New type system.
 	
 	(c) Nyanko.ws
 */
@@ -16,6 +17,7 @@
 #include "nymph_types.h"
 #include "nymph_utilities.h"
 #include "nymph_logger.h"
+#include "nymph_message.h"
 
 #include <sstream>
 #include <iostream>
@@ -33,1127 +35,499 @@ using namespace std;
 using namespace Poco;
 
 
-// >>> NYMPH ARRAY <<<
-// 
+uint64_t binaryStringLength(uint64_t len) {
+	// Length is:
+	// * typecode (string)
+	// * typecode (uint*)
+	// * byte length of uint*
+	uint64_t length;
+	if (len <= 0xFF) { length = 3 + len; }
+	else if (len <= 0xFFFF) { length = 4 + len; }
+	else if (len <= 0xFFFFFFFF) { length = 6 + len; }
+	else { length = 10 + len; }
+	
+	return length;
+}
 
-// --- DECONSTRUCTOR ---
-NymphArray::~NymphArray() {
-	for (int i = 0; i < values.size(); ++i) {
-		delete values[i];
+
+// --- CONSTRUCTORS ---
+// Byte length for a type is calculated as its data size in bytes, plus the 1-byte typecode, plus
+// any additional (meta) information.
+NymphType::NymphType(bool v) 		{ type = NYMPH_BOOL;	length = 1;	data.boolean = v;	}
+NymphType::NymphType(uint8_t v) 	{ type = NYMPH_UINT8;	length = 2;	data.uint8 = v;		}
+NymphType::NymphType(int8_t v) 		{ type = NYMPH_SINT8;	length = 2;	data.int8 = v;		}
+NymphType::NymphType(uint16_t v) 	{ type = NYMPH_UINT16;	length = 3;	data.uint16 = v;	}
+NymphType::NymphType(int16_t v) 	{ type = NYMPH_SINT16;	length = 3; data.int16 = v;		}
+NymphType::NymphType(uint32_t v) 	{ type = NYMPH_UINT32;	length = 5;	data.uint32 = v;	}
+NymphType::NymphType(int32_t v) 	{ type = NYMPH_SINT32;	length = 5;	data.int32 = v;		}
+NymphType::NymphType(uint64_t v) 	{ type = NYMPH_UINT64;	length = 9; data.uint64 = v;	}
+NymphType::NymphType(int64_t v) 	{ type = NYMPH_SINT64;	length = 9; data.int64 = v;		}
+NymphType::NymphType(float v) 		{ type = NYMPH_FLOAT;	length = 5;	data.fp32 = v;		}
+NymphType::NymphType(double v) 		{ type = NYMPH_DOUBLE;	length = 9; data.fp64 = v;		}
+
+
+NymphType::NymphType(char* v, uint32_t bytes, bool own) {
+	type = NYMPH_STRING;
+	length = binaryStringLength(bytes);
+	strLength = bytes;
+	data.chars = v;
+	this->own = own;
+	
+	if (bytes == 0) { emptyString = true; }
+}
+
+
+NymphType::NymphType(std::string* v, bool own) {
+	type = NYMPH_STRING;
+	length = binaryStringLength(v->length());
+	strLength = v->length();
+	data.chars = v->data();
+	this->own = own;
+	
+	if (own) 			{ string = v; }
+	if (strLength == 0) { emptyString = true; }
+}
+
+
+NymphType::NymphType(std::vector<NymphType*>* v, bool own) {
+	this->own = own;
+	type = NYMPH_ARRAY;
+	length = 0;
+	data.vector = v;
+	
+	// Get length from all of the NymphTypes in the vector.
+	for (int i = 0; i < v->size(); ++i) {
+		length += (*v)[i]->bytes();
 	}
-}
-
-// --- ADD VALUE ---
-void NymphArray::addValue(NymphType* value) {
-	values.push_back(value); 
-	isEmpty = false;
-	binSize += value->binarySize();
-	//if (value->type() == NYMPH_ARRAY) { ++dimension; }
-}
-
-// --- TO STRING ---
-string NymphArray::toString(bool quotes) {
-	// TODO: implement
-	return string();
-}
-
-// ---- SERIALIZE ---
-string NymphArray::serialize() {
-	string out;
-	out.reserve(3 + binSize); // type & terminator + size.
-	uint8_t typecode = NYMPH_TYPE_ARRAY;
-	out.append(((const char*) &typecode), 1);
 	
-	uint64_t valueCount = (uint64_t) values.size();
-	out.append(((const char*) &valueCount), 8);
+	length += 10; // Add array type code & element count (uint64), plus terminator (1).
+}
+
+
+NymphType::NymphType(std::map<std::string, NymphPair>* v, bool own) {
+	type = NYMPH_STRUCT;
+	this->own = own;
+	length = 0;
+	data.pairs = v;
 	
-	vector<NymphType*>::iterator it;
-	for (it = values.begin(); it != values.end(); ++it) {
-		out += (*it)->serialize();
+	// Determine byte size from the pairs.
+	std::map<std::string, NymphPair>::iterator it;
+	for (it = v->begin(); it != v->end(); it++) {
+		length += (it->second.key)->bytes();
+		length += (it->second.value)->bytes();
 	}
 	
-	typecode = NYMPH_TYPE_NONE;
-	out.append(((const char*) &typecode), 1);
+	// Add typecode & terminator.
+	length += 2;
 	
-	return out;
 }
 
 
-// --- DESERIALIZE ---
-bool NymphArray::deserialize(string* binary, int &index) {
-	string loggerName = "NymphTypes";
-	//NYMPH_LOG_DEBUG("NYMPH_TYPE_ARRAY");
-	// An ARRAY type consists out of a length (uint64_t),
-	// followed by typecode/value sequences. It ends with a NONE
-	// typecode.
-	
-	// Size of the array, in number of elements.
-	uint64_t numElements = getUInt64(binary, index);
-	
-	NYMPH_LOG_DEBUG("Array size: " + NumberFormatter::format(numElements) + " elements.");
-	
-	values.reserve(numElements);
-	
-	// Now parse the elements.
-	uint8_t typecode = 0;
-	for (uint64_t i = 0; i < numElements; ++i) {
-		NYMPH_LOG_TRACE("Parsing array index " + NumberFormatter::format(i) + " of " + NumberFormatter::format(numElements) + " elements - Index: " + NumberFormatter::format(index) + ".");
-		typecode = getUInt8(binary, index);
-		NymphType* elVal = 0;
-		NymphUtilities::parseValue(typecode, binary, index, elVal);
-		if (elVal) {
-			values.push_back(elVal);
-			binSize += elVal->binarySize();
+// --- DESTRUCTOR ---
+NymphType::~NymphType() {
+	if (type == NYMPH_ARRAY) {
+		if (linkedMsg) {
+			linkedMsg->decrementReferenceCount();
+		}
+		
+		if (own) {
+			// Delete the std::vector & contents as we own it.
+			for (int i = 0; i < data.vector->size(); i++) {
+				delete (*data.vector)[i];
+			}
+			
+			delete data.vector;
 		}
 	}
-	
-	typecode = getUInt8(binary, index);
-	if (typecode != NYMPH_TYPE_NONE) {
-		NYMPH_LOG_ERROR("Array terminator was not found where expected.");
+	else if (type == NYMPH_STRUCT) {
+		if (linkedMsg) {
+			linkedMsg->decrementReferenceCount();
+		}
+		
+		if (own) {
+			std::map<std::string, NymphPair>::iterator it;
+			for (it = data.pairs->begin(); it != data.pairs->end(); it++) {
+				delete it->second.key;
+				delete it->second.value;
+			}
+			
+			delete data.pairs;
+		}
 	}
+	else if (type == NYMPH_STRING) {
+		if (linkedMsg) {
+			linkedMsg->decrementReferenceCount();
+		}
+		
+		if (own) {
+			if (string == 0) {
+				delete data.chars;
+			}
+			else {
+				delete string;
+			}
+		}
+	}
+}
+
+
+// --- VALUE ---
+//void* 		NymphType::value() 	{ return data.any; 		}
+bool 		NymphType::getBool(bool* v)			{ if (v) { v = &data.boolean; }	return data.boolean;}
+uint8_t 	NymphType::getUint8(uint8_t* v) 	{ if (v) { v = &data.uint8; } 	return data.uint8; 	}
+int8_t 		NymphType::getInt8(int8_t* v) 		{ if (v) { v = &data.int8; } 	return data.int8; 	}
+uint16_t 	NymphType::getUint16(uint16_t* v) 	{ if (v) { v = &data.uint16; }	return data.uint16; }
+int16_t 	NymphType::getInt16(int16_t* v) 	{ if (v) { v = &data.int16; }	return data.int16; 	}
+uint32_t 	NymphType::getUint32(uint32_t* v) 	{ if (v) { v = &data.uint32; }	return data.uint32; }
+int32_t 	NymphType::getInt32(int32_t* v) 	{ if (v) { v = &data.int32; }	return data.int32; 	}
+uint64_t 	NymphType::getUint64(uint64_t* v) 	{ if (v) { v = &data.uint64; }	return data.uint64; }
+int64_t 	NymphType::getInt64(int64_t* v)  	{ if (v) { v = &data.int64; }	return data.int64; 	}
+float 		NymphType::getFloat(float* v) 		{ if (v) { v = &data.fp32; }	return data.fp32; 	}
+double 		NymphType::getDouble(double* v) 	{ if (v) { v = &data.fp64; }	return data.fp64; 	}
+const char*	NymphType::getChar(const char* v)	{ if (v) { v = data.chars; }	return data.chars; 	}
+
+std::vector<NymphType*>* NymphType::getArray(std::vector<NymphType*>* v) { 
+	if (v) { v = data.vector; }
+	return data.vector; 	
+}
+
+
+std::map<std::string, NymphPair>* NymphType::getStruct(std::map<std::string, NymphPair>* v) {
+	if (v) { v = data.pairs; }
+	return data.pairs; 	
+}
+
+
+std::string NymphType::getString() {
+	return std::string(data.chars, strLength);
+}
+
+
+// --- GET STRUCT VALUE ---
+bool NymphType::getStructValue(std::string key, NymphType* &value) {
+	std::map<std::string, NymphPair>::iterator it = data.pairs->find(key);
+	if (it == data.pairs->end()) { return false; }
+	
+	value = it->second.value;
 	
 	return true;
 }
 
 
-// >>> NYMPH BOOLEAN <<<
-// In the Nymph protocol, boolean is defined as two types:
-// * Boolean false (0x02)
-// * Boolean true (0x03)
-// Thus by reading the type one also knows its value. For compatibility with
-// the C/C++ boolean type, and the programmer's sanity, here both types are merged
-// into a singular class.
-/* NymphBoolean::NymphBoolean(bool value) {
-	this->value = value;
-	isEmpty = false;
-}*/
+// --- SET VALUE ---
+void NymphType::setValue(bool v) 		{ type = NYMPH_BOOL; 	length = 1; data.boolean = v; 	}
+void NymphType::setValue(uint8_t v) 	{ type = NYMPH_UINT8;	length = 2; data.uint8 = v;		}
+void NymphType::setValue(int8_t v) 		{ type = NYMPH_SINT8;	length = 2; data.int8 = v;		}
+void NymphType::setValue(uint16_t v) 	{ type = NYMPH_UINT16;	length = 3;	data.uint16 = v;	}
+void NymphType::setValue(int16_t v) 	{ type = NYMPH_SINT16;	length = 3;	data.int16 = v;		}
+void NymphType::setValue(uint32_t v) 	{ type = NYMPH_UINT32;	length = 5; data.uint32 = v;	}
+void NymphType::setValue(int32_t v) 	{ type = NYMPH_SINT32;	length = 5; data.int32 = v;		}
+void NymphType::setValue(uint64_t v) 	{ type = NYMPH_UINT64;	length = 9; data.uint64 = v;	}
+void NymphType::setValue(int64_t v) 	{ type = NYMPH_SINT64;	length = 9; data.int64 = v;		}
+void NymphType::setValue(float v) 		{ type = NYMPH_FLOAT;	length = 5; data.fp32 = v;		}
+void NymphType::setValue(double v) 		{ type = NYMPH_DOUBLE;	length = 9;	data.fp64 = v;		}
 
 
-NymphBoolean::NymphBoolean(string value) {
-	int index = 0;
-	deserialize(&value, index);
-}
-
-
-// --- TO STRING ---
-string NymphBoolean::toString(bool quotes) {
-	string out = "";
-	if (quotes) { out += "\""; }
-	if (value) { out += "true"; } else { out += "false"; }
-	if (quotes) { out += "\""; }
+void NymphType::setValue(char* v, uint32_t bytes, bool own) {
+	type = NYMPH_STRING;
+	length = binaryStringLength(bytes);
+	strLength = bytes;
+	data.chars = v;
+	this->own = own;
 	
-	return out;
+	if (bytes == 0) { emptyString = true; }
 }
 
-void NymphBoolean::setValue(bool value) { this->value = value; }
-bool NymphBoolean::getValue() { return value; }
+
+void NymphType::setValue(std::string* v, bool own) {
+	type = NYMPH_STRING;
+	length = binaryStringLength(v->length());
+	strLength = v->length();
+	data.chars = v->data();
+	this->own = own;
+	
+	if (own) 			{ string = v; }
+	if (strLength == 0) { emptyString = true; }
+}
+
+
+void NymphType::setValue(std::vector<NymphType*>* v, bool own) {
+	this->own = own;
+	type = NYMPH_ARRAY;
+	length = 0;
+	data.vector = v;
+	
+	// Get length from all of the NymphTypes in the vector.
+	for (int i = 0; i < v->size(); ++i) {
+		length += (*v)[i]->bytes();
+	}
+	
+	length += 10; // Add array type code & element count (uint64), plus terminator (1).
+}
+
+
+void NymphType::setValue(std::map<std::string, NymphPair>* v, bool own) {
+	type = NYMPH_STRUCT;
+	this->own = own;
+	length = 0;
+	data.pairs = v;
+	
+	// Determine byte size from the pairs.
+	std::map<std::string, NymphPair>::iterator it;
+	for (it = v->begin(); it != v->end(); it++) {
+		length += it->second.key->bytes();
+		length += it->second.value->bytes();
+	}
+	
+	// Add typecode & terminator.
+	length += 2;
+}
+
+
+
+
+// --- BYTES ---
+// Return the number of bytes in the current value (serialised length).
+uint64_t NymphType::bytes() {
+	return length;
+}
+
+
+// --- STRING LENGTH ---
+// Returns the length of a string (if NYMPH_STRING type or equivalent).
+uint32_t NymphType::string_length() {
+	return strLength;
+}
+
+
+// --- VALUE TYPE ---
+// Return the stored type.
+NymphTypes NymphType::valuetype() {
+	return type;
+}
 
 
 // --- SERIALIZE ---
-string NymphBoolean::serialize() {
-	string out;
-	out.reserve(1);
-	int8_t typecode = 0;
-	if (value) { typecode = NYMPH_TYPE_BOOLEAN_TRUE; }
-	else { typecode = NYMPH_TYPE_BOOLEAN_FALSE; }
-	
-	out.append(((const char*) &typecode), 1);
-	return out;
-}
-
-
-// --- DESERIALIZE ---
-// Input is a single-character string. Read it and convert it to the proper
-// boolean value.
-bool NymphBoolean::deserialize(string* binary, int &index) {
-	isEmpty = false;
-	if (binary->length() < 1) { return false; }
-	unsigned char ch = (*binary)[index];
-	if (ch == NYMPH_TYPE_BOOLEAN_FALSE) { value = false; }
-	else if (ch == NYMPH_TYPE_BOOLEAN_TRUE) { value = true; }
-	else { return false; }
-	
-	++index;
-	return true;
-}
-
-
-// >>> NYMPH STRING <<<
-// The Nymph string can have two forms:
-// * Empty string (0x92)
-// * String (0x93)
-// Further format:
-// - length: integer type. uint8_t is either length (within range), or defines
-// the integer type (short, int, long) followed by the length in that type.
-// Finally the length number of bytes follow.
-// For the sanity of developers, both types of strings are merged into 
-// this singular class.
-NymphString::NymphString(string value) {
-	this->value = value;
-	isEmpty = false;
-	emptyString = false;
-	binSize = 0;
-} 
-
-// --- TO STRING ---
-string NymphString::toString(bool quotes) {
-	string out = "";
-	if (quotes) { out += "\""; }
-	out += value;
-	if (quotes) { out += "\""; }
-	
-	return out;
-}
-
-
-// --- SET VALUE ---
-void NymphString::setValue(string value) { 
-	this->value = value; 
-	isEmpty = false; 
-	
-	uint64_t length = value.length();
-	if (length <= 0xFF) { binSize = 3 + length; }
-	else if (length <= 0xFFFF) { binSize = 4 + length; }
-	else if (length <= 0xFFFFFFFF) { binSize = 6 + length; }
-	else { binSize = 10 + length; }
-}
-
-
-// ---- SERIALIZE ---
-string NymphString::serialize() {
-	string out;
-	uint8_t strType;
-	if (emptyString) {
-		strType = NYMPH_TYPE_EMPTY_STRING;
-		out.append(((const char*) &strType), 1);
-		return out;
+void NymphType::serialize(uint8_t* &index) {
+	if (type == NYMPH_ANY) {
+		// ?
 	}
-	else {
-		strType = NYMPH_TYPE_STRING;		
-		uint64_t length = value.length();
-		uint8_t typecode = 0;
-		if (length <= 0xFF) {
-			out.reserve(3 + value.length());
-			out.append(((const char*) &strType), 1);
-			typecode = NYMPH_TYPE_UINT8;			
-			out.append(((const char*) &typecode), 1);
-			uint8_t l = length;
-			out.append(((const char*) &l), 1);
+	else if (type == NYMPH_ARRAY) {
+		uint8_t typecode = NYMPH_TYPE_ARRAY;
+		*index = typecode;
+		index++;
+		
+		uint64_t valueCount = (uint64_t) data.vector->size();
+		*((uint64_t*) index) = valueCount;
+		index += 8;
+		
+		vector<NymphType*>::iterator it;
+		for (it = data.vector->begin(); it != data.vector->end(); ++it) {
+			(*it)->serialize(index);
 		}
-		else if (length <= 0xFFFF) {
-			out.reserve(4 + value.length());
-			out.append(((const char*) &strType), 1);
-			typecode = NYMPH_TYPE_UINT16;			
-			out.append(((const char*) &typecode), 1);
-			uint16_t l = length;
-			out.append(((const char*) &l), 2);
-		}
-		else if (length <= 0xFFFFFFFF) {
-			out.reserve(6 + value.length());
-			out.append(((const char*) &strType), 1);
-			typecode = NYMPH_TYPE_UINT32;			
-			out.append(((const char*) &typecode), 1);
-			uint32_t l = length;
-			out.append(((const char*) &l), 4);
+		
+		typecode = NYMPH_TYPE_NONE;
+		*index = typecode;
+		index++;
+	}
+	else if (type == NYMPH_BOOL) {
+		int8_t typecode = NYMPH_TYPE_BOOLEAN_FALSE;
+		if (data.boolean) { typecode = NYMPH_TYPE_BOOLEAN_TRUE; }
+		
+		*index = typecode;
+		index++;
+	}
+	else if (type == NYMPH_UINT8) {
+		uint8_t typecode = NYMPH_TYPE_UINT8;
+		*index = typecode;
+		index++;
+	
+		*index = data.uint8;
+		index++;
+	}
+	else if (type == NYMPH_SINT8) {
+		uint8_t typecode = NYMPH_TYPE_SINT8;
+		*index = typecode;
+		index++;
+	
+		*index = data.int8;
+		index++;
+	}
+	else if (type == NYMPH_UINT16) {
+		uint8_t typecode = NYMPH_TYPE_UINT16;
+		*index = typecode;
+		index++;
+	
+		*((uint16_t*) index) = data.uint16;
+		index += 2;
+	}
+	else if (type == NYMPH_SINT16) {
+		uint8_t typecode = NYMPH_TYPE_SINT16;
+		*index = typecode;
+		index++;
+	
+		*((int16_t*) index) = data.int16;
+		index += 2;
+	}
+	else if (type == NYMPH_UINT32) {
+		uint8_t typecode = NYMPH_TYPE_UINT32;
+		*index = typecode;
+		index++;
+	
+		*((uint32_t*) index) = data.uint32;
+		index += 4;
+	}
+	else if (type == NYMPH_SINT32) {
+		uint8_t typecode = NYMPH_TYPE_SINT32;
+		*index = typecode;
+		index++;
+	
+		*((int32_t*) index) = data.int32;
+		index += 4;
+	}
+	else if (type == NYMPH_UINT64) {
+		uint8_t typecode = NYMPH_TYPE_UINT64;
+		*index = typecode;
+		index++;
+	
+		*((uint64_t*) index) = data.uint64;
+		index += 8;
+	}
+	else if (type == NYMPH_SINT64) {
+		uint8_t typecode = NYMPH_TYPE_SINT64;
+		*index = typecode;
+		index++;
+	
+		*((int64_t*) index) = data.int64;
+		index += 8;
+	}
+	else if (type == NYMPH_FLOAT) {
+		uint8_t typecode = NYMPH_TYPE_FLOAT;
+		*index = typecode;
+		index++;
+		
+		*((float*) index) = data.fp32;
+		index += 4;
+	}
+	else if (type == NYMPH_DOUBLE) {
+		uint8_t typecode = NYMPH_TYPE_DOUBLE;
+		*index = typecode;
+		index++;
+		
+		*((double*) index) = data.fp64;
+		index += 8;
+	}
+	else if (type == NYMPH_STRING) {
+		uint8_t typecode;
+		if (emptyString) {
+			typecode = NYMPH_TYPE_EMPTY_STRING;
+			*index = typecode;
+			index++;
 		}
 		else {
-			out.reserve(10 + value.length());
-			out.append(((const char*) &strType), 1);
-			typecode = NYMPH_TYPE_UINT64;			
-			out.append(((const char*) &typecode), 1);
-			uint64_t l = length;
-			out.append(((const char*) &l), 8);
-		}
-		
-		out += value;
-	}
-	
-	return out;
-}
-
-
-// --- DESERIALIZE ---
-bool NymphString::deserialize(string* binary, int &index) {
-	string loggerName = "NymphTypes";
-	uint8_t typecode = 0;
-	typecode = getUInt8(binary, index);
-	uint64_t l = 0;
-	switch (typecode) {
-		 case NYMPH_TYPE_UINT8: {
-			l = getUInt8(binary, index);
-		 }
-            break;
-		case NYMPH_TYPE_UINT16: {
-			l = getUInt16(binary, index);
-		}
-			break;
-		case NYMPH_TYPE_UINT32: {
-			l = getUInt32(binary, index);
-		}
-			break;
-		case NYMPH_TYPE_UINT64: {
-			l = getUInt64(binary, index);
-		}
-			break;
-		default:
-			NYMPH_LOG_ERROR("Not a valid integer type for string length.");
-			return false;
-	}
-	
-	value = binary->substr(index, l);
-	index += l;
-	
-	NYMPH_LOG_DEBUG("String value: " + value + ".");
-	
-	isEmpty = false;
-	emptyString = false;
-	
-	// Set size of the serialised message.
-	uint64_t length = value.length();
-	if (length <= 0xFF) { binSize = 3 + length; }
-	else if (length <= 0xFFFF) { binSize = 4 + length; }
-	else if (length <= 0xFFFFFFFF) { binSize = 6 + length; }
-	else { binSize = 10 + length; }
-	
-	return true;
-}
-
-
-// >>> NYMPH DOUBLE <<<
-// 64-bit floating point type.
-
-// --- TO STRING ---
-string NymphDouble::toString(bool quotes) {
-	string out = "";
-	if (quotes) { out += "\""; }
-	out += Poco::NumberFormatter::format(value);
-	if (quotes) { out += "\""; }
-	
-	return out;
-}
-
-// ---- SERIALIZE ---
-string NymphDouble::serialize() {
-	string out;
-	out.reserve(9);
-	uint8_t typecode = NYMPH_TYPE_DOUBLE;
-	out.append(((const char*) &typecode), 1);
-	
-	string valStr(((const char*) &value), 8);
-	reverse(valStr.begin(), valStr.end());
-	out += valStr;
-	return out;
-}
-
-
-// --- DESERIALIZE ---
-bool NymphDouble::deserialize(string* binary, int &index) {
-	value = *((double*) &((*binary)[index]));
-	index += 8;
-	return true;
-}
-
-
-// >>> NYMPH FLOAT <<<
-// 32-bit floating point type.
-
-// --- TO STRING ---
-string NymphFloat::toString(bool quotes) {
-	string out = "";
-	if (quotes) { out += "\""; }
-	out += Poco::NumberFormatter::format(value);
-	if (quotes) { out += "\""; }
-	
-	return out;
-}
-
-// ---- SERIALIZE ---
-string NymphFloat::serialize() {
-	string out;
-	out.reserve(5);
-	uint8_t typecode = NYMPH_TYPE_FLOAT;
-	out.append(((const char*) &typecode), 1);
-	
-	string valStr(((const char*) &value), 4);
-	reverse(valStr.begin(), valStr.end());
-	out += valStr;
-	return out;
-}
-
-
-// --- DESERIALIZE ---
-bool NymphFloat::deserialize(string* binary, int &index) {
-	value = *((float*) &((*binary)[index]));
-	index += 4;
-	return true;
-}
-
-
-// >>> NYMPH INTEGERS <<<
-// Signed and unsigned 8 through 32-bit integer types.
-
-// >> UINT 8 <<
-// --- TO STRING ---
-string NymphUint8::toString(bool quotes) {
-	string out = "";
-	if (quotes) { out += "\""; }
-	out += Poco::NumberFormatter::format(value);
-	if (quotes) { out += "\""; }
-	
-	return out;
-}
-
-// ---- SERIALIZE ---
-string NymphUint8::serialize() {
-	string out;
-	out.reserve(2);
-	uint8_t typecode = NYMPH_TYPE_UINT8;
-	out.append(((const char*) &typecode), 1);
-	
-	out.append(((const char*) &value), 1);
-	return out;
-}
-
-
-// --- DESERIALIZE ---
-bool NymphUint8::deserialize(string* binary, int &index) {
-	value = getUInt8(binary, index);
-	return true;
-}
-
-
-// >> SINT 8 <<
-// --- TO STRING ---
-string NymphSint8::toString(bool quotes) {
-	string out = "";
-	if (quotes) { out += "\""; }
-	out += Poco::NumberFormatter::format(value);
-	if (quotes) { out += "\""; }
-	
-	return out;
-}
-
-// ---- SERIALIZE ---
-string NymphSint8::serialize() {
-	string out;
-	out.reserve(2);
-	uint8_t typecode = NYMPH_TYPE_SINT8;
-	out.append(((const char*) &typecode), 1);
-	out.append(((const char*) &value), 1);
-	return out;
-}
-
-
-// --- DESERIALIZE ---
-bool NymphSint8::deserialize(string* binary, int &index) {
-	value = getSInt8(binary, index);
-	return true;
-}
-
-
-// >> UINT 16 <<
-// --- TO STRING ---
-string NymphUint16::toString(bool quotes) {
-	string out = "";
-	if (quotes) { out += "\""; }
-	out += Poco::NumberFormatter::format(value);
-	if (quotes) { out += "\""; }
-	
-	return out;
-}
-
-// ---- SERIALIZE ---
-string NymphUint16::serialize() {
-	string out;
-	out.reserve(3);
-	uint8_t typecode = NYMPH_TYPE_UINT16;
-	out.append(((const char*) &typecode), 1);
-	out.append(((const char*) &value), 2);
-	return out;
-}
-
-
-// --- DESERIALIZE ---
-bool NymphUint16::deserialize(string* binary, int &index) {
-	value = getUInt16(binary, index);
-	return true;
-}
-
-
-// >> SINT 16 <<
-// --- TO STRING ---
-string NymphSint16::toString(bool quotes) {
-	string out = "";
-	if (quotes) { out += "\""; }
-	out += Poco::NumberFormatter::format(value);
-	if (quotes) { out += "\""; }
-	
-	return out;
-}
-
-// ---- SERIALIZE ---
-string NymphSint16::serialize() {
-	string out;
-	out.reserve(3);
-	uint8_t typecode = NYMPH_TYPE_SINT16;
-	out.append(((const char*) &typecode), 1);
-	out.append(((const char*) &value), 2);
-	return out;
-}
-
-
-// --- DESERIALIZE ---
-bool NymphSint16::deserialize(string* binary, int &index) {
-	value = getSInt16(binary, index);
-	return true;
-}
-
-
-// >> UINT 32 <<
-// --- TO STRING ---
-string NymphUint32::toString(bool quotes) {
-	string out = "";
-	if (quotes) { out += "\""; }
-	out += Poco::NumberFormatter::format(value);
-	if (quotes) { out += "\""; }
-	
-	return out;
-}
-
-// ---- SERIALIZE ---
-string NymphUint32::serialize() {
-	string out;
-	out.reserve(5);
-	uint8_t typecode = NYMPH_TYPE_UINT32;
-	out.append(((const char*) &typecode), 1);
-	out.append(((const char*) &value), 4);
-	return out;
-}
-
-
-// --- DESERIALIZE ---
-bool NymphUint32::deserialize(string* binary, int &index) {
-	value = getUInt32(binary, index);
-	return true;
-}
-
-
-// >> SINT 32 <<
-// --- TO STRING ---
-string NymphSint32::toString(bool quotes) {
-	string out = "";
-	if (quotes) { out += "\""; }
-	out += Poco::NumberFormatter::format(value);
-	if (quotes) { out += "\""; }
-	
-	return out;
-}
-
-// ---- SERIALIZE ---
-string NymphSint32::serialize() {
-	string out;
-	out.reserve(5);
-	uint8_t typecode = NYMPH_TYPE_SINT32;
-	out.append(((const char*) &typecode), 1);
-	out.append(((const char*) &value), 4);
-	return out;
-}
-
-
-// --- DESERIALIZE ---
-bool NymphSint32::deserialize(string* binary, int &index) {
-	value = getSInt32(binary, index);
-	return true;
-}
-
-
-// >> UINT 64 <<
-// --- TO STRING ---
-string NymphUint64::toString(bool quotes) {
-	string out = "";
-	if (quotes) { out += "\""; }
-	out += Poco::NumberFormatter::format(value);
-	if (quotes) { out += "\""; }
-	
-	return out;
-}
-
-// ---- SERIALIZE ---
-string NymphUint64::serialize() {
-	string out;
-	out.reserve(9);
-	uint8_t typecode = NYMPH_TYPE_UINT64;
-	out.append(((const char*) &typecode), 1);
-	out.append(((const char*) &value), 8);
-	return out;
-}
-
-
-// --- DESERIALIZE ---
-bool NymphUint64::deserialize(string* binary, int &index) {
-	value = getUInt64(binary, index);
-	return true;
-}
-
-
-// >> SINT 64 <<
-// --- TO STRING ---
-string NymphSint64::toString(bool quotes) {
-	string out = "";
-	if (quotes) { out += "\""; }
-	out += Poco::NumberFormatter::format(value);
-	if (quotes) { out += "\""; }
-	
-	return out;
-}
-
-// ---- SERIALIZE ---
-string NymphSint64::serialize() {
-	string out;
-	out.reserve(9);
-	uint8_t typecode = NYMPH_TYPE_SINT64;
-	out.append(((const char*) &typecode), 1);
-	out.append(((const char*) &value), 8);
-	return out;
-}
-
-
-// --- DESERIALIZE ---
-bool NymphSint64::deserialize(string* binary, int &index) {
-	value = getSInt64(binary, index);
-	return true;
-}
-
-
-// >>> NYMPH STRUCT <<<
-// A struct type is a collection of key/value pairs.
-
-// --- DECONSTRUCTOR ---
-NymphStruct::~NymphStruct() {
-	std::map<std::string, NymphPair>::iterator it;
-	for (it = pairs.begin(); it != pairs.end(); ++it) {
-		delete it->second.key;
-		delete it->second.value;
-	}
-}
-
-
-// --- TO STRING ---
-string NymphStruct::toString(bool quotes) {
-	string out = "";
-	if (quotes) { out += "\""; }
-	out += "unimplemented";
-	if (quotes) { out += "\""; }
-	
-	return out;
-}
-
-
-// ---- SERIALIZE ---
-string NymphStruct::serialize() {
-	string out;
-	out.reserve(2 + binSize); // type & terminator + size.
-	uint8_t typecode = NYMPH_TYPE_STRUCT;
-	out.append(((const char*) &typecode), 1);
-	
-	std::map<std::string, NymphPair>::const_iterator it;
-	for (it = pairs.begin(); it != pairs.end(); it++) {
-		out += it->second.key->serialize();
-		out += it->second.value->serialize();
-	}
-	
-	typecode = NYMPH_TYPE_NONE;
-	out += string(((const char*) &typecode), 1);
-	
-	return out;
-}
-
-
-// --- DESERIALIZE ---
-bool NymphStruct::deserialize(string* binary, int &index) {
-	string loggerName = "NymphTypes";
-	
-	// Read pairs until NONE type has been found.
-	// FIXME: check that we're not running out of bytes to read.
-	while ((*binary)[index] != NYMPH_TYPE_NONE) {
-		if ((*binary)[index] != NYMPH_TYPE_STRING) { return false; }
-		uint8_t typecode = getUInt8(binary, index);
-		NymphPair p;
-		if (!NymphUtilities::parseValue(typecode, binary, index, p.key)) { return false; }
-		typecode = getUInt8(binary, index);
-		if (!NymphUtilities::parseValue(typecode, binary, index, p.value)) { return false; }
-		
-		pairs.insert(std::pair<std::string, NymphPair>(((NymphString*) p.key)->getValue(), p));
-	}
-	
-	// Skip the terminator.
-	index++;
-	
-	return true;
-}
-
-
-// --- ADD PAIR ---
-void NymphStruct::addPair(std::string key, NymphType* value) {
-	NymphPair p;
-	p.key = new NymphString(key);
-	p.value = value;
-	pairs.insert(std::pair<std::string, NymphPair>(key, p));
-}
-
-
-// --- GET VALUE ---
-bool NymphStruct::getValue(std::string key, NymphType* &value) {
-	std::map<std::string, NymphPair>::const_iterator it;
-	it = pairs.find(key);
-	if (it == pairs.end()) { return false; }
-	
-	// Found the key, assign value to reference.
-	value = it->second.value;
-	return true;
-}
-
-
-// >>> NYMPH BLOB <<<
-NymphBlob::NymphBlob(string value) {
-	this->value = value;
-	isEmpty = false;
-	binSize = 0;
-} 
-
-// --- TO STRING ---
-string NymphBlob::toString(bool quotes) {
-	string out = "";
-	if (quotes) { out += "\""; }
-	out += value;
-	if (quotes) { out += "\""; }
-	
-	return out;
-}
-
-
-// --- SET VALUE ---
-void NymphBlob::setValue(string value) { 
-	this->value = value; 
-	isEmpty = false; 
-	
-	uint64_t length = value.length();
-	if (length <= 0xFF) { binSize = 3 + length; }
-	else if (length <= 0xFFFF) { binSize = 4 + length; }
-	else if (length <= 0xFFFFFFFF) { binSize = 6 + length; }
-	else { binSize = 10 + length; }
-}
-
-
-// ---- SERIALIZE ---
-string NymphBlob::serialize() {
-	string out;
-	uint8_t strType;
-	
-	strType = NYMPH_TYPE_BLOB;
-	uint64_t length = value.length();
-	uint8_t typecode = 0;
-	if (length <= 0xFF) {
-		out.reserve(3 + value.length());
-		out.append(((const char*) &strType), 1);
-		typecode = NYMPH_TYPE_UINT8;			
-		out.append(((const char*) &typecode), 1);
-		uint8_t l = length;
-		out.append(((const char*) &l), 1);
-	}
-	else if (length <= 0xFFFF) {
-		out.reserve(4 + value.length());
-		out.append(((const char*) &strType), 1);
-		typecode = NYMPH_TYPE_UINT16;			
-		out.append(((const char*) &typecode), 1);
-		uint16_t l = length;
-		out.append(((const char*) &l), 2);
-	}
-	else if (length <= 0xFFFFFFFF) {
-		out.reserve(6 + value.length());
-		out.append(((const char*) &strType), 1);
-		typecode = NYMPH_TYPE_UINT32;			
-		out.append(((const char*) &typecode), 1);
-		uint32_t l = length;
-		out.append(((const char*) &l), 4);
-	}
-	else {
-		out.reserve(10 + value.length());
-		out.append(((const char*) &strType), 1);
-		typecode = NYMPH_TYPE_UINT64;			
-		out.append(((const char*) &typecode), 1);
-		uint64_t l = length;
-		out.append(((const char*) &l), 8);
-	}
-	
-	out += value;
-	
-	return out;
-}
-
-
-// --- DESERIALIZE ---
-bool NymphBlob::deserialize(string* binary, int &index) {
-	string loggerName = "NymphTypes";
-	uint8_t typecode = 0;
-	typecode = getUInt8(binary, index);
-	uint64_t l = 0;
-	switch (typecode) {
-		 case NYMPH_TYPE_UINT8: {
-			l = getUInt8(binary, index);
-		 }
-            break;
-		case NYMPH_TYPE_UINT16: {
-			l = getUInt16(binary, index);
-		}
-			break;
-		case NYMPH_TYPE_UINT32: {
-			l = getUInt32(binary, index);
-		}
-			break;
-		case NYMPH_TYPE_UINT64: {
-			l = getUInt64(binary, index);
-		}
-			break;
-		default:
-			NYMPH_LOG_ERROR("Not a valid integer type for blob length.");
-			return false;
-	}
-	
-	value = binary->substr(index, l);
-	index += l;
-	
-	NYMPH_LOG_DEBUG("Blob size: " + NumberFormatter::format(l) + ".");
-	
-	isEmpty = false;
-	
-	// Set size of the serialised message.
-	uint64_t length = value.length();
-	if (length <= 0xFF) { binSize = 3 + length; }
-	else if (length <= 0xFFFF) { binSize = 4 + length; }
-	else if (length <= 0xFFFFFFFF) { binSize = 6 + length; }
-	else { binSize = 10 + length; }
-	
-	return true;
-}
-
-
-// >>> NYMPH TABLE <<<
-// This type is basically an array of values, with the possibility of adding
-// sub-levels with an additional Nymph Array level.
-
-// --- DECONSTRUCTOR ---
-/* NymphTable::~NymphTable() {
-	for (int i = 0; i < values.size(); ++i) {
-		delete values[i];
-	}
-}
-
-// --- TO STRING ---
-string NymphTable::toString(bool quotes) {
-	string out = "";
-	if (quotes) { out += "\""; }
-	out += getJson();
-	if (quotes) { out += "\""; }
-	
-	return out;
-}
-
-// ---- SERIALIZE ---
-string NymphTable::serialize() {
-	string out;
-	uint8_t typecode = 0;
-	typecode = NYMPH_TYPE_CUSTOM;
-	out = string(((const char*) &typecode), 1);
-	typecode = NYMPH_TYPE_INT;
-	out += string(((const char*) &typecode), 1);
-	uint32_t nameHash = 0x7feae04b; // Nymph Hashmap name hash
-	string h = string(((const char*) &nameHash), 4);
-	reverse(h.begin(), h.end());
-	out += h;
-	
-	uint8_t length = 1;
-	out += string(((const char*) &length), 1);
-	out += string(((const char*) &typecode), 1);
-	uint32_t keyHash = 0xee9ff760; // 'keysAndValues' hash.
-	h = string(((const char*) &keyHash), 4);
-	reverse(h.begin(), h.end());
-	out += h;
-	
-	// Start array key/value pair.
-	
-	typecode = NYMPH_TYPE_ARRAY;
-	out += string(((const char*) &typecode), 1);
-	typecode = NYMPH_TYPE_ANY;
-	out += string(((const char*) &typecode), 1);
-	uint8_t dim = 1;
-	out += string(((const char*) &dim), 1);
-	typecode = NYMPH_TYPE_SHORT;
-	out += string(((const char*) &typecode), 1);
-	int16_t pairCount = values.size();
-	h = string(((const char*) &pairCount), 2);
-	reverse(h.begin(), h.end());
-	out += h;
-		
-	vector<NymphType*>::iterator it;
-	for (it = values.begin(); it != values.end(); ++it) {
-		out += (*it)->serialize();
-	}
-	
-	typecode = NYMPH_TYPE_NONE; 	// end array
-	out += string (((const char*) &typecode), 1);
-	typecode = NYMPH_TYPE_NONE;	// end custom.
-	out += string (((const char*) &typecode), 1);
-	
-	return out;
-}
-
-
-// --- DESERIALIZE ---
-bool NymphTable::deserialize(string binary) {
-	// TODO: 
-	
-	return true;
-}
-
-
-// --- GET JSON OBJECT ---
-// Returns a JSON Object representation of the table.
-JSON::Object::Ptr NymphTable::getJsonObject(string &result) {
-	JSON::Object::Ptr root = new JSON::Object();
-	vector<NymphType*>::iterator it;
-	for (it = values.begin(); it != values.end(); ++it) {
-    	string key = (*it)->toString(false);
-    	if (!key.empty()) {
-			//IPCE_DEBUG("key: %s (%d)", key.c_str(), key.length());
-			NymphType* value = *(++it);
-
-			switch(value->type()) {
-				case NYMPH_STRING:
-					root->set(key, ((NymphString*) value)->getValue());
-					break;
-				case NYMPH_BOOL:
-					root->set(key, ((NymphBoolean*) value)->getValue());
-					break;
-				case NYMPH_BYTE:
-					root->set(key, ((NymphByte*) value)->getValue());
-					break;
-				case NYMPH_SHORT:
-					root->set(key, ((NymphShort*) value)->getValue());
-					break;
-				case NYMPH_INT:
-					root->set(key, ((NymphInt*) value)->getValue());
-					break;
-				case NYMPH_TABLE:
-					root->set(key, ((NymphTable*) value)->getJsonObject(result));
-					break;
-				case NYMPH_ARRAY:
-					// TODO
-					break;
-				default:
-					result = "Unknown Nymph type.";
-					continue; // skip this pair.
-			}
-    	}
-		else {
-			result = "Key was an empty string.";
-		}
-	}
-	
-	return root;
-}
-
-
-// --- GET JSON ---
-// Returns a JSON representation of the stored table.
-//
-// The table is stored as an interleaved key/value format. The output JSON
-// has each key as a string, with the value in its original format.
-bool NymphTable::getJson(string &json, string &result) {
-	JSON::Object::Ptr root = getJsonObject(result);
-	ostringstream oss;
-	JSON::Stringifier::stringify(root, oss);
-	json = oss.str();
-	
-	return true;
-}
-
-
-string NymphTable::getJson() {
-	string result;
-	JSON::Object::Ptr root = getJsonObject(result);
-	ostringstream oss;
-	JSON::Stringifier::stringify(root, oss);
-	return oss.str();
-}
-
-
-// --- SET JSON ---
-// Parses the provided JSON string into the internal table representation.
-bool NymphTable::setJson(string &json, string &result) {
-	string loggerName = "NymphTypes";
-	isEmpty = false;
-	JSON::Parser parser;
-	Dynamic::Var res;
-	try {
-		res = parser.parse(json);
-	}
-	catch (SyntaxException& e) {
-		result = "JSON decoding failed.";
-		NYMPH_LOG_ERROR("JSON decoding error: " + e.message());
-		return false;
-	}
-	catch (JSON::JSONException& e) {
-		result = "JSON decoding failed.";
-		NYMPH_LOG_ERROR("JSON decoding error: " + e.message());
-		return false;
-	}
-	catch (...) {
-		result = "JSON decoding failed.";
-		NYMPH_LOG_ERROR("JSON decoding error.");
-		return false;
-	}
-	
-	JSON::Object::Ptr object;
-	try {
-		object = res.extract<JSON::Object::Ptr>();
-	}
-	catch (BadCastException& e) {
-		result = "Failed to extract JSON object.";
-		NYMPH_LOG_ERROR(result + ". " + e.message());
-		return false;
-	}
-	
-	return setJsonObject(object, result);
-}
-
-
-// --- SET JSON OBJECT ---
-bool NymphTable::setJsonObject(JSON::Object::Ptr &json, string &result) {
-	string loggerName = "NymphTypes";
-	isEmpty = false;
-	
-	NYMPH_LOG_INFORMATION("Creating new hash table.");
-	JSON::Object::ConstIterator it;
-	for (it = json->begin(); it != json->end(); ++it) {
-		Dynamic::Var key = it->first; // Get the object key.
-		NymphInt* k = new NymphInt(atoi(key.toString().c_str()));
-		values.push_back(k);
-		
-		Dynamic::Var value = it->second; // Get the object value.
-		if (value.isString()) {
-			NYMPH_LOG_DEBUG("Converting string value...");
-			string v;
-			try { it->second.convert<string>(v); }
-			catch (...) {
-				result = "Exception converting to string.";
-				NYMPH_LOG_ERROR("Exception converting to string.");
-				return false; 
-			}
+			typecode = NYMPH_TYPE_STRING;
+			*index = typecode;
+			index++;
 			
-			NymphString* es = new NymphString(v);			
-			if (v.length() < 500) {
-				NYMPH_LOG_DEBUG("Key: " + NumberFormatter::format(k->getValue()) + ", value: " + v);
-			}
-			
-			values.push_back(es);
-		} 
-		else if (value.isBoolean()) {
-			NYMPH_LOG_DEBUG("Converting boolean value...");
-			bool v;
-			try { it->second.convert<bool>(v); }
-			catch (...) {
-				result = "Exception converting to boolean.";
-				NYMPH_LOG_ERROR("Exception converting to boolean.");
-				return false;
-			}
-			
-			NymphBoolean* eb = new NymphBoolean(v);
-			NYMPH_LOG_DEBUG("Key: " + NumberFormatter::format(k->getValue()) + ", value: " + NumberFormatter::format(v));
-			values.push_back(eb);
-		} 
-		else if (value.isInteger()) {			
-			NYMPH_LOG_DEBUG("Converting integer value...");
-			int32_t v;
-			try { it->second.convert<int32_t>(v); }
-			catch (...) {
-				result = "Exception converting to integer.";
-				NYMPH_LOG_ERROR("Exception converting to integer.");
-				return false;
-			}
-			
-			NymphInt* el = new NymphInt(v);
-			NYMPH_LOG_DEBUG("Key: " + NumberFormatter::format(k->getValue()) + ", value: " + NumberFormatter::format(v));
-			values.push_back(el);
-		}  
-		else if (value.isNumeric()) { // floating point value
-			NYMPH_LOG_DEBUG("Converting double value...");
-			double v;
-			try { it->second.convert<double>(v); }
-			catch (...) {
-				result = "Exception converting to double.";
-				NYMPH_LOG_ERROR("Exception converting to double.");
-				return false;
-			}
-			
-			NymphDouble* ed = new NymphDouble(v);
-			NYMPH_LOG_DEBUG("Key: " + NumberFormatter::format(k->getValue()) + ", value: " + NumberFormatter::format(v));
-			values.push_back(ed);
-		} 
-		else {	// Array or Object
-			// This is a bit of an edge-case, specific to the BMW usage:
-			// an embedded object as value, which contains a Base64-encoded
-			// binary string, with as key 'binary'.
-			// Since a hash table is flat (no sub-levels), this means that we
-			// can just collapse any objects we find.
-			//
-			// FIXME: make this generic instead of searching for the 'binary'
-			// key.
-			
-			NYMPH_LOG_DEBUG("Converting object value...");
-			
-			JSON::Object::Ptr child = value.extract<JSON::Object::Ptr>();
-			Dynamic::Var binary = child->get("binary");
-			string v;
-			if (!binary.isEmpty() && binary.isString()) {
-				string str;
-				try {
-					binary.convert<string>(str);
-					istringstream istr(str);
-					ostringstream ostr;
-					Base64Decoder b64d(istr);
-					if (!b64d.good()) {
-						result = "Decoding Base64 data failed. Bad stream.";
-						NYMPH_LOG_ERROR("Decoding Base64 data failed. Bad stream.");
-						return false;
-					}
-					
-					copy(istreambuf_iterator<char>(b64d), istreambuf_iterator<char>(),
-							ostreambuf_iterator<char>(ostr));
-					v = ostr.str();
-					if (v.empty()) {
-						result = "Base64 decoding failed.";
-						NYMPH_LOG_ERROR("Base64 decoding failed.");
-						return false;
-					}
-				}
-				catch (Poco::DataFormatException& e) {
-					result = "Base64 decoding failed.";
-					NYMPH_LOG_ERROR("Base64 decoding error: " + e.message());
-					return false;
-				}
+			if (strLength <= 0xFF) {
+				typecode = NYMPH_TYPE_UINT8;
+				*index = typecode;
+				index++;
 				
-				NymphBytes* eb = new NymphBytes(v);
-				NYMPH_LOG_DEBUG("Key: " + NumberFormatter::format(k->getValue()) + ", value size: " + NumberFormatter::format(v.length()));
-				values.push_back(eb);
+				uint8_t l = strLength;
+				*index = l;
+				index++;
 			}
-		}*/
-		/* else {
-			// FIXME: handle this case.
-			cout << "Unknown JSON type.\n";
-		} */
-	/*}
-
-	return true;
+			else if (strLength <= 0xFFFF) {
+				typecode = NYMPH_TYPE_UINT16;
+				*index = typecode;
+				index++;
+				
+				uint16_t l = strLength;
+				*((uint16_t*) index) = l;
+				index += 2;
+			}
+			else if (strLength <= 0xFFFFFFFF) {
+				typecode = NYMPH_TYPE_UINT32;
+				*index = typecode;
+				index++;
+				
+				uint32_t l = strLength;
+				*((uint32_t*) index) = l;
+				index += 4;
+			}
+			else {
+				typecode = NYMPH_TYPE_UINT64;
+				*index = typecode;
+				index++;
+				
+				uint64_t l = strLength;
+				*((uint64_t*) index) = l;
+				index += 8;
+			}
+		}
+		
+		memcpy(index, (uint8_t*) data.chars, strLength);
+		index += strLength;
+	}
+	else if (type == NYMPH_STRUCT) {
+		uint8_t typecode = NYMPH_TYPE_STRUCT;
+		*index = typecode;
+		index++;
+		
+		std::map<std::string, NymphPair>::iterator it;
+		for (it = data.pairs->begin(); it != data.pairs->end(); it++) {
+			it->second.key->serialize(index);
+			it->second.value->serialize(index);
+		}
+		
+		typecode = NYMPH_TYPE_NONE;
+		*index = typecode;
+		index++;
+	}
+	else {
+		// World ends.
+	}
 }
- */
+
+
+// --- LINK WITH MESSAGE ---
+// Link this NymphType with a specific NymphMessage instance. This will 
+void NymphType::linkWithMessage(NymphMessage* msg) {
+	linkedMsg = msg;
+	
+	triggerAddRC();
+}
+	
+	
+// --- TRIGGER ADD RC ---
+void NymphType::triggerAddRC() {
+	if (!linkedMsg) { return; }
+	
+	if (type == NYMPH_ARRAY) {
+		linkedMsg->addReferenceCount();
+	}
+	else if (type == NYMPH_STRUCT) {
+		linkedMsg->addReferenceCount();
+	}
+	else if (type == NYMPH_STRING) {
+		linkedMsg->addReferenceCount();
+	}
+}
+	
+	
+// --- DISCARD ---
+// Triggers clean-up routines.
+void NymphType::discard() {
+	if (!linkedMsg) { return; }
+	
+	if (type == NYMPH_ARRAY) {
+		linkedMsg->decrementReferenceCount();
+	}
+	else if (type == NYMPH_STRUCT) {
+		linkedMsg->decrementReferenceCount();
+	}
+	else if (type == NYMPH_STRING) {
+		linkedMsg->decrementReferenceCount();
+	}
+}

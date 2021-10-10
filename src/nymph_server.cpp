@@ -56,5 +56,9 @@ bool NymphServer::start(int port) {
 bool NymphServer::stop() {
 	server->stop();
 	running = false;
+	delete server;
+	
+	NYMPH_LOG_INFORMATION("Stopped NymphServer.");
+	
 	return true;
 }

@@ -32,7 +32,7 @@ class NymphSession : public Poco::Net::TCPServerConnection {
 public:
 	NymphSession(const Poco::Net::StreamSocket& socket);
 	void run();
-	bool send(std::string& msg, std::string &result);
+	bool send(uint8_t* msg, uint32_t length, std::string &result);
 };
 
 #endif
