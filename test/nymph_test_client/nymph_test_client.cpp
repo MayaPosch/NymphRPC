@@ -20,21 +20,9 @@
 #include <iostream>
 #include <vector>
 
-using namespace std;
 
-#include <Poco/Condition.h>
-
-using namespace Poco;
-
-
-// Globals
-Condition cnd;
-Mutex mtx;
-// ---
-
-
-void logFunction(int level, string logStr) {
-	cout << level << " - " << logStr << endl;
+void logFunction(int level, std::string logStr) {
+	std::cout << level << " - " << logStr << std::endl;
 }
 
 
@@ -43,13 +31,12 @@ void logFunction(int level, string logStr) {
 // useful for one-off events, but can also be used for callbacks during the 
 // life-time of the client.
 void callbackFunction(uint32_t session, NymphMessage* msg, void* data) {
-	cout << "Client callback function called.\n";
+	std::cout << "Client callback function called.\n";
 	
 	// Remove the callback.
 	NymphRemoteServer::removeCallback("helloCallbackFunction");
 	
-	// Signal the condition variable.
-	//cnd.signal();
+	msg->discard();
 }
 
 
@@ -60,75 +47,117 @@ int main() {
 	
 	// Connect to the remote server.
 	uint32_t handle;
-	string result;
+	std::string result;
 	if (!NymphRemoteServer::connect("localhost", 4004, handle, 0, result)) {
-		cout << "Connecting to remote server failed: " << result << endl;
+		std::cout << "Connecting to remote server failed: " << result << std::endl;
 		NymphRemoteServer::disconnect(handle, result);
 		NymphRemoteServer::shutdown();
 		return 1;
 	}
 	
 	// Send message and wait for response.
-	vector<NymphType*> values;
-	values.push_back(new NymphString("Hello World!"));
+	//values.push_back(new NymphString("Hello World!"));
+	std::vector<NymphType*> values;
+	std::string hello = "Hello World!";
+	values.push_back(new NymphType(&hello));
 	NymphType* returnValue = 0;
 	if (!NymphRemoteServer::callMethod(handle, "helloFunction", values, returnValue, result)) {
-		cout << "Error calling remote method: " << result << endl;
+		std::cout << "Error calling remote method: " << result << std::endl;
 		NymphRemoteServer::disconnect(handle, result);
 		NymphRemoteServer::shutdown();
 		return 1;
 	}
 	
-	if (returnValue->type() != NYMPH_STRING) {
-		cout << "Return value wasn't a string. Type: " << returnValue->type() << endl;
-		NymphRemoteServer::disconnect(handle, result);
-		NymphRemoteServer::shutdown();
-		return 1;
-	}
+	std::string response(returnValue->getChar(), returnValue->string_length());
 	
-	string response = ((NymphString*) returnValue)->getValue();
-	
-	cout << "Response string: " << response << endl;
+	std::cout << "Response string: " << response << std::endl;
 	
 	delete returnValue;
-	returnValue = 0;
 	
 	// Register callback and send message with its ID to the server. Then wait
 	// for the callback to be called.
 	NymphRemoteServer::registerCallback("callbackFunction", callbackFunction, 0);
 	values.clear();
-	values.push_back(new NymphString("callbackFunction"));
+	std::string cbStr = "callbackFunction";
+	values.push_back(new NymphType(&cbStr));
+	returnValue = 0;
 	if (!NymphRemoteServer::callMethod(handle, "helloCallbackFunction", values, returnValue, result)) {
-		cout << "Error calling remote method: " << result << endl;
+		std::cout << "Error calling remote method: " << result << std::endl;
 		NymphRemoteServer::disconnect(handle, result);
 		NymphRemoteServer::shutdown();
 		return 1;
 	}
 	
-	if (returnValue->type() != NYMPH_BOOL) {
-		cout << "Return value wasn't a boolean. Type: " << returnValue->type() << endl;
-		NymphRemoteServer::disconnect(handle, result);
-		NymphRemoteServer::shutdown();
-		return 1;
-	}
-	
-	if (!(((NymphBoolean*) returnValue)->getValue())) {
-		cout << "Remote method returned false. " << result << endl;
+	if (!returnValue->getBool()) {
+		std::cout << "Remote method returned false. " << result << std::endl;
 		NymphRemoteServer::disconnect(handle, result);
 		NymphRemoteServer::shutdown();
 		return 1;
 	}
 	
 	delete returnValue;
+	
+	// Request array with integers.
 	returnValue = 0;
+	values.clear();
+	if (!NymphRemoteServer::callMethod(handle, "arrayFunction", values, returnValue, result)) {
+		std::cout << "Error calling remote method: " << result << std::endl;
+		NymphRemoteServer::disconnect(handle, result);
+		NymphRemoteServer::shutdown();
+		return 1;
+	}
 	
-	// Wait for the callback method to be called on the client. We wait for
-	// 5 seconds or until signalled, whichever comes first.
-	/* mtx.lock();
-	cnd.tryWait(mtx, 5000);
-	mtx.unlock(); */
+	// Print out values in vector.
+	std::vector<NymphType*>* numbers = returnValue->getArray();
+	std::cout << "Got numbers: ";
+	for (int i = 0; i < numbers->size(); i++) {
+		std::cout << i << ":" << (uint16_t) (*numbers)[i]->getUint8() << " ";
+	}
 	
-	cout << "Shutting down client...\n";
+	std::cout << "." << std::endl;
+	
+	delete returnValue;
+	
+	// Request struct with all basic types (integers, floats).
+	returnValue = 0;
+	if (!NymphRemoteServer::callMethod(handle, "structFunction", values, returnValue, result)) {
+		std::cout << "Error calling remote method: " << result << std::endl;
+		NymphRemoteServer::disconnect(handle, result);
+		NymphRemoteServer::shutdown();
+		return 1;
+	}
+	
+	// Print out the values.
+	std::map<std::string, NymphPair>* pairs = returnValue->getStruct();
+	std::cout << "Pairs: " << std::endl;
+	NymphPair ref = (*pairs)["Boolean"];
+	std::cout << "Boolean: " << ref.value->getBool() << std::endl;
+	ref = (*pairs)["Uint8"];
+	std::cout << "Uint8: " << (uint16_t) ref.value->getUint8() << std::endl;
+	ref = (*pairs)["Int8"];
+	std::cout << "Int8: " << (int16_t) ref.value->getInt8() << std::endl;
+	ref = (*pairs)["Uint16"];
+	std::cout << "Uint16: " << ref.value->getUint16() << std::endl;
+	ref = (*pairs)["Int16"];
+	std::cout << "Int16: " << ref.value->getInt16() << std::endl;
+	ref = (*pairs)["Uint32"];
+	std::cout << "Uint32: " << ref.value->getUint32() << std::endl;
+	ref = (*pairs)["Int32"];
+	std::cout << "Int32: " << ref.value->getInt32() << std::endl;
+	ref = (*pairs)["Uint64"];
+	std::cout << "Uint64: " << ref.value->getUint64() << std::endl;
+	ref = (*pairs)["Int64"];
+	std::cout << "Int64: " << ref.value->getInt64() << std::endl;
+	ref = (*pairs)["Float"];
+	std::cout << "Float: " << ref.value->getFloat() << std::endl;
+	ref = (*pairs)["Double"];
+	std::cout << "Double: " << ref.value->getDouble() << std::endl;
+	
+	delete returnValue;
+	
+	std::cout << "Test completed." << std::endl;
+	
+	std::cout << "Shutting down client...\n";
 	
 	// Shutdown.
 	NymphRemoteServer::disconnect(handle, result);

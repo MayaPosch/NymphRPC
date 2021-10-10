@@ -6,9 +6,15 @@ GCC = g++
 MAKEDIR = mkdir -p
 RM = rm
 
+
+ifndef ARCH
+ARCH := $(shell g++ -dumpmachine)/
+endif
+
+
 OUTPUT = nymph_client
 INCLUDE = -I $(TOP)/src
-LIB := -lnymphrpc -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON
+LIB := ../../lib/$(ARCH)libnymphrpc.a -lPocoNet -lPocoUtil -lPocoFoundation
 CFLAGS := $(INCLUDE) -std=c++11 -g3
 
 # Check for MinGW and patch up POCO
