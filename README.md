@@ -18,7 +18,7 @@ NymphRPC's C++ version is based around the POCO library (see [https://pocoprojec
 
 With the common C++ build tools installed (g++, make, etc.) and the optional OpenSSL dependency, building NymphRPC is done using:
 
-`make lib` - Build just the library. Found under `lib`.This builds both a static and shared library.
+`make` - Build just the library. Found under `lib`.This builds both a static and shared library.
 
 `make test-client` - Build the test client.
 
@@ -26,7 +26,7 @@ With the common C++ build tools installed (g++, make, etc.) and the optional Ope
 
 `make test` - Build both the test client & server.
 
-`make clean` - Clean all targets.
+`make clean` - Remove the library's build files.
 
 `make clean-lib` - Clean just the `lib` target.
 
@@ -38,5 +38,7 @@ With the common C++ build tools installed (g++, make, etc.) and the optional Ope
 
 ## Installing ##
 
-Installing the resulting `libnymphrpc` library has to be done by hand, currently. On Linux one would copy the static library `libnymphrpc.a` and/or the `libnymphrpc.so` shared library file to `/usr/lib`, and the header files to `/usr/include` or similar. Consult the documentation for your OS and development tools for more detailed instructions.
+Use `make install` to install NymphRPC after building with `make`. This has been tested with MSYS2 (Windows) and Linux.
+
+Installing the resulting `libnymphrpc` library on other platforms may have to be done by hand, currently. On Linux one would copy the static library `libnymphrpc.a` and/or the `libnymphrpc.so` shared library file to `/usr/lib`, and the header files to `/usr/include` or similar. Consult the documentation for your OS and development tools for more detailed instructions.
 
