@@ -6,9 +6,13 @@ GCC = g++
 MAKEDIR = mkdir -p
 RM = rm
 
+ifndef ARCH
+ARCH := $(shell g++ -dumpmachine)/
+endif
+
 OUTPUT = nymph_server
 INCLUDE = -I $(TOP)/src
-LIB := -lnymphrpc -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON
+LIB := ../../lib/$(ARCH)libnymphrpc.a -lPocoNet -lPocoUtil -lPocoFoundation
 CFLAGS := $(INCLUDE) -std=c++11 -U__STRICT_ANSI__ -g3
 SOURCES := $(wildcard *.cpp)
 OBJECTS := $(addprefix obj/,$(notdir) $(SOURCES:.cpp=.o))
