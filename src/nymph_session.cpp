@@ -113,7 +113,7 @@ void NymphSession::run() {
 						else if (received != unread) {
 							unread -= received;
 							buffIdx += received;
-							NYMPH_LOG_WARNING("Incomplete message: " + NumberFormatter::format(unread) + "/" + NumberFormatter::format(length) + " unread.");
+							NYMPH_LOG_DEBUG("Incomplete message: " + NumberFormatter::format(unread) + "/" + NumberFormatter::format(length) + " unread.");
 							continue;
 						}
 						
