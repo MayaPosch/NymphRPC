@@ -94,7 +94,7 @@ void NymphSession::run() {
 			received = socket.receiveBytes((void*) buff, length);
 			if (received != length) {
 				// Handle incomplete message.
-				NYMPH_LOG_WARNING("Incomplete message: " + NumberFormatter::format(received) + " of " + NumberFormatter::format(length));
+				NYMPH_LOG_DEBUG("Incomplete message: " + NumberFormatter::format(received) + " of " + NumberFormatter::format(length));
 				
 				// Loop until the rest of the message has been received.
 				// TODO: Set a maximum number of loops/timeout? Reset when 
