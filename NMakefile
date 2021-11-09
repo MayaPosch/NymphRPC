@@ -36,7 +36,7 @@
 #   `INSTALL_PREFIX` is specified on the commandline.
 #
 # Dependencies:
-# - Poco: PocoNet, PocoUtil, PocoFoundation, PocoJSON
+# - Poco: PocoFoundation, PocoNet, https://pocoproject.org/
 #
 # Installation destination:
 # - `NYMPHRPC_ROOT`
