@@ -1,0 +1,101 @@
+\hypertarget{nymph__message_8h_source}{}\doxysection{nymph\+\_\+message.\+h}
+\label{nymph__message_8h_source}\index{src/nymph\_message.h@{src/nymph\_message.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{    nymph\_message.h -\/ Declares the NymphRPC Message class.}}
+\DoxyCodeLine{3 \textcolor{comment}{    }}
+\DoxyCodeLine{4 \textcolor{comment}{    Revision 0}}
+\DoxyCodeLine{5 \textcolor{comment}{    }}
+\DoxyCodeLine{6 \textcolor{comment}{    Notes:}}
+\DoxyCodeLine{7 \textcolor{comment}{            -\/ }}
+\DoxyCodeLine{8 \textcolor{comment}{            }}
+\DoxyCodeLine{9 \textcolor{comment}{    2017/06/24, Maya Posch : Initial version.}}
+\DoxyCodeLine{10 \textcolor{comment}{    (c) Nyanko.ws}}
+\DoxyCodeLine{11 \textcolor{comment}{*/}}
+\DoxyCodeLine{12 }
+\DoxyCodeLine{13 }
+\DoxyCodeLine{14 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{15 \textcolor{preprocessor}{\#ifndef NYMPH\_MESSAGE\_H}}
+\DoxyCodeLine{16 \textcolor{preprocessor}{\#define NYMPH\_MESSAGE\_H}}
+\DoxyCodeLine{17 }
+\DoxyCodeLine{18 \textcolor{preprocessor}{\#include "{}nymph\_types.h"{}}}
+\DoxyCodeLine{19 }
+\DoxyCodeLine{20 \textcolor{preprocessor}{\#include <Poco/Poco.h>}}
+\DoxyCodeLine{21 }
+\DoxyCodeLine{22 \textcolor{preprocessor}{\#include <vector>}}
+\DoxyCodeLine{23 \textcolor{preprocessor}{\#include <atomic>}}
+\DoxyCodeLine{24 }
+\DoxyCodeLine{25 }
+\DoxyCodeLine{26 \textcolor{keyword}{enum} \{}
+\DoxyCodeLine{27     NYMPH\_MESSAGE\_REPLY = 0x01,     \textcolor{comment}{// Message is a reply.}}
+\DoxyCodeLine{28     NYMPH\_MESSAGE\_EXCEPTION = 0x02, \textcolor{comment}{// Message is an exception.}}
+\DoxyCodeLine{29     NYMPH\_MESSAGE\_CALLBACK = 0x04   \textcolor{comment}{// Message is a callback.}}
+\DoxyCodeLine{30 \};}
+\DoxyCodeLine{31 }
+\DoxyCodeLine{32 }
+\DoxyCodeLine{33 \textcolor{keyword}{struct }\mbox{\hyperlink{struct_nymph_exception}{NymphException}} \{}
+\DoxyCodeLine{34     uint32\_t id;}
+\DoxyCodeLine{35     std::string value;}
+\DoxyCodeLine{36 \};}
+\DoxyCodeLine{37 }
+\DoxyCodeLine{38 }
+\DoxyCodeLine{39 \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_message}{NymphMessage}} \{}
+\DoxyCodeLine{40     std::vector<NymphType*> values;}
+\DoxyCodeLine{41     uint32\_t command;}
+\DoxyCodeLine{42     uint32\_t flags;}
+\DoxyCodeLine{43     uint32\_t methodId;}
+\DoxyCodeLine{44     \textcolor{keywordtype}{int} state;}
+\DoxyCodeLine{45     \textcolor{keywordtype}{bool} corrupt;}
+\DoxyCodeLine{46     uint64\_t messageId;}
+\DoxyCodeLine{47     uint64\_t responseId;}
+\DoxyCodeLine{48     \mbox{\hyperlink{struct_nymph_exception}{NymphException}} exception;}
+\DoxyCodeLine{49     \textcolor{keywordtype}{bool} hasResult;}
+\DoxyCodeLine{50     std::string callbackName;}
+\DoxyCodeLine{51     \mbox{\hyperlink{class_nymph_type}{NymphType}}* response = 0;}
+\DoxyCodeLine{52     std::string loggerName;}
+\DoxyCodeLine{53     uint8\_t* data\_buffer;}
+\DoxyCodeLine{54     uint32\_t buffer\_length;}
+\DoxyCodeLine{55     \textcolor{keywordtype}{bool} responseOwned = \textcolor{keyword}{true};}
+\DoxyCodeLine{56     std::atomic<uint32\_t> refCount = \{ 0 \};}
+\DoxyCodeLine{57     std::atomic<bool> deleted = \{ \textcolor{keyword}{false} \};}
+\DoxyCodeLine{58     }
+\DoxyCodeLine{59 \textcolor{keyword}{public}:}
+\DoxyCodeLine{60     \mbox{\hyperlink{class_nymph_message}{NymphMessage}}();}
+\DoxyCodeLine{61     \mbox{\hyperlink{class_nymph_message}{NymphMessage}}(uint32\_t methodId);}
+\DoxyCodeLine{62     \mbox{\hyperlink{class_nymph_message}{NymphMessage}}(uint8\_t* binmsg, uint64\_t bytes);}
+\DoxyCodeLine{63     \mbox{\hyperlink{class_nymph_message}{\string~NymphMessage}}();}
+\DoxyCodeLine{64     \textcolor{keywordtype}{bool} addValue(\mbox{\hyperlink{class_nymph_type}{NymphType}}* value);}
+\DoxyCodeLine{65     \textcolor{keywordtype}{bool} addValues(std::vector<NymphType*> \&values);}
+\DoxyCodeLine{66     }
+\DoxyCodeLine{67     \textcolor{keywordtype}{void} serialize();}
+\DoxyCodeLine{68     uint8\_t* buffer() \{ \textcolor{keywordflow}{return} data\_buffer; \}}
+\DoxyCodeLine{69     uint32\_t buffer\_size() \{ \textcolor{keywordflow}{return} buffer\_length; \}}
+\DoxyCodeLine{70     }
+\DoxyCodeLine{71     \textcolor{keywordtype}{int} getState() \{ \textcolor{keywordflow}{return} state; \}}
+\DoxyCodeLine{72     \textcolor{keywordtype}{bool} isCorrupt() \{ \textcolor{keywordflow}{return} corrupt; \}}
+\DoxyCodeLine{73     }
+\DoxyCodeLine{74     \textcolor{keywordtype}{void} setInReplyTo(uint64\_t msgId);}
+\DoxyCodeLine{75     \textcolor{keywordtype}{bool} isCallback() \{ \textcolor{keywordflow}{return} flags \& NYMPH\_MESSAGE\_CALLBACK; \}}
+\DoxyCodeLine{76     uint64\_t getResponseId() \{ \textcolor{keywordflow}{return} responseId; \}}
+\DoxyCodeLine{77     uint64\_t getMessageId() \{ \textcolor{keywordflow}{return} messageId; \}}
+\DoxyCodeLine{78     \textcolor{keywordtype}{void} setResultValue(\mbox{\hyperlink{class_nymph_type}{NymphType}}* value);}
+\DoxyCodeLine{79     \mbox{\hyperlink{class_nymph_type}{NymphType}}* getResponse(\textcolor{keywordtype}{bool} take = \textcolor{keyword}{false}) \{ responseOwned = take; \textcolor{keywordflow}{return} response; \}}
+\DoxyCodeLine{80     std::vector<NymphType*>\& parameters() \{ \textcolor{keywordflow}{return} values; \}}
+\DoxyCodeLine{81     uint32\_t getMethodId() \{ \textcolor{keywordflow}{return} methodId; \}}
+\DoxyCodeLine{82     \mbox{\hyperlink{class_nymph_message}{NymphMessage}}* getReplyMessage();}
+\DoxyCodeLine{83     \mbox{\hyperlink{struct_nymph_exception}{NymphException}} getException() \{ \textcolor{keywordflow}{return} exception; \}}
+\DoxyCodeLine{84     std::string getCallbackName() \{ \textcolor{keywordflow}{return} callbackName; \}}
+\DoxyCodeLine{85     \textcolor{keywordtype}{bool} isReply() \{ \textcolor{keywordflow}{return} flags \& NYMPH\_MESSAGE\_REPLY; \}}
+\DoxyCodeLine{86     \textcolor{keywordtype}{bool} isException() \{ \textcolor{keywordflow}{return} flags \& NYMPH\_MESSAGE\_EXCEPTION; \}}
+\DoxyCodeLine{87     \textcolor{keywordtype}{bool} setException(\textcolor{keywordtype}{int} exceptionId, std::string value);}
+\DoxyCodeLine{88     \textcolor{keywordtype}{bool} setCallback(std::string name);}
+\DoxyCodeLine{89     }
+\DoxyCodeLine{90     \textcolor{keywordtype}{void} addReferenceCount();}
+\DoxyCodeLine{91     \textcolor{keywordtype}{void} decrementReferenceCount();}
+\DoxyCodeLine{92     \textcolor{keywordtype}{void} discard();}
+\DoxyCodeLine{93 \};}
+\DoxyCodeLine{94 }
+\DoxyCodeLine{95 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

@@ -1,0 +1,80 @@
+\hypertarget{nymph__socket__listener_8h_source}{}\doxysection{nymph\+\_\+socket\+\_\+listener.\+h}
+\label{nymph__socket__listener_8h_source}\index{src/nymph\_socket\_listener.h@{src/nymph\_socket\_listener.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{    nymph\_socket\_listener.h -\/ Declares the NymphRPC Socket Listener class.}}
+\DoxyCodeLine{3 \textcolor{comment}{    }}
+\DoxyCodeLine{4 \textcolor{comment}{    Revision 0}}
+\DoxyCodeLine{5 \textcolor{comment}{    }}
+\DoxyCodeLine{6 \textcolor{comment}{    Notes:}}
+\DoxyCodeLine{7 \textcolor{comment}{            -\/ }}
+\DoxyCodeLine{8 \textcolor{comment}{            }}
+\DoxyCodeLine{9 \textcolor{comment}{    History:}}
+\DoxyCodeLine{10 \textcolor{comment}{    2017/06/24, Maya Posch : Initial version.}}
+\DoxyCodeLine{11 \textcolor{comment}{    }}
+\DoxyCodeLine{12 \textcolor{comment}{    (c) Nyanko.ws}}
+\DoxyCodeLine{13 \textcolor{comment}{*/}}
+\DoxyCodeLine{14 }
+\DoxyCodeLine{15 }
+\DoxyCodeLine{16 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{17 \textcolor{preprocessor}{\#ifndef NYMPH\_SOCKET\_LISTENER\_H}}
+\DoxyCodeLine{18 \textcolor{preprocessor}{\#define NYMPH\_SOCKET\_LISTENER\_H}}
+\DoxyCodeLine{19 }
+\DoxyCodeLine{20 \textcolor{preprocessor}{\#include "{}nymph\_message.h"{}}}
+\DoxyCodeLine{21 }
+\DoxyCodeLine{22 \textcolor{preprocessor}{\#include <Poco/Runnable.h>}}
+\DoxyCodeLine{23 \textcolor{preprocessor}{\#include <Poco/Net/StreamSocket.h>}}
+\DoxyCodeLine{24 \textcolor{preprocessor}{\#include <Poco/Semaphore.h>}}
+\DoxyCodeLine{25 \textcolor{preprocessor}{\#include <Poco/Condition.h>}}
+\DoxyCodeLine{26 }
+\DoxyCodeLine{27 \textcolor{preprocessor}{\#include <map>}}
+\DoxyCodeLine{28 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{29 \textcolor{preprocessor}{\#include <atomic>}}
+\DoxyCodeLine{30 }
+\DoxyCodeLine{31 \textcolor{comment}{// TYPES}}
+\DoxyCodeLine{32 }
+\DoxyCodeLine{33 \textcolor{keyword}{struct }\mbox{\hyperlink{struct_nymph_socket}{NymphSocket}} \{}
+\DoxyCodeLine{34     Poco::Net::StreamSocket* socket;    \textcolor{comment}{// Pointer to the socket instance.}}
+\DoxyCodeLine{35     Poco::Semaphore* semaphore;     \textcolor{comment}{// Signals when it's safe to delete the socket.}}
+\DoxyCodeLine{36     \textcolor{keywordtype}{void}* data;                     \textcolor{comment}{// User data.}}
+\DoxyCodeLine{37     uint32\_t handle;                \textcolor{comment}{// The Nymph internal socket handle.}}
+\DoxyCodeLine{38 \};}
+\DoxyCodeLine{39 }
+\DoxyCodeLine{40 }
+\DoxyCodeLine{41 \textcolor{keyword}{struct }\mbox{\hyperlink{struct_nymph_request}{NymphRequest}} \{}
+\DoxyCodeLine{42     \textcolor{keywordtype}{int} handle;}
+\DoxyCodeLine{43     uint64\_t messageId;}
+\DoxyCodeLine{44     Poco::Mutex mutex;}
+\DoxyCodeLine{45     Poco::Condition condition;}
+\DoxyCodeLine{46     \mbox{\hyperlink{class_nymph_type}{NymphType}}* response;}
+\DoxyCodeLine{47     \textcolor{keywordtype}{bool} exception;}
+\DoxyCodeLine{48     \mbox{\hyperlink{struct_nymph_exception}{NymphException}} exceptionData;}
+\DoxyCodeLine{49 \};}
+\DoxyCodeLine{50 }
+\DoxyCodeLine{51 \textcolor{comment}{// -\/-\/-\/}}
+\DoxyCodeLine{52 }
+\DoxyCodeLine{53 }
+\DoxyCodeLine{54 \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_socket_listener}{NymphSocketListener}} : \textcolor{keyword}{public} Poco::Runnable \{}
+\DoxyCodeLine{55     std::string loggerName;}
+\DoxyCodeLine{56     std::atomic<bool> listen;}
+\DoxyCodeLine{57     \mbox{\hyperlink{struct_nymph_socket}{NymphSocket}} nymphSocket;}
+\DoxyCodeLine{58     Poco::Net::StreamSocket* socket;}
+\DoxyCodeLine{59     std::map<uint64\_t, NymphRequest*> messages;}
+\DoxyCodeLine{60     Poco::Mutex messagesMutex;}
+\DoxyCodeLine{61     \textcolor{keywordtype}{bool} init;}
+\DoxyCodeLine{62     Poco::Condition* readyCond;}
+\DoxyCodeLine{63     Poco::Mutex* readyMutex;}
+\DoxyCodeLine{64     }
+\DoxyCodeLine{65 \textcolor{keyword}{public}:}
+\DoxyCodeLine{66     \mbox{\hyperlink{class_nymph_socket_listener}{NymphSocketListener}}(\mbox{\hyperlink{struct_nymph_socket}{NymphSocket}} socket, Poco::Condition* cond, Poco::Mutex* mtx);}
+\DoxyCodeLine{67     \mbox{\hyperlink{class_nymph_socket_listener}{\string~NymphSocketListener}}();}
+\DoxyCodeLine{68     \textcolor{keywordtype}{void} run();}
+\DoxyCodeLine{69     \textcolor{keywordtype}{void} stop();}
+\DoxyCodeLine{70     \textcolor{keywordtype}{bool} addMessage(\mbox{\hyperlink{struct_nymph_request}{NymphRequest}}* \&request);}
+\DoxyCodeLine{71     \textcolor{keywordtype}{bool} removeMessage(uint64\_t messageId);}
+\DoxyCodeLine{72 \};}
+\DoxyCodeLine{73 }
+\DoxyCodeLine{74 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

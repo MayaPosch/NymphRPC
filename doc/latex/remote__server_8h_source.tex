@@ -1,0 +1,90 @@
+\hypertarget{remote__server_8h_source}{}\doxysection{remote\+\_\+server.\+h}
+\label{remote__server_8h_source}\index{src/remote\_server.h@{src/remote\_server.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{    remote\_server.h -\/ header file for the Remote Server class.}}
+\DoxyCodeLine{3 \textcolor{comment}{    }}
+\DoxyCodeLine{4 \textcolor{comment}{    Revision 0}}
+\DoxyCodeLine{5 \textcolor{comment}{    }}
+\DoxyCodeLine{6 \textcolor{comment}{    Notes:}}
+\DoxyCodeLine{7 \textcolor{comment}{            -\/ This class declares the main class to be used by NymphRPC clients.}}
+\DoxyCodeLine{8 \textcolor{comment}{            }}
+\DoxyCodeLine{9 \textcolor{comment}{    2017/06/24, Maya Posch  : Initial version.  }}
+\DoxyCodeLine{10 \textcolor{comment}{    (c) Nyanko.ws}}
+\DoxyCodeLine{11 \textcolor{comment}{*/}}
+\DoxyCodeLine{12 }
+\DoxyCodeLine{13 }
+\DoxyCodeLine{14 \textcolor{preprocessor}{\#ifndef REMOTE\_SERVER\_H}}
+\DoxyCodeLine{15 \textcolor{preprocessor}{\#define REMOTE\_SERVER\_H}}
+\DoxyCodeLine{16 }
+\DoxyCodeLine{17 }
+\DoxyCodeLine{18 \textcolor{preprocessor}{\#include <vector>}}
+\DoxyCodeLine{19 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{20 \textcolor{preprocessor}{\#include <map>}}
+\DoxyCodeLine{21 }
+\DoxyCodeLine{22 \textcolor{preprocessor}{\#include <Poco/Semaphore.h>}}
+\DoxyCodeLine{23 \textcolor{preprocessor}{\#include <Poco/Net/SocketAddress.h>}}
+\DoxyCodeLine{24 \textcolor{preprocessor}{\#include <Poco/Net/StreamSocket.h>}}
+\DoxyCodeLine{25 }
+\DoxyCodeLine{26 \textcolor{preprocessor}{\#include "{}nymph\_method.h"{}}}
+\DoxyCodeLine{27 \textcolor{preprocessor}{\#include "{}nymph\_listener.h"{}}}
+\DoxyCodeLine{28 \textcolor{preprocessor}{\#include "{}nymph\_logger.h"{}}}
+\DoxyCodeLine{29 }
+\DoxyCodeLine{30 }
+\DoxyCodeLine{31 \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_server_instance}{NymphServerInstance}} \{}
+\DoxyCodeLine{32     std::string loggerName = \textcolor{stringliteral}{"{}NymphServerInstance"{}};}
+\DoxyCodeLine{33     Poco::Net::StreamSocket* socket = 0;}
+\DoxyCodeLine{34     Poco::Semaphore* socketSemaphore = 0;}
+\DoxyCodeLine{35     uint32\_t nextMethodId = 0;}
+\DoxyCodeLine{36     std::map<std::string, NymphMethod> methods;}
+\DoxyCodeLine{37     std::map<uint32\_t, NymphMethod*> methodIds;}
+\DoxyCodeLine{38     Poco::Mutex methodsMutex;}
+\DoxyCodeLine{39     uint32\_t handle;}
+\DoxyCodeLine{40     uint32\_t timeout;}
+\DoxyCodeLine{41     }
+\DoxyCodeLine{42 \textcolor{keyword}{public}:}
+\DoxyCodeLine{43     \mbox{\hyperlink{class_nymph_server_instance}{NymphServerInstance}}(uint32\_t handle, Poco::Net::StreamSocket* socket, uint32\_t timeout = 3000);}
+\DoxyCodeLine{44     \mbox{\hyperlink{class_nymph_server_instance}{\string~NymphServerInstance}}();}
+\DoxyCodeLine{45     }
+\DoxyCodeLine{46     \textcolor{keywordtype}{void} setHandle(uint32\_t handle);}
+\DoxyCodeLine{47     uint32\_t getHandle();}
+\DoxyCodeLine{48     Poco::Semaphore* semaphore();}
+\DoxyCodeLine{49     \textcolor{keywordtype}{bool} sync(std::string \&result);}
+\DoxyCodeLine{50     \textcolor{keywordtype}{bool} addMethod(std::string name, \mbox{\hyperlink{class_nymph_method}{NymphMethod}} method);}
+\DoxyCodeLine{51     \textcolor{keywordtype}{bool} removeMethod(std::string name);}
+\DoxyCodeLine{52     \textcolor{keywordtype}{bool} disconnect(std::string\& result);}
+\DoxyCodeLine{53     \textcolor{keywordtype}{bool} callMethod(std::string name, std::vector<NymphType*> \&values, }
+\DoxyCodeLine{54                                         \mbox{\hyperlink{class_nymph_type}{NymphType}}* \&returnvalue, std::string \&result);}
+\DoxyCodeLine{55     \textcolor{keywordtype}{bool} callMethodId(uint32\_t \textcolor{keywordtype}{id}, std::vector<NymphType*> \&values, \mbox{\hyperlink{class_nymph_type}{NymphType}}* \&returnvalue, std::string \&result);}
+\DoxyCodeLine{56 \};}
+\DoxyCodeLine{57 }
+\DoxyCodeLine{58 }
+\DoxyCodeLine{59 \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_remote_server}{NymphRemoteServer}} \{}
+\DoxyCodeLine{60     \textcolor{keyword}{static} std::map<uint32\_t, NymphServerInstance*> instances;}
+\DoxyCodeLine{61     \textcolor{keyword}{static} Poco::Mutex instancesMutex;}
+\DoxyCodeLine{62     \textcolor{keyword}{static} uint32\_t lastHandle;}
+\DoxyCodeLine{63     \textcolor{keyword}{static} \textcolor{keywordtype}{long} timeout;}
+\DoxyCodeLine{64     \textcolor{keyword}{static} std::string loggerName;}
+\DoxyCodeLine{65     \textcolor{keyword}{static} uint32\_t nextMethodId;}
+\DoxyCodeLine{66     }
+\DoxyCodeLine{67 \textcolor{keyword}{public}:}
+\DoxyCodeLine{68     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} init(logFnc logger, \textcolor{keywordtype}{int} level = NYMPH\_LOG\_LEVEL\_TRACE, \textcolor{keywordtype}{long} timeout = 3000);}
+\DoxyCodeLine{69     \textcolor{keyword}{static} \textcolor{keywordtype}{void} setLogger(logFnc logger, \textcolor{keywordtype}{int} level);}
+\DoxyCodeLine{70     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} shutdown();}
+\DoxyCodeLine{71     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} connect(std::string host, \textcolor{keywordtype}{int} port, uint32\_t \&handle, \textcolor{keywordtype}{void}* data, std::string \&result);}
+\DoxyCodeLine{72     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} connect(std::string url, uint32\_t \&handle, \textcolor{keywordtype}{void}* data, std::string \&result);}
+\DoxyCodeLine{73     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} connect(Poco::Net::SocketAddress sa, uint32\_t \&handle, \textcolor{keywordtype}{void}* data, std::string \&result);}
+\DoxyCodeLine{74     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} disconnect(uint32\_t handle, std::string \&result);}
+\DoxyCodeLine{75     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} callMethod(uint32\_t handle, std::string name, std::vector<NymphType*> \&values, }
+\DoxyCodeLine{76                                         \mbox{\hyperlink{class_nymph_type}{NymphType}}* \&returnvalue, std::string \&result);}
+\DoxyCodeLine{77     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} callMethodId(uint32\_t handle, uint32\_t \textcolor{keywordtype}{id}, std::vector<NymphType*> \&values, \mbox{\hyperlink{class_nymph_type}{NymphType}}* \&returnvalue, std::string \&result);}
+\DoxyCodeLine{78     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} removeMethod(uint32\_t handle, std::string name);}
+\DoxyCodeLine{79     }
+\DoxyCodeLine{80     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} registerCallback(std::string name, NymphCallbackMethod method, \textcolor{keywordtype}{void}* data);}
+\DoxyCodeLine{81     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} removeCallback(std::string name);}
+\DoxyCodeLine{82 \};}
+\DoxyCodeLine{83 }
+\DoxyCodeLine{84 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

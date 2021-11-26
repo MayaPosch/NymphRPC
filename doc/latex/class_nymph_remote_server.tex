@@ -6,9 +6,6 @@
 \mbox{\Hypertarget{class_nymph_remote_server_a4fcd1a2f2a95b528ededffeb3280fb1e}\label{class_nymph_remote_server_a4fcd1a2f2a95b528ededffeb3280fb1e}} 
 static bool {\bfseries init} (log\+Fnc logger, int level=NYMPH\+\_\+\+LOG\+\_\+\+LEVEL\+\_\+\+TRACE, long timeout=3000)
 \item 
-\mbox{\Hypertarget{class_nymph_remote_server_aa2e8c9b4baa4369b6b7dbc3984fae88e}\label{class_nymph_remote_server_aa2e8c9b4baa4369b6b7dbc3984fae88e}} 
-static bool {\bfseries sync} (uint32\+\_\+t handle, std\+::string \&result)
-\item 
 \mbox{\Hypertarget{class_nymph_remote_server_ac7e50d457da1ee0768d28728a1e01dca}\label{class_nymph_remote_server_ac7e50d457da1ee0768d28728a1e01dca}} 
 static void {\bfseries set\+Logger} (log\+Fnc logger, int level)
 \item 
@@ -33,8 +30,8 @@ static bool {\bfseries call\+Method} (uint32\+\_\+t handle, std\+::string name, 
 \mbox{\Hypertarget{class_nymph_remote_server_ad454df862657c70b59dff289bc48bab8}\label{class_nymph_remote_server_ad454df862657c70b59dff289bc48bab8}} 
 static bool {\bfseries call\+Method\+Id} (uint32\+\_\+t handle, uint32\+\_\+t id, std\+::vector$<$ \mbox{\hyperlink{class_nymph_type}{Nymph\+Type}} $\ast$ $>$ \&values, \mbox{\hyperlink{class_nymph_type}{Nymph\+Type}} $\ast$\&returnvalue, std\+::string \&result)
 \item 
-\mbox{\Hypertarget{class_nymph_remote_server_af6bcd97e18737fa68039fce824435954}\label{class_nymph_remote_server_af6bcd97e18737fa68039fce824435954}} 
-static bool {\bfseries remove\+Method} (std\+::string name)
+\mbox{\Hypertarget{class_nymph_remote_server_a0b14e816f4b4cc7ce704f092ce1596ed}\label{class_nymph_remote_server_a0b14e816f4b4cc7ce704f092ce1596ed}} 
+static bool {\bfseries remove\+Method} (uint32\+\_\+t handle, std\+::string name)
 \item 
 \mbox{\Hypertarget{class_nymph_remote_server_a503dfb25d2f0e1156bd86d796ac61e5d}\label{class_nymph_remote_server_a503dfb25d2f0e1156bd86d796ac61e5d}} 
 static bool {\bfseries register\+Callback} (std\+::string name, Nymph\+Callback\+Method method, void $\ast$data)

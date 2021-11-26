@@ -1,0 +1,72 @@
+\hypertarget{nymph__listener_8h_source}{}\doxysection{nymph\+\_\+listener.\+h}
+\label{nymph__listener_8h_source}\index{src/nymph\_listener.h@{src/nymph\_listener.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{    nymph\_listener.h    -\/ Declares the NymphRPC Listener class.}}
+\DoxyCodeLine{3 \textcolor{comment}{    }}
+\DoxyCodeLine{4 \textcolor{comment}{    Revision 0}}
+\DoxyCodeLine{5 \textcolor{comment}{    }}
+\DoxyCodeLine{6 \textcolor{comment}{    Notes:}}
+\DoxyCodeLine{7 \textcolor{comment}{            -\/ }}
+\DoxyCodeLine{8 \textcolor{comment}{            }}
+\DoxyCodeLine{9 \textcolor{comment}{    History:}}
+\DoxyCodeLine{10 \textcolor{comment}{    2017/06/24, Maya Posch  : Initial version.}}
+\DoxyCodeLine{11 \textcolor{comment}{    }}
+\DoxyCodeLine{12 \textcolor{comment}{    (c) Nyanko.ws}}
+\DoxyCodeLine{13 \textcolor{comment}{*/}}
+\DoxyCodeLine{14 }
+\DoxyCodeLine{15 }
+\DoxyCodeLine{16 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{17 \textcolor{preprocessor}{\#ifndef NYMPH\_LISTENER\_H}}
+\DoxyCodeLine{18 \textcolor{preprocessor}{\#define NYMPH\_LISTENER\_H}}
+\DoxyCodeLine{19 }
+\DoxyCodeLine{20 }
+\DoxyCodeLine{21 \textcolor{preprocessor}{\#include <vector>}}
+\DoxyCodeLine{22 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{23 \textcolor{preprocessor}{\#include <functional>}}
+\DoxyCodeLine{24 }
+\DoxyCodeLine{25 \textcolor{preprocessor}{\#include <Poco/Mutex.h>}}
+\DoxyCodeLine{26 }
+\DoxyCodeLine{27 \textcolor{preprocessor}{\#include "{}nymph\_socket\_listener.h"{}}}
+\DoxyCodeLine{28 }
+\DoxyCodeLine{29 }
+\DoxyCodeLine{30 \textcolor{comment}{// TYPES}}
+\DoxyCodeLine{31 }
+\DoxyCodeLine{32 \textcolor{comment}{//typedef void (*NymphCallbackMethod)(uint32\_t session, NymphMessage* msg, void* data);}}
+\DoxyCodeLine{33 \textcolor{keyword}{typedef} std::function<void(uint32\_t, \mbox{\hyperlink{class_nymph_message}{NymphMessage}}*, \textcolor{keywordtype}{void}*)> NymphCallbackMethod;}
+\DoxyCodeLine{34 }
+\DoxyCodeLine{35 }
+\DoxyCodeLine{36 \textcolor{keyword}{struct }\mbox{\hyperlink{struct_nymph_callback}{NymphCallback}} \{}
+\DoxyCodeLine{37     std::string name;               \textcolor{comment}{// Callback method name.}}
+\DoxyCodeLine{38     NymphCallbackMethod method; \textcolor{comment}{// The callback.}}
+\DoxyCodeLine{39     \textcolor{keywordtype}{void}* data;                 \textcolor{comment}{// Custom user data.}}
+\DoxyCodeLine{40 \};}
+\DoxyCodeLine{41 }
+\DoxyCodeLine{42 }
+\DoxyCodeLine{43 \textcolor{comment}{// -\/-\/-\/}}
+\DoxyCodeLine{44 }
+\DoxyCodeLine{45 }
+\DoxyCodeLine{46 \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_listener}{NymphListener}} \{}
+\DoxyCodeLine{47     \textcolor{keyword}{static} std::map<int, NymphSocketListener*> listeners;}
+\DoxyCodeLine{48     \textcolor{keyword}{static} Poco::Mutex listenersMutex;}
+\DoxyCodeLine{49     \textcolor{keyword}{static} std::string loggerName;}
+\DoxyCodeLine{50     }
+\DoxyCodeLine{51     \textcolor{keyword}{static} std::map<std::string, NymphCallback>\& callbacks();}
+\DoxyCodeLine{52     \textcolor{keyword}{static} Poco::Mutex\& callbacksMutex();}
+\DoxyCodeLine{53     }
+\DoxyCodeLine{54 \textcolor{keyword}{public}:}
+\DoxyCodeLine{55     \textcolor{keyword}{static} \textcolor{keywordtype}{void} stop();}
+\DoxyCodeLine{56     }
+\DoxyCodeLine{57     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} addConnection(\textcolor{keywordtype}{int} handle, \mbox{\hyperlink{struct_nymph_socket}{NymphSocket}} socket);}
+\DoxyCodeLine{58     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} removeConnection(\textcolor{keywordtype}{int} handle);}
+\DoxyCodeLine{59     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} addMessage(\mbox{\hyperlink{struct_nymph_request}{NymphRequest}}* \&request);}
+\DoxyCodeLine{60     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} removeMessage(\textcolor{keywordtype}{int} handle, int64\_t messageId);}
+\DoxyCodeLine{61     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} addCallback(\mbox{\hyperlink{struct_nymph_callback}{NymphCallback}} callback);}
+\DoxyCodeLine{62     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} callCallback(uint32\_t session, \mbox{\hyperlink{class_nymph_message}{NymphMessage}}* msg, \textcolor{keywordtype}{void}* data);}
+\DoxyCodeLine{63     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} removeCallback(std::string name);}
+\DoxyCodeLine{64 \};}
+\DoxyCodeLine{65 }
+\DoxyCodeLine{66 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

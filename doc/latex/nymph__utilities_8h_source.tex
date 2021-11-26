@@ -1,0 +1,46 @@
+\hypertarget{nymph__utilities_8h_source}{}\doxysection{nymph\+\_\+utilities.\+h}
+\label{nymph__utilities_8h_source}\index{src/nymph\_utilities.h@{src/nymph\_utilities.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{    nymph\_utilities.h   -\/ Declares the NymphRPC Utilities class.}}
+\DoxyCodeLine{3 \textcolor{comment}{    }}
+\DoxyCodeLine{4 \textcolor{comment}{    Revision 0}}
+\DoxyCodeLine{5 \textcolor{comment}{    }}
+\DoxyCodeLine{6 \textcolor{comment}{    Notes:}}
+\DoxyCodeLine{7 \textcolor{comment}{            -\/ }}
+\DoxyCodeLine{8 \textcolor{comment}{            }}
+\DoxyCodeLine{9 \textcolor{comment}{    History:}}
+\DoxyCodeLine{10 \textcolor{comment}{    2017/06/24, Maya Posch : Initial version.}}
+\DoxyCodeLine{11 \textcolor{comment}{    }}
+\DoxyCodeLine{12 \textcolor{comment}{    (c) Nyanko.ws}}
+\DoxyCodeLine{13 \textcolor{comment}{*/}}
+\DoxyCodeLine{14 }
+\DoxyCodeLine{15 }
+\DoxyCodeLine{16 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{17 \textcolor{preprocessor}{\#ifndef NYMPH\_UTILITIES\_H}}
+\DoxyCodeLine{18 }
+\DoxyCodeLine{19 \textcolor{preprocessor}{\#include "{}nymph\_types.h"{}}}
+\DoxyCodeLine{20 }
+\DoxyCodeLine{21 \textcolor{preprocessor}{\#include <Poco/Poco.h>}}
+\DoxyCodeLine{22 \textcolor{preprocessor}{\#include <Poco/Mutex.h>}}
+\DoxyCodeLine{23 \textcolor{preprocessor}{\#include <Poco/Dynamic/Var.h>}}
+\DoxyCodeLine{24 }
+\DoxyCodeLine{25 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{26 }
+\DoxyCodeLine{27 \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_utilities}{NymphUtilities}} \{}
+\DoxyCodeLine{28     \textcolor{keyword}{static} int64\_t messageId;}
+\DoxyCodeLine{29     \textcolor{keyword}{static} Poco::Mutex idMutex; }
+\DoxyCodeLine{30     \textcolor{keyword}{static} std::string loggerName;}
+\DoxyCodeLine{31     }
+\DoxyCodeLine{32 \textcolor{keyword}{public}:}
+\DoxyCodeLine{33     \textcolor{comment}{//static UInt32 createHash(std::string name);}}
+\DoxyCodeLine{34     \textcolor{keyword}{static} int64\_t getMessageId();}
+\DoxyCodeLine{35     \textcolor{keyword}{static} \mbox{\hyperlink{class_nymph_type}{NymphType}}* dynamicVarToNymphType(Poco::Dynamic::Var \&\textcolor{keywordtype}{object});}
+\DoxyCodeLine{36     \textcolor{comment}{//static bool parseValue(uint8\_t typecode, std::string* binmsg, int \&index, NymphType* \&value);}}
+\DoxyCodeLine{37     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} parseValue(uint8\_t typecode, uint8\_t* binmsg, \textcolor{keywordtype}{int} \&index, \mbox{\hyperlink{class_nymph_type}{NymphType}} \&value);}
+\DoxyCodeLine{38 \};}
+\DoxyCodeLine{39 }
+\DoxyCodeLine{40 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

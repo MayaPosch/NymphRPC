@@ -1,0 +1,107 @@
+\hypertarget{nymph__logger_8h_source}{}\doxysection{nymph\+\_\+logger.\+h}
+\label{nymph__logger_8h_source}\index{src/nymph\_logger.h@{src/nymph\_logger.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{    nymph\_logger.h  -\/ header file for the NymphRPC Logger class.}}
+\DoxyCodeLine{3 \textcolor{comment}{    }}
+\DoxyCodeLine{4 \textcolor{comment}{    Revision 0}}
+\DoxyCodeLine{5 \textcolor{comment}{    }}
+\DoxyCodeLine{6 \textcolor{comment}{    Notes:}}
+\DoxyCodeLine{7 \textcolor{comment}{            -\/ The central logging client for the Nymph library.}}
+\DoxyCodeLine{8 \textcolor{comment}{            }}
+\DoxyCodeLine{9 \textcolor{comment}{    2017/06/24, Maya Posch  : Initial version.}}
+\DoxyCodeLine{10 \textcolor{comment}{    (c) Nyanko.ws}}
+\DoxyCodeLine{11 \textcolor{comment}{*/}}
+\DoxyCodeLine{12 }
+\DoxyCodeLine{13 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{14 \textcolor{preprocessor}{\#ifndef NYMPH\_LOGGER\_H}}
+\DoxyCodeLine{15 \textcolor{preprocessor}{\#define NYMPH\_LOGGER\_H}}
+\DoxyCodeLine{16 }
+\DoxyCodeLine{17 \textcolor{preprocessor}{\#include <Poco/Logger.h>}}
+\DoxyCodeLine{18 \textcolor{preprocessor}{\#include <Poco/LogStream.h>}}
+\DoxyCodeLine{19 \textcolor{preprocessor}{\#include <Poco/Channel.h>}}
+\DoxyCodeLine{20 }
+\DoxyCodeLine{21 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{22 }
+\DoxyCodeLine{23 }
+\DoxyCodeLine{24 \textcolor{keyword}{enum} NymphLogLevels \{}
+\DoxyCodeLine{25     NYMPH\_LOG\_LEVEL\_FATAL = 1,}
+\DoxyCodeLine{26     NYMPH\_LOG\_LEVEL\_CRITICAL,}
+\DoxyCodeLine{27     NYMPH\_LOG\_LEVEL\_ERROR,}
+\DoxyCodeLine{28     NYMPH\_LOG\_LEVEL\_WARNING,}
+\DoxyCodeLine{29     NYMPH\_LOG\_LEVEL\_NOTICE,}
+\DoxyCodeLine{30     NYMPH\_LOG\_LEVEL\_INFO,}
+\DoxyCodeLine{31     NYMPH\_LOG\_LEVEL\_DEBUG,}
+\DoxyCodeLine{32     NYMPH\_LOG\_LEVEL\_TRACE}
+\DoxyCodeLine{33 \};}
+\DoxyCodeLine{34 }
+\DoxyCodeLine{35 }
+\DoxyCodeLine{36 \textcolor{preprocessor}{\#define NYMPH\_LOG\_FATAL(msg) \(\backslash\)}}
+\DoxyCodeLine{37 \textcolor{preprocessor}{    if (NymphLogger::priority >= Poco::Message::PRIO\_FATAL) \{ \(\backslash\)}}
+\DoxyCodeLine{38 \textcolor{preprocessor}{        NymphLogger::logger(loggerName).fatal(msg, \_\_FILE\_\_, \_\_LINE\_\_);\(\backslash\)}}
+\DoxyCodeLine{39 \textcolor{preprocessor}{    \} }}
+\DoxyCodeLine{40 \textcolor{preprocessor}{\#define NYMPH\_LOG\_CRITICAL(msg) \(\backslash\)}}
+\DoxyCodeLine{41 \textcolor{preprocessor}{    if (NymphLogger::priority >= Poco::Message::PRIO\_CRITICAL) \{ \(\backslash\)}}
+\DoxyCodeLine{42 \textcolor{preprocessor}{        NymphLogger::logger(loggerName).critical(msg, \_\_FILE\_\_, \_\_LINE\_\_);\(\backslash\)}}
+\DoxyCodeLine{43 \textcolor{preprocessor}{    \}}}
+\DoxyCodeLine{44 \textcolor{preprocessor}{\#define NYMPH\_LOG\_ERROR(msg) \(\backslash\)}}
+\DoxyCodeLine{45 \textcolor{preprocessor}{    if (NymphLogger::priority >= Poco::Message::PRIO\_ERROR) \{ \(\backslash\)}}
+\DoxyCodeLine{46 \textcolor{preprocessor}{        NymphLogger::logger(loggerName).error(msg, \_\_FILE\_\_, \_\_LINE\_\_);\(\backslash\)}}
+\DoxyCodeLine{47 \textcolor{preprocessor}{    \}}}
+\DoxyCodeLine{48 \textcolor{preprocessor}{\#define NYMPH\_LOG\_WARNING(msg) \(\backslash\)}}
+\DoxyCodeLine{49 \textcolor{preprocessor}{    if (NymphLogger::priority >= Poco::Message::PRIO\_WARNING) \{ \(\backslash\)}}
+\DoxyCodeLine{50 \textcolor{preprocessor}{        NymphLogger::logger(loggerName).warning(msg, \_\_FILE\_\_, \_\_LINE\_\_);\(\backslash\)}}
+\DoxyCodeLine{51 \textcolor{preprocessor}{    \}}}
+\DoxyCodeLine{52 \textcolor{preprocessor}{\#define NYMPH\_LOG\_NOTICE(msg) \(\backslash\)}}
+\DoxyCodeLine{53 \textcolor{preprocessor}{    if (NymphLogger::priority >= Poco::Message::PRIO\_NOTICE) \{ \(\backslash\)}}
+\DoxyCodeLine{54 \textcolor{preprocessor}{        NymphLogger::logger(loggerName).notice(msg, \_\_FILE\_\_, \_\_LINE\_\_);\(\backslash\)}}
+\DoxyCodeLine{55 \textcolor{preprocessor}{    \}}}
+\DoxyCodeLine{56 \textcolor{preprocessor}{\#define NYMPH\_LOG\_INFORMATION(msg) \(\backslash\)}}
+\DoxyCodeLine{57 \textcolor{preprocessor}{    if (NymphLogger::priority >= Poco::Message::PRIO\_INFORMATION) \{ \(\backslash\)}}
+\DoxyCodeLine{58 \textcolor{preprocessor}{        NymphLogger::logger(loggerName).information(msg, \_\_FILE\_\_, \_\_LINE\_\_);\(\backslash\)}}
+\DoxyCodeLine{59 \textcolor{preprocessor}{    \}}}
+\DoxyCodeLine{60 \textcolor{preprocessor}{\#define NYMPH\_LOG\_DEBUG(msg) \(\backslash\)}}
+\DoxyCodeLine{61 \textcolor{preprocessor}{    if (NymphLogger::priority >= Poco::Message::PRIO\_DEBUG) \{ \(\backslash\)}}
+\DoxyCodeLine{62 \textcolor{preprocessor}{        NymphLogger::logger(loggerName).debug(msg, \_\_FILE\_\_, \_\_LINE\_\_);\(\backslash\)}}
+\DoxyCodeLine{63 \textcolor{preprocessor}{    \}}}
+\DoxyCodeLine{64 \textcolor{preprocessor}{\#define NYMPH\_LOG\_TRACE(msg) \(\backslash\)}}
+\DoxyCodeLine{65 \textcolor{preprocessor}{    if (NymphLogger::priority >= Poco::Message::PRIO\_TRACE) \{ \(\backslash\)}}
+\DoxyCodeLine{66 \textcolor{preprocessor}{        NymphLogger::logger(loggerName).trace(msg, \_\_FILE\_\_, \_\_LINE\_\_);\(\backslash\)}}
+\DoxyCodeLine{67 \textcolor{preprocessor}{    \}}}
+\DoxyCodeLine{68 }
+\DoxyCodeLine{69 }
+\DoxyCodeLine{70 \textcolor{comment}{// Function pointer typedef for the function-\/based logger.}}
+\DoxyCodeLine{71 \textcolor{keyword}{typedef} void (*logFnc)(int, std::string);}
+\DoxyCodeLine{72 }
+\DoxyCodeLine{73 }
+\DoxyCodeLine{74 \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_logger_channel}{NymphLoggerChannel}} : \textcolor{keyword}{public} Poco::Channel \{}
+\DoxyCodeLine{75     logFnc loggerFunction;}
+\DoxyCodeLine{76     }
+\DoxyCodeLine{77 \textcolor{keyword}{public}:}
+\DoxyCodeLine{78     \mbox{\hyperlink{class_nymph_logger_channel}{NymphLoggerChannel}}(logFnc \textcolor{keyword}{function});}
+\DoxyCodeLine{79     \mbox{\hyperlink{class_nymph_logger_channel}{\string~NymphLoggerChannel}}();}
+\DoxyCodeLine{80     }
+\DoxyCodeLine{81     \textcolor{keywordtype}{void} close();}
+\DoxyCodeLine{82     \textcolor{comment}{//string getProperty(const string \&name) \{ return string(); \}}}
+\DoxyCodeLine{83     \textcolor{keywordtype}{void} log(\textcolor{keyword}{const} Poco::Message \&msg);}
+\DoxyCodeLine{84     \textcolor{keywordtype}{void} open();}
+\DoxyCodeLine{85     \textcolor{comment}{//void setProperty(const string \&name, const string \&value) \{ \}}}
+\DoxyCodeLine{86 \};}
+\DoxyCodeLine{87 }
+\DoxyCodeLine{88 }
+\DoxyCodeLine{89 \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_logger}{NymphLogger}} \{}
+\DoxyCodeLine{90     \textcolor{comment}{//static Poco::Logger* loggerRef;}}
+\DoxyCodeLine{91 \textcolor{keyword}{public}:}
+\DoxyCodeLine{92     \textcolor{keyword}{static} Poco::Message::Priority priority;}
+\DoxyCodeLine{93     }
+\DoxyCodeLine{94     \textcolor{keyword}{static} \textcolor{keywordtype}{void} setLoggerFunction(logFnc \textcolor{keyword}{function});}
+\DoxyCodeLine{95     \textcolor{keyword}{static} \textcolor{keywordtype}{void} setLogLevel(Poco::Message::Priority priority);}
+\DoxyCodeLine{96     \textcolor{keyword}{static} Poco::Logger\& logger();}
+\DoxyCodeLine{97     \textcolor{keyword}{static} Poco::Logger\& logger(std::string \&name);}
+\DoxyCodeLine{98     \textcolor{comment}{//static void log(string message);}}
+\DoxyCodeLine{99 \};}
+\DoxyCodeLine{100 }
+\DoxyCodeLine{101 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

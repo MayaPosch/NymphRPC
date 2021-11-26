@@ -1,0 +1,46 @@
+\hypertarget{worker_8h_source}{}\doxysection{worker.\+h}
+\label{worker_8h_source}\index{src/worker.h@{src/worker.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{    worker.h -\/ Header file for the Worker class.}}
+\DoxyCodeLine{3 \textcolor{comment}{    }}
+\DoxyCodeLine{4 \textcolor{comment}{    Revision 0}}
+\DoxyCodeLine{5 \textcolor{comment}{    }}
+\DoxyCodeLine{6 \textcolor{comment}{    Notes:}}
+\DoxyCodeLine{7 \textcolor{comment}{            -\/ }}
+\DoxyCodeLine{8 \textcolor{comment}{            }}
+\DoxyCodeLine{9 \textcolor{comment}{    2016/11/19, Maya Posch}}
+\DoxyCodeLine{10 \textcolor{comment}{    (c) Nyanko.ws}}
+\DoxyCodeLine{11 \textcolor{comment}{*/}}
+\DoxyCodeLine{12 }
+\DoxyCodeLine{13 }
+\DoxyCodeLine{14 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{15 \textcolor{preprocessor}{\#ifndef WORKER\_H}}
+\DoxyCodeLine{16 \textcolor{preprocessor}{\#define WORKER\_H}}
+\DoxyCodeLine{17 }
+\DoxyCodeLine{18 \textcolor{preprocessor}{\#include "{}abstract\_request.h"{}}}
+\DoxyCodeLine{19 }
+\DoxyCodeLine{20 \textcolor{preprocessor}{\#include <condition\_variable>}}
+\DoxyCodeLine{21 \textcolor{preprocessor}{\#include <mutex>}}
+\DoxyCodeLine{22 }
+\DoxyCodeLine{23 }
+\DoxyCodeLine{24 \textcolor{keyword}{class }\mbox{\hyperlink{class_worker}{Worker}} \{}
+\DoxyCodeLine{25     std::condition\_variable cv;}
+\DoxyCodeLine{26     std::mutex mtx;}
+\DoxyCodeLine{27     \mbox{\hyperlink{class_abstract_request}{AbstractRequest}}* request;}
+\DoxyCodeLine{28     \textcolor{keywordtype}{bool} running;}
+\DoxyCodeLine{29     \textcolor{keywordtype}{bool} ready;}
+\DoxyCodeLine{30     }
+\DoxyCodeLine{31 \textcolor{keyword}{public}:}
+\DoxyCodeLine{32     \mbox{\hyperlink{class_worker}{Worker}}() \{ running = \textcolor{keyword}{true}; ready = \textcolor{keyword}{false}; \}}
+\DoxyCodeLine{33     \textcolor{keywordtype}{void} run();}
+\DoxyCodeLine{34     \textcolor{keywordtype}{void} stop() \{ running = \textcolor{keyword}{false}; \}}
+\DoxyCodeLine{35     \textcolor{keywordtype}{void} setRequest(\mbox{\hyperlink{class_abstract_request}{AbstractRequest}}* request) \{ this-\/>request = request; ready = \textcolor{keyword}{true}; \}}
+\DoxyCodeLine{36     \textcolor{keywordtype}{void} getCondition(std::condition\_variable* \&cv);}
+\DoxyCodeLine{37     \textcolor{keywordtype}{void} getMutex(std::mutex* \&mtx);}
+\DoxyCodeLine{38 \};}
+\DoxyCodeLine{39 }
+\DoxyCodeLine{40 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

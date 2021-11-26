@@ -1,0 +1,44 @@
+\hypertarget{nymph__server_8h_source}{}\doxysection{nymph\+\_\+server.\+h}
+\label{nymph__server_8h_source}\index{src/nymph\_server.h@{src/nymph\_server.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{    nymph\_server.h  -\/ header file for the NymphRPC Server class.}}
+\DoxyCodeLine{3 \textcolor{comment}{    }}
+\DoxyCodeLine{4 \textcolor{comment}{    Revision 0}}
+\DoxyCodeLine{5 \textcolor{comment}{    }}
+\DoxyCodeLine{6 \textcolor{comment}{    Notes:}}
+\DoxyCodeLine{7 \textcolor{comment}{            -\/ This class declares the server class to be used by Nymph servers.}}
+\DoxyCodeLine{8 \textcolor{comment}{            }}
+\DoxyCodeLine{9 \textcolor{comment}{    History:}}
+\DoxyCodeLine{10 \textcolor{comment}{    2017/06/24, Maya Posch : Initial version.}}
+\DoxyCodeLine{11 \textcolor{comment}{    }}
+\DoxyCodeLine{12 \textcolor{comment}{    (c) Nyanko.ws}}
+\DoxyCodeLine{13 \textcolor{comment}{*/}}
+\DoxyCodeLine{14 }
+\DoxyCodeLine{15 }
+\DoxyCodeLine{16 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{17 \textcolor{preprocessor}{\#ifndef NYMPH\_SERVER\_H}}
+\DoxyCodeLine{18 \textcolor{preprocessor}{\#define NYMPH\_SERVER\_H}}
+\DoxyCodeLine{19 }
+\DoxyCodeLine{20 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{21 \textcolor{preprocessor}{\#include <atomic>}}
+\DoxyCodeLine{22 }
+\DoxyCodeLine{23 \textcolor{preprocessor}{\#include <Poco/Net/TCPServer.h>}}
+\DoxyCodeLine{24 }
+\DoxyCodeLine{25 }
+\DoxyCodeLine{26 \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_server}{NymphServer}} \{}
+\DoxyCodeLine{27     \textcolor{keyword}{static} std::string loggerName;}
+\DoxyCodeLine{28     \textcolor{keyword}{static} Poco::Net::ServerSocket ss;}
+\DoxyCodeLine{29     \textcolor{keyword}{static} Poco::Net::TCPServer* server;}
+\DoxyCodeLine{30     }
+\DoxyCodeLine{31 \textcolor{keyword}{public}:}
+\DoxyCodeLine{32     \textcolor{keyword}{static} std::atomic<bool> running;}
+\DoxyCodeLine{33     }
+\DoxyCodeLine{34     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} start(\textcolor{keywordtype}{int} port = 4004);}
+\DoxyCodeLine{35     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} stop();}
+\DoxyCodeLine{36 \};}
+\DoxyCodeLine{37 }
+\DoxyCodeLine{38 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

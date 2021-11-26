@@ -1,0 +1,190 @@
+\hypertarget{nymph__types_8h_source}{}\doxysection{nymph\+\_\+types.\+h}
+\label{nymph__types_8h_source}\index{src/nymph\_types.h@{src/nymph\_types.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{    nymph\_types.h   -\/ Defines the NymphRPC data types.}}
+\DoxyCodeLine{3 \textcolor{comment}{    }}
+\DoxyCodeLine{4 \textcolor{comment}{    Revision 1}}
+\DoxyCodeLine{5 \textcolor{comment}{    }}
+\DoxyCodeLine{6 \textcolor{comment}{    Notes:}}
+\DoxyCodeLine{7 \textcolor{comment}{            -\/ }}
+\DoxyCodeLine{8 \textcolor{comment}{            }}
+\DoxyCodeLine{9 \textcolor{comment}{    History:}}
+\DoxyCodeLine{10 \textcolor{comment}{    2017/06/24, Maya Posch : Initial version.}}
+\DoxyCodeLine{11 \textcolor{comment}{    2021/10/01, Maya Posch : New type system.}}
+\DoxyCodeLine{12 \textcolor{comment}{    }}
+\DoxyCodeLine{13 \textcolor{comment}{    (c) Nyanko.ws}}
+\DoxyCodeLine{14 \textcolor{comment}{*/}}
+\DoxyCodeLine{15 }
+\DoxyCodeLine{16 }
+\DoxyCodeLine{17 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{18 \textcolor{preprocessor}{\#ifndef NYMPH\_TYPES\_H}}
+\DoxyCodeLine{19 \textcolor{preprocessor}{\#define NYMPH\_TYPES\_H}}
+\DoxyCodeLine{20 }
+\DoxyCodeLine{21 \textcolor{preprocessor}{\#include <Poco/Poco.h>}}
+\DoxyCodeLine{22 }
+\DoxyCodeLine{23 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{24 \textcolor{preprocessor}{\#include <map>}}
+\DoxyCodeLine{25 \textcolor{preprocessor}{\#include <vector>}}
+\DoxyCodeLine{26 \textcolor{preprocessor}{\#include <cstdint>}}
+\DoxyCodeLine{27 }
+\DoxyCodeLine{28 }
+\DoxyCodeLine{29 \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_message}{NymphMessage}};}
+\DoxyCodeLine{30 }
+\DoxyCodeLine{31 }
+\DoxyCodeLine{32 \textcolor{keyword}{enum} NymphInternalTypes \{}
+\DoxyCodeLine{33     NYMPH\_TYPE\_NULL             = 0x00,}
+\DoxyCodeLine{34     NYMPH\_TYPE\_NONE             = 0x01,}
+\DoxyCodeLine{35     NYMPH\_TYPE\_BOOLEAN\_FALSE    = 0x02,}
+\DoxyCodeLine{36     NYMPH\_TYPE\_BOOLEAN\_TRUE     = 0x03,}
+\DoxyCodeLine{37     NYMPH\_TYPE\_UINT8            = 0x04,}
+\DoxyCodeLine{38     NYMPH\_TYPE\_SINT8            = 0x05,}
+\DoxyCodeLine{39     NYMPH\_TYPE\_UINT16           = 0x06,}
+\DoxyCodeLine{40     NYMPH\_TYPE\_SINT16           = 0x07,}
+\DoxyCodeLine{41     NYMPH\_TYPE\_UINT32           = 0x08,}
+\DoxyCodeLine{42     NYMPH\_TYPE\_SINT32           = 0x09,}
+\DoxyCodeLine{43     NYMPH\_TYPE\_UINT64           = 0x0a,}
+\DoxyCodeLine{44     NYMPH\_TYPE\_SINT64           = 0x0b,}
+\DoxyCodeLine{45     NYMPH\_TYPE\_FLOAT            = 0x0c,}
+\DoxyCodeLine{46     NYMPH\_TYPE\_DOUBLE           = 0x0d,}
+\DoxyCodeLine{47     NYMPH\_TYPE\_ARRAY            = 0x0e,}
+\DoxyCodeLine{48     NYMPH\_TYPE\_EMPTY\_STRING     = 0x0f,}
+\DoxyCodeLine{49     NYMPH\_TYPE\_STRING           = 0x10,}
+\DoxyCodeLine{50     NYMPH\_TYPE\_STRUCT           = 0x11,}
+\DoxyCodeLine{51     NYMPH\_TYPE\_VOID             = 0x12,}
+\DoxyCodeLine{52     NYMPH\_TYPE\_BLOB             = 0x13}
+\DoxyCodeLine{53 \};}
+\DoxyCodeLine{54 }
+\DoxyCodeLine{55 }
+\DoxyCodeLine{56 \textcolor{comment}{// External types.}}
+\DoxyCodeLine{57 \textcolor{comment}{// I.e. those seen by an application using the library.}}
+\DoxyCodeLine{58 \textcolor{keyword}{enum} NymphTypes \{}
+\DoxyCodeLine{59     NYMPH\_NULL  = 0,}
+\DoxyCodeLine{60     NYMPH\_ARRAY,}
+\DoxyCodeLine{61     NYMPH\_BOOL,}
+\DoxyCodeLine{62     NYMPH\_UINT8,}
+\DoxyCodeLine{63     NYMPH\_SINT8,}
+\DoxyCodeLine{64     NYMPH\_UINT16,}
+\DoxyCodeLine{65     NYMPH\_SINT16,}
+\DoxyCodeLine{66     NYMPH\_UINT32,}
+\DoxyCodeLine{67     NYMPH\_SINT32,}
+\DoxyCodeLine{68     NYMPH\_UINT64,}
+\DoxyCodeLine{69     NYMPH\_SINT64,}
+\DoxyCodeLine{70     NYMPH\_FLOAT,}
+\DoxyCodeLine{71     NYMPH\_DOUBLE,}
+\DoxyCodeLine{72     NYMPH\_INT,}
+\DoxyCodeLine{73     NYMPH\_LONG,}
+\DoxyCodeLine{74     NYMPH\_SHORT,}
+\DoxyCodeLine{75     NYMPH\_STRING,}
+\DoxyCodeLine{76     NYMPH\_STRUCT,}
+\DoxyCodeLine{77     NYMPH\_BLOB,}
+\DoxyCodeLine{78     NYMPH\_ANY}
+\DoxyCodeLine{79 \};}
+\DoxyCodeLine{80 }
+\DoxyCodeLine{81 }
+\DoxyCodeLine{82 \textcolor{keyword}{struct }\mbox{\hyperlink{struct_nymph_pair}{NymphPair}};}
+\DoxyCodeLine{83 }
+\DoxyCodeLine{84 }
+\DoxyCodeLine{85 \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_type}{NymphType}} \{}
+\DoxyCodeLine{86     NymphTypes type = NYMPH\_NULL;}
+\DoxyCodeLine{87     \textcolor{keyword}{union }DataUnion \{}
+\DoxyCodeLine{88         \textcolor{keywordtype}{void}* any;}
+\DoxyCodeLine{89         \textcolor{keywordtype}{bool} boolean;}
+\DoxyCodeLine{90         uint8\_t uint8;}
+\DoxyCodeLine{91         int8\_t int8;}
+\DoxyCodeLine{92         uint16\_t uint16;}
+\DoxyCodeLine{93         int16\_t int16;}
+\DoxyCodeLine{94         uint32\_t uint32;}
+\DoxyCodeLine{95         int32\_t int32;}
+\DoxyCodeLine{96         uint64\_t uint64;}
+\DoxyCodeLine{97         int64\_t int64;}
+\DoxyCodeLine{98         \textcolor{keywordtype}{float} fp32;}
+\DoxyCodeLine{99         \textcolor{keywordtype}{double} fp64;}
+\DoxyCodeLine{100         \textcolor{keyword}{const} \textcolor{keywordtype}{char}* chars;}
+\DoxyCodeLine{101         std::vector<NymphType*>* vector;}
+\DoxyCodeLine{102         std::map<std::string, NymphPair>* pairs;}
+\DoxyCodeLine{103     \};}
+\DoxyCodeLine{104     }
+\DoxyCodeLine{105     DataUnion data;}
+\DoxyCodeLine{106     uint64\_t length;            \textcolor{comment}{// Length of serialised value in bytes.}}
+\DoxyCodeLine{107     uint32\_t strLength;         \textcolor{comment}{// String length (for NYMPH\_STRING).}}
+\DoxyCodeLine{108     \textcolor{keywordtype}{bool} emptyString = \textcolor{keyword}{false};   \textcolor{comment}{// Indicates whether a NYMPH\_STRING is empty.}}
+\DoxyCodeLine{109     \textcolor{keywordtype}{bool} own = \textcolor{keyword}{false};}
+\DoxyCodeLine{110     std::string* \textcolor{keywordtype}{string} = 0;}
+\DoxyCodeLine{111     \mbox{\hyperlink{class_nymph_message}{NymphMessage}}* linkedMsg = 0;}
+\DoxyCodeLine{112     }
+\DoxyCodeLine{113 \textcolor{keyword}{public}:}
+\DoxyCodeLine{114     \mbox{\hyperlink{class_nymph_type}{NymphType}}() \{ \}}
+\DoxyCodeLine{115     \mbox{\hyperlink{class_nymph_type}{NymphType}}(\textcolor{keywordtype}{bool} v);}
+\DoxyCodeLine{116     \mbox{\hyperlink{class_nymph_type}{NymphType}}(uint8\_t v);}
+\DoxyCodeLine{117     \mbox{\hyperlink{class_nymph_type}{NymphType}}(int8\_t v);}
+\DoxyCodeLine{118     \mbox{\hyperlink{class_nymph_type}{NymphType}}(uint16\_t v);}
+\DoxyCodeLine{119     \mbox{\hyperlink{class_nymph_type}{NymphType}}(int16\_t v);}
+\DoxyCodeLine{120     \mbox{\hyperlink{class_nymph_type}{NymphType}}(uint32\_t v);}
+\DoxyCodeLine{121     \mbox{\hyperlink{class_nymph_type}{NymphType}}(int32\_t v);}
+\DoxyCodeLine{122     \mbox{\hyperlink{class_nymph_type}{NymphType}}(uint64\_t v);}
+\DoxyCodeLine{123     \mbox{\hyperlink{class_nymph_type}{NymphType}}(int64\_t v);}
+\DoxyCodeLine{124     \mbox{\hyperlink{class_nymph_type}{NymphType}}(\textcolor{keywordtype}{float} v);}
+\DoxyCodeLine{125     \mbox{\hyperlink{class_nymph_type}{NymphType}}(\textcolor{keywordtype}{double} v);}
+\DoxyCodeLine{126     \mbox{\hyperlink{class_nymph_type}{NymphType}}(\textcolor{keywordtype}{char}* v, uint32\_t bytes, \textcolor{keywordtype}{bool} own = \textcolor{keyword}{false});}
+\DoxyCodeLine{127     \mbox{\hyperlink{class_nymph_type}{NymphType}}(std::string* v, \textcolor{keywordtype}{bool} own = \textcolor{keyword}{false});}
+\DoxyCodeLine{128     \mbox{\hyperlink{class_nymph_type}{NymphType}}(std::vector<NymphType*>* v, \textcolor{keywordtype}{bool} own = \textcolor{keyword}{false});}
+\DoxyCodeLine{129     \mbox{\hyperlink{class_nymph_type}{NymphType}}(std::map<std::string, NymphPair>* v, \textcolor{keywordtype}{bool} own = \textcolor{keyword}{false});}
+\DoxyCodeLine{130     }
+\DoxyCodeLine{131     \mbox{\hyperlink{class_nymph_type}{\string~NymphType}}();}
+\DoxyCodeLine{132     }
+\DoxyCodeLine{133     \textcolor{keywordtype}{bool} getBool(\textcolor{keywordtype}{bool}* v = 0);}
+\DoxyCodeLine{134     uint8\_t getUint8(uint8\_t* v = 0);}
+\DoxyCodeLine{135     int8\_t getInt8(int8\_t* v = 0);}
+\DoxyCodeLine{136     uint16\_t getUint16(uint16\_t* v = 0);}
+\DoxyCodeLine{137     int16\_t getInt16(int16\_t* v = 0);}
+\DoxyCodeLine{138     uint32\_t getUint32(uint32\_t* v = 0);}
+\DoxyCodeLine{139     int32\_t getInt32(int32\_t* v = 0);}
+\DoxyCodeLine{140     uint64\_t getUint64(uint64\_t* v = 0);}
+\DoxyCodeLine{141     int64\_t getInt64(int64\_t* v = 0);}
+\DoxyCodeLine{142     \textcolor{keywordtype}{float} getFloat(\textcolor{keywordtype}{float}* v = 0);}
+\DoxyCodeLine{143     \textcolor{keywordtype}{double} getDouble(\textcolor{keywordtype}{double}* v = 0);}
+\DoxyCodeLine{144     \textcolor{keyword}{const} \textcolor{keywordtype}{char}* getChar(\textcolor{keyword}{const} \textcolor{keywordtype}{char}* v = 0);}
+\DoxyCodeLine{145     std::vector<NymphType*>* getArray(std::vector<NymphType*>* v = 0);}
+\DoxyCodeLine{146     std::map<std::string, NymphPair>* getStruct(std::map<std::string, NymphPair>* v = 0);}
+\DoxyCodeLine{147     }
+\DoxyCodeLine{148     std::string getString();}
+\DoxyCodeLine{149     \textcolor{keywordtype}{bool} getStructValue(std::string key, \mbox{\hyperlink{class_nymph_type}{NymphType}}* \&value);}
+\DoxyCodeLine{150     }
+\DoxyCodeLine{151     \textcolor{keywordtype}{void} setValue(\textcolor{keywordtype}{bool} v);}
+\DoxyCodeLine{152     \textcolor{keywordtype}{void} setValue(uint8\_t v);}
+\DoxyCodeLine{153     \textcolor{keywordtype}{void} setValue(int8\_t v);}
+\DoxyCodeLine{154     \textcolor{keywordtype}{void} setValue(uint16\_t v);}
+\DoxyCodeLine{155     \textcolor{keywordtype}{void} setValue(int16\_t v);}
+\DoxyCodeLine{156     \textcolor{keywordtype}{void} setValue(uint32\_t v);}
+\DoxyCodeLine{157     \textcolor{keywordtype}{void} setValue(int32\_t v);}
+\DoxyCodeLine{158     \textcolor{keywordtype}{void} setValue(uint64\_t v);}
+\DoxyCodeLine{159     \textcolor{keywordtype}{void} setValue(int64\_t v);}
+\DoxyCodeLine{160     \textcolor{keywordtype}{void} setValue(\textcolor{keywordtype}{float} v);}
+\DoxyCodeLine{161     \textcolor{keywordtype}{void} setValue(\textcolor{keywordtype}{double} v);}
+\DoxyCodeLine{162     \textcolor{keywordtype}{void} setValue(\textcolor{keywordtype}{char}* v, uint32\_t bytes, \textcolor{keywordtype}{bool} own = \textcolor{keyword}{false});}
+\DoxyCodeLine{163     \textcolor{keywordtype}{void} setValue(std::string* v, \textcolor{keywordtype}{bool} own = \textcolor{keyword}{false});}
+\DoxyCodeLine{164     \textcolor{keywordtype}{void} setValue(std::vector<NymphType*>* v, \textcolor{keywordtype}{bool} own = \textcolor{keyword}{false});}
+\DoxyCodeLine{165     \textcolor{keywordtype}{void} setValue(std::map<std::string, NymphPair>* v, \textcolor{keywordtype}{bool} own = \textcolor{keyword}{false});}
+\DoxyCodeLine{166     }
+\DoxyCodeLine{167     uint64\_t bytes();}
+\DoxyCodeLine{168     uint32\_t string\_length();}
+\DoxyCodeLine{169     NymphTypes valuetype();}
+\DoxyCodeLine{170     }
+\DoxyCodeLine{171     \textcolor{keywordtype}{void} serialize(uint8\_t* \&index);}
+\DoxyCodeLine{172     }
+\DoxyCodeLine{173     \textcolor{keywordtype}{void} linkWithMessage(\mbox{\hyperlink{class_nymph_message}{NymphMessage}}* msg);}
+\DoxyCodeLine{174     \textcolor{keywordtype}{void} triggerAddRC();}
+\DoxyCodeLine{175     \textcolor{keywordtype}{void} discard();}
+\DoxyCodeLine{176 \};}
+\DoxyCodeLine{177 }
+\DoxyCodeLine{178 }
+\DoxyCodeLine{179 \textcolor{keyword}{struct }\mbox{\hyperlink{struct_nymph_pair}{NymphPair}} \{}
+\DoxyCodeLine{180     \mbox{\hyperlink{class_nymph_type}{NymphType}}* key;}
+\DoxyCodeLine{181     \mbox{\hyperlink{class_nymph_type}{NymphType}}* value;}
+\DoxyCodeLine{182 \};}
+\DoxyCodeLine{183 }
+\DoxyCodeLine{184 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

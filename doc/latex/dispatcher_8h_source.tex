@@ -1,0 +1,49 @@
+\hypertarget{dispatcher_8h_source}{}\doxysection{dispatcher.\+h}
+\label{dispatcher_8h_source}\index{src/dispatcher.h@{src/dispatcher.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{    dispatcher.h -\/ header file for the Dispatcher class.}}
+\DoxyCodeLine{3 \textcolor{comment}{    }}
+\DoxyCodeLine{4 \textcolor{comment}{    Revision 0}}
+\DoxyCodeLine{5 \textcolor{comment}{    }}
+\DoxyCodeLine{6 \textcolor{comment}{    Notes:}}
+\DoxyCodeLine{7 \textcolor{comment}{            -\/ }}
+\DoxyCodeLine{8 \textcolor{comment}{            }}
+\DoxyCodeLine{9 \textcolor{comment}{    2016/11/19, Maya Posch}}
+\DoxyCodeLine{10 \textcolor{comment}{    (c) Nyanko.ws.}}
+\DoxyCodeLine{11 \textcolor{comment}{*/}}
+\DoxyCodeLine{12 }
+\DoxyCodeLine{13 }
+\DoxyCodeLine{14 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{15 \textcolor{preprocessor}{\#ifndef DISPATCHER\_H}}
+\DoxyCodeLine{16 \textcolor{preprocessor}{\#define DISPATCHER\_H}}
+\DoxyCodeLine{17 }
+\DoxyCodeLine{18 \textcolor{preprocessor}{\#include "{}abstract\_request.h"{}}}
+\DoxyCodeLine{19 \textcolor{preprocessor}{\#include "{}worker.h"{}}}
+\DoxyCodeLine{20 }
+\DoxyCodeLine{21 \textcolor{preprocessor}{\#include <queue>}}
+\DoxyCodeLine{22 \textcolor{preprocessor}{\#include <mutex>}}
+\DoxyCodeLine{23 \textcolor{preprocessor}{\#include <thread>}}
+\DoxyCodeLine{24 \textcolor{preprocessor}{\#include <vector>}}
+\DoxyCodeLine{25 }
+\DoxyCodeLine{26 }
+\DoxyCodeLine{27 \textcolor{keyword}{class }\mbox{\hyperlink{class_dispatcher}{Dispatcher}} \{}
+\DoxyCodeLine{28     \textcolor{keyword}{static} \textcolor{keywordtype}{int} poolSize;}
+\DoxyCodeLine{29     \textcolor{keyword}{static} std::queue<AbstractRequest*> requests;}
+\DoxyCodeLine{30     \textcolor{keyword}{static} std::queue<Worker*> workers;}
+\DoxyCodeLine{31     \textcolor{keyword}{static} std::mutex requestsMutex;}
+\DoxyCodeLine{32     \textcolor{keyword}{static} std::mutex workersMutex;}
+\DoxyCodeLine{33     \textcolor{keyword}{static} std::vector<Worker*> allWorkers;}
+\DoxyCodeLine{34     \textcolor{keyword}{static} std::vector<std::thread*> threads;}
+\DoxyCodeLine{35     }
+\DoxyCodeLine{36 \textcolor{keyword}{public}:}
+\DoxyCodeLine{37     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} init(\textcolor{keywordtype}{int} workers);}
+\DoxyCodeLine{38     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} stop();}
+\DoxyCodeLine{39     \textcolor{keyword}{static} \textcolor{keywordtype}{void} addRequest(\mbox{\hyperlink{class_abstract_request}{AbstractRequest}}* request);}
+\DoxyCodeLine{40     \textcolor{keyword}{static} \textcolor{keywordtype}{bool} addWorker(\mbox{\hyperlink{class_worker}{Worker}}* worker);}
+\DoxyCodeLine{41 \};}
+\DoxyCodeLine{42 }
+\DoxyCodeLine{43 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

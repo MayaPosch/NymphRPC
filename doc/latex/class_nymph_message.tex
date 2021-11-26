@@ -6,17 +6,29 @@
 \mbox{\Hypertarget{class_nymph_message_aa377472d412a4a26d2226c1b8903c22b}\label{class_nymph_message_aa377472d412a4a26d2226c1b8903c22b}} 
 {\bfseries Nymph\+Message} (uint32\+\_\+t method\+Id)
 \item 
-\mbox{\Hypertarget{class_nymph_message_a7d54d7b15b94dbebf8903a31902d97cf}\label{class_nymph_message_a7d54d7b15b94dbebf8903a31902d97cf}} 
-{\bfseries Nymph\+Message} (std\+::string $\ast$binmsg)
+\mbox{\Hypertarget{class_nymph_message_a3c925bb15d5065edec0cab60966e0630}\label{class_nymph_message_a3c925bb15d5065edec0cab60966e0630}} 
+{\bfseries Nymph\+Message} (uint8\+\_\+t $\ast$binmsg, uint64\+\_\+t bytes)
 \item 
 \mbox{\Hypertarget{class_nymph_message_aa0de92dfc188c916f14725b1cb818776}\label{class_nymph_message_aa0de92dfc188c916f14725b1cb818776}} 
 bool {\bfseries add\+Value} (\mbox{\hyperlink{class_nymph_type}{Nymph\+Type}} $\ast$value)
 \item 
-\mbox{\Hypertarget{class_nymph_message_a8488bc094d37820e2a52da3a89e9ac39}\label{class_nymph_message_a8488bc094d37820e2a52da3a89e9ac39}} 
-bool {\bfseries finish} (std\+::string \&output)
+\mbox{\Hypertarget{class_nymph_message_a3880ea3e4b2f43275a782d484c036957}\label{class_nymph_message_a3880ea3e4b2f43275a782d484c036957}} 
+bool {\bfseries add\+Values} (std\+::vector$<$ \mbox{\hyperlink{class_nymph_type}{Nymph\+Type}} $\ast$ $>$ \&values)
+\item 
+\mbox{\Hypertarget{class_nymph_message_a351cb0184b7a78c6a8d82414b7d17f0d}\label{class_nymph_message_a351cb0184b7a78c6a8d82414b7d17f0d}} 
+void {\bfseries serialize} ()
+\item 
+\mbox{\Hypertarget{class_nymph_message_a9b4ce2645e04af047d5ac306fd5aa6b0}\label{class_nymph_message_a9b4ce2645e04af047d5ac306fd5aa6b0}} 
+uint8\+\_\+t $\ast$ {\bfseries buffer} ()
+\item 
+\mbox{\Hypertarget{class_nymph_message_aff46ce3fc646f2443f804473ebcacb1d}\label{class_nymph_message_aff46ce3fc646f2443f804473ebcacb1d}} 
+uint32\+\_\+t {\bfseries buffer\+\_\+size} ()
 \item 
 \mbox{\Hypertarget{class_nymph_message_ad160214c399037ff8a52e60101a302f9}\label{class_nymph_message_ad160214c399037ff8a52e60101a302f9}} 
 int {\bfseries get\+State} ()
+\item 
+\mbox{\Hypertarget{class_nymph_message_a355b1ba6c9d1d038fb468ee746bc4ab4}\label{class_nymph_message_a355b1ba6c9d1d038fb468ee746bc4ab4}} 
+bool {\bfseries is\+Corrupt} ()
 \item 
 \mbox{\Hypertarget{class_nymph_message_a5c4a844531d196f62bf90100458a4f2f}\label{class_nymph_message_a5c4a844531d196f62bf90100458a4f2f}} 
 void {\bfseries set\+In\+Reply\+To} (uint64\+\_\+t msg\+Id)
@@ -33,11 +45,11 @@ uint64\+\_\+t {\bfseries get\+Message\+Id} ()
 \mbox{\Hypertarget{class_nymph_message_a0e7d5bdf343e091cca3a078603bddba9}\label{class_nymph_message_a0e7d5bdf343e091cca3a078603bddba9}} 
 void {\bfseries set\+Result\+Value} (\mbox{\hyperlink{class_nymph_type}{Nymph\+Type}} $\ast$value)
 \item 
-\mbox{\Hypertarget{class_nymph_message_a0d8cb20ebe69fab497f349f84eecb9ed}\label{class_nymph_message_a0d8cb20ebe69fab497f349f84eecb9ed}} 
-\mbox{\hyperlink{class_nymph_type}{Nymph\+Type}} $\ast$ {\bfseries get\+Response} ()
+\mbox{\Hypertarget{class_nymph_message_a50bd4c4f056df4f63c6554759b68c703}\label{class_nymph_message_a50bd4c4f056df4f63c6554759b68c703}} 
+\mbox{\hyperlink{class_nymph_type}{Nymph\+Type}} $\ast$ {\bfseries get\+Response} (bool take=false)
 \item 
-\mbox{\Hypertarget{class_nymph_message_a6a847d3a7bfc80b590c89b897acf75af}\label{class_nymph_message_a6a847d3a7bfc80b590c89b897acf75af}} 
-std\+::vector$<$ \mbox{\hyperlink{class_nymph_type}{Nymph\+Type}} $\ast$ $>$ {\bfseries parameters} ()
+\mbox{\Hypertarget{class_nymph_message_a9b6198592806cd9d89f9f073663c8c45}\label{class_nymph_message_a9b6198592806cd9d89f9f073663c8c45}} 
+std\+::vector$<$ \mbox{\hyperlink{class_nymph_type}{Nymph\+Type}} $\ast$ $>$ \& {\bfseries parameters} ()
 \item 
 \mbox{\Hypertarget{class_nymph_message_a7e9ad713c67ff9a9f10dfa6e8322da9a}\label{class_nymph_message_a7e9ad713c67ff9a9f10dfa6e8322da9a}} 
 uint32\+\_\+t {\bfseries get\+Method\+Id} ()
@@ -62,6 +74,15 @@ bool {\bfseries set\+Exception} (int exception\+Id, std\+::string value)
 \item 
 \mbox{\Hypertarget{class_nymph_message_a67c1ce6c86660e2c91eba6e014044257}\label{class_nymph_message_a67c1ce6c86660e2c91eba6e014044257}} 
 bool {\bfseries set\+Callback} (std\+::string name)
+\item 
+\mbox{\Hypertarget{class_nymph_message_a96eee320d578e6a92fb5ff42494f7fc4}\label{class_nymph_message_a96eee320d578e6a92fb5ff42494f7fc4}} 
+void {\bfseries add\+Reference\+Count} ()
+\item 
+\mbox{\Hypertarget{class_nymph_message_a596ee18ab7ade271136d57d0d7dc2a34}\label{class_nymph_message_a596ee18ab7ade271136d57d0d7dc2a34}} 
+void {\bfseries decrement\+Reference\+Count} ()
+\item 
+\mbox{\Hypertarget{class_nymph_message_a72f99448c691e2efa26eff4c53300fda}\label{class_nymph_message_a72f99448c691e2efa26eff4c53300fda}} 
+void {\bfseries discard} ()
 \end{DoxyCompactItemize}
 
 

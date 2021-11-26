@@ -1,0 +1,47 @@
+\hypertarget{callback__request_8h_source}{}\doxysection{callback\+\_\+request.\+h}
+\label{callback__request_8h_source}\index{src/callback\_request.h@{src/callback\_request.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{    callback\_request.h -\/ header file for the CallbackRequest class.}}
+\DoxyCodeLine{3 \textcolor{comment}{    }}
+\DoxyCodeLine{4 \textcolor{comment}{    Revision 0}}
+\DoxyCodeLine{5 \textcolor{comment}{    }}
+\DoxyCodeLine{6 \textcolor{comment}{    Notes:}}
+\DoxyCodeLine{7 \textcolor{comment}{            -\/ }}
+\DoxyCodeLine{8 \textcolor{comment}{            }}
+\DoxyCodeLine{9 \textcolor{comment}{    2016/11/19, Maya Posch}}
+\DoxyCodeLine{10 \textcolor{comment}{    (c) Nyanko.ws}}
+\DoxyCodeLine{11 \textcolor{comment}{*/}}
+\DoxyCodeLine{12 }
+\DoxyCodeLine{13 }
+\DoxyCodeLine{14 \textcolor{preprocessor}{\#ifndef REQUEST\_H}}
+\DoxyCodeLine{15 \textcolor{preprocessor}{\#define REQUEST\_H}}
+\DoxyCodeLine{16 }
+\DoxyCodeLine{17 }
+\DoxyCodeLine{18 \textcolor{preprocessor}{\#include "{}abstract\_request.h"{}}}
+\DoxyCodeLine{19 \textcolor{preprocessor}{\#include "{}nymph\_message.h"{}}}
+\DoxyCodeLine{20 }
+\DoxyCodeLine{21 }
+\DoxyCodeLine{22 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{23 \textcolor{preprocessor}{\#include <atomic>}}
+\DoxyCodeLine{24 \textcolor{preprocessor}{\#include <condition\_variable>}}
+\DoxyCodeLine{25 \textcolor{preprocessor}{\#include <mutex>}}
+\DoxyCodeLine{26 }
+\DoxyCodeLine{27 }
+\DoxyCodeLine{28 \textcolor{keyword}{class }\mbox{\hyperlink{class_callback_request}{CallbackRequest}} : \textcolor{keyword}{public} \mbox{\hyperlink{class_abstract_request}{AbstractRequest}} \{}
+\DoxyCodeLine{29     uint32\_t session;}
+\DoxyCodeLine{30     \mbox{\hyperlink{class_nymph_message}{NymphMessage}}* msg;}
+\DoxyCodeLine{31     \textcolor{keywordtype}{void}* data;}
+\DoxyCodeLine{32     std::string loggerName;}
+\DoxyCodeLine{33     }
+\DoxyCodeLine{34 \textcolor{keyword}{public}:}
+\DoxyCodeLine{35     \mbox{\hyperlink{class_callback_request}{CallbackRequest}}() \{ loggerName = \textcolor{stringliteral}{"{}CallbackRequest"{}}; \}}
+\DoxyCodeLine{36     \textcolor{keywordtype}{void} setMessage(uint32\_t session, \mbox{\hyperlink{class_nymph_message}{NymphMessage}}* msg, \textcolor{keywordtype}{void}* data);}
+\DoxyCodeLine{37     \textcolor{keywordtype}{void} process();}
+\DoxyCodeLine{38     \textcolor{keywordtype}{void} finish();}
+\DoxyCodeLine{39 \};}
+\DoxyCodeLine{40 }
+\DoxyCodeLine{41 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

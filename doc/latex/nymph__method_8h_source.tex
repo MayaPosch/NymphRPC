@@ -1,0 +1,71 @@
+\hypertarget{nymph__method_8h_source}{}\doxysection{nymph\+\_\+method.\+h}
+\label{nymph__method_8h_source}\index{src/nymph\_method.h@{src/nymph\_method.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{    nymph\_method.h  -\/ header file for the NympRPC hMethod class.}}
+\DoxyCodeLine{3 \textcolor{comment}{    }}
+\DoxyCodeLine{4 \textcolor{comment}{    Revision 0}}
+\DoxyCodeLine{5 \textcolor{comment}{    }}
+\DoxyCodeLine{6 \textcolor{comment}{    Notes:}}
+\DoxyCodeLine{7 \textcolor{comment}{            -\/ }}
+\DoxyCodeLine{8 \textcolor{comment}{            }}
+\DoxyCodeLine{9 \textcolor{comment}{    History:}}
+\DoxyCodeLine{10 \textcolor{comment}{    2017/06/24, Maya Posch : Initial version.}}
+\DoxyCodeLine{11 \textcolor{comment}{    }}
+\DoxyCodeLine{12 \textcolor{comment}{    (c) Nyanko.ws}}
+\DoxyCodeLine{13 \textcolor{comment}{*/}}
+\DoxyCodeLine{14 }
+\DoxyCodeLine{15 }
+\DoxyCodeLine{16 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{17 \textcolor{preprocessor}{\#ifndef NYMPH\_METHOD\_H}}
+\DoxyCodeLine{18 \textcolor{preprocessor}{\#define NYMPH\_METHOD\_H}}
+\DoxyCodeLine{19 }
+\DoxyCodeLine{20 \textcolor{preprocessor}{\#include "{}nymph\_types.h"{}}}
+\DoxyCodeLine{21 \textcolor{preprocessor}{\#include "{}nymph\_listener.h"{}}}
+\DoxyCodeLine{22 \textcolor{preprocessor}{\#include "{}nymph\_message.h"{}}}
+\DoxyCodeLine{23 \textcolor{preprocessor}{\#include "{}nymph\_session.h"{}}}
+\DoxyCodeLine{24 }
+\DoxyCodeLine{25 \textcolor{preprocessor}{\#include <Poco/Poco.h>}}
+\DoxyCodeLine{26 \textcolor{preprocessor}{\#include <Poco/Net/StreamSocket.h>}}
+\DoxyCodeLine{27 }
+\DoxyCodeLine{28 \textcolor{preprocessor}{\#include <vector>}}
+\DoxyCodeLine{29 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{30 \textcolor{preprocessor}{\#include <functional>}}
+\DoxyCodeLine{31 }
+\DoxyCodeLine{32 }
+\DoxyCodeLine{33 \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_remote_client}{NymphRemoteClient}};}
+\DoxyCodeLine{34 }
+\DoxyCodeLine{35 }
+\DoxyCodeLine{36 \textcolor{keyword}{typedef} std::function<\mbox{\hyperlink{class_nymph_message}{NymphMessage}}*(int, \mbox{\hyperlink{class_nymph_message}{NymphMessage}}*, \textcolor{keywordtype}{void}*)> NymphMethodCallback;}
+\DoxyCodeLine{37 }
+\DoxyCodeLine{38 }
+\DoxyCodeLine{39 \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_method}{NymphMethod}} \{}
+\DoxyCodeLine{40     \textcolor{keyword}{friend} \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_remote_client}{NymphRemoteClient}};}
+\DoxyCodeLine{41     \textcolor{keyword}{friend} \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_remote_server}{NymphRemoteServer}};}
+\DoxyCodeLine{42     }
+\DoxyCodeLine{43     std::string name;}
+\DoxyCodeLine{44     uint32\_t id;}
+\DoxyCodeLine{45     std::vector<NymphTypes> parameters;}
+\DoxyCodeLine{46     NymphMethodCallback callback;}
+\DoxyCodeLine{47     NymphTypes returnType;}
+\DoxyCodeLine{48     std::string loggerName;}
+\DoxyCodeLine{49     std::string serialized;}
+\DoxyCodeLine{50     \textcolor{keywordtype}{bool} isCallback;}
+\DoxyCodeLine{51     }
+\DoxyCodeLine{52 \textcolor{keyword}{public}:}
+\DoxyCodeLine{53     \mbox{\hyperlink{class_nymph_method}{NymphMethod}}(std::string name, std::vector<NymphTypes> parameters, NymphTypes retType);}
+\DoxyCodeLine{54     \mbox{\hyperlink{class_nymph_method}{NymphMethod}}(std::string name, std::vector<NymphTypes> parameters, NymphTypes retType, NymphMethodCallback cb);}
+\DoxyCodeLine{55     \textcolor{keywordtype}{void} setCallback(NymphMethodCallback callback);}
+\DoxyCodeLine{56     \mbox{\hyperlink{class_nymph_message}{NymphMessage}}* callCallback(\textcolor{keywordtype}{int} handle, \mbox{\hyperlink{class_nymph_message}{NymphMessage}}* msg);}
+\DoxyCodeLine{57     \textcolor{keywordtype}{bool} call(Poco::Net::StreamSocket* socket, \mbox{\hyperlink{struct_nymph_request}{NymphRequest}}* \&request, std::vector<NymphType*> \&values, std::string \&result);}
+\DoxyCodeLine{58     \textcolor{keywordtype}{bool} call(\mbox{\hyperlink{class_nymph_session}{NymphSession}}* session, std::vector<NymphType*> \&values, std::string \&result);}
+\DoxyCodeLine{59     \textcolor{keywordtype}{void} setId(uint32\_t \textcolor{keywordtype}{id});}
+\DoxyCodeLine{60     uint32\_t getId() \{ \textcolor{keywordflow}{return} id; \}}
+\DoxyCodeLine{61     std::string getSerialized() \{ \textcolor{keywordflow}{return} serialized; \}}
+\DoxyCodeLine{62     \textcolor{keywordtype}{bool} enableCallback(\textcolor{keywordtype}{bool} state = \textcolor{keyword}{true}) \{ isCallback = state; \textcolor{keywordflow}{return} \textcolor{keyword}{true}; \}}
+\DoxyCodeLine{63 \};}
+\DoxyCodeLine{64 }
+\DoxyCodeLine{65 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

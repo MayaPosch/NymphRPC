@@ -1,0 +1,44 @@
+\hypertarget{nymph__session_8h_source}{}\doxysection{nymph\+\_\+session.\+h}
+\label{nymph__session_8h_source}\index{src/nymph\_session.h@{src/nymph\_session.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{comment}{/*}}
+\DoxyCodeLine{2 \textcolor{comment}{    nymph\_session.h -\/ header file for the NymphRPC Session class.}}
+\DoxyCodeLine{3 \textcolor{comment}{    }}
+\DoxyCodeLine{4 \textcolor{comment}{    Revision 0}}
+\DoxyCodeLine{5 \textcolor{comment}{    }}
+\DoxyCodeLine{6 \textcolor{comment}{    Notes:}}
+\DoxyCodeLine{7 \textcolor{comment}{            -\/ This class declares the session class to be used by Nymph servers.}}
+\DoxyCodeLine{8 \textcolor{comment}{            }}
+\DoxyCodeLine{9 \textcolor{comment}{    History:}}
+\DoxyCodeLine{10 \textcolor{comment}{    2017/06/24, Maya Posch : Initial version.}}
+\DoxyCodeLine{11 \textcolor{comment}{    }}
+\DoxyCodeLine{12 \textcolor{comment}{    (c) Nyanko.ws}}
+\DoxyCodeLine{13 \textcolor{comment}{*/}}
+\DoxyCodeLine{14 }
+\DoxyCodeLine{15 }
+\DoxyCodeLine{16 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{17 \textcolor{preprocessor}{\#ifndef NYMPH\_SESSION\_H}}
+\DoxyCodeLine{18 \textcolor{preprocessor}{\#define NYMPH\_SESSION\_H}}
+\DoxyCodeLine{19 }
+\DoxyCodeLine{20 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{21 }
+\DoxyCodeLine{22 \textcolor{preprocessor}{\#include <Poco/Net/TCPServerConnection.h>}}
+\DoxyCodeLine{23 \textcolor{preprocessor}{\#include <Poco/Mutex.h>}}
+\DoxyCodeLine{24 }
+\DoxyCodeLine{25 }
+\DoxyCodeLine{26 \textcolor{keyword}{class }\mbox{\hyperlink{class_nymph_session}{NymphSession}} : \textcolor{keyword}{public} Poco::Net::TCPServerConnection \{}
+\DoxyCodeLine{27     std::string loggerName;}
+\DoxyCodeLine{28     \textcolor{keywordtype}{int} handle;}
+\DoxyCodeLine{29     \textcolor{keyword}{static} \textcolor{keywordtype}{int} lastSessionHandle;}
+\DoxyCodeLine{30     \textcolor{keyword}{static} Poco::Mutex handleMutex;}
+\DoxyCodeLine{31     }
+\DoxyCodeLine{32 \textcolor{keyword}{public}:}
+\DoxyCodeLine{33     \mbox{\hyperlink{class_nymph_session}{NymphSession}}(\textcolor{keyword}{const} Poco::Net::StreamSocket\& socket);}
+\DoxyCodeLine{34     \textcolor{keywordtype}{void} run();}
+\DoxyCodeLine{35     \textcolor{keywordtype}{bool} send(uint8\_t* msg, uint32\_t length, std::string \&result);}
+\DoxyCodeLine{36 \};}
+\DoxyCodeLine{37 }
+\DoxyCodeLine{38 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}
