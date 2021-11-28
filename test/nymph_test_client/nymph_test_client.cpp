@@ -56,7 +56,6 @@ int main() {
 	}
 	
 	// Send message and wait for response.
-	//values.push_back(new NymphString("Hello World!"));
 	std::vector<NymphType*> values;
 	std::string hello = "Hello World!";
 	values.push_back(new NymphType(&hello));
