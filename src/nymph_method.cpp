@@ -149,10 +149,10 @@ bool NymphMethod::call(Net::StreamSocket* socket, NymphRequest* &request, vector
 			return false;
 		}
 		
-		//msg.addValue(values[i]);
+		msg.addValue(values[i]);
 	}
 	
-	msg.addValues(values);
+	//msg.addValues(values);
 	
 	// Obtain binary message.
 	msg.serialize();

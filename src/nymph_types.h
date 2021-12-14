@@ -48,8 +48,7 @@ enum NymphInternalTypes {
     NYMPH_TYPE_EMPTY_STRING  	= 0x0f,
     NYMPH_TYPE_STRING        	= 0x10,
     NYMPH_TYPE_STRUCT        	= 0x11,
-    NYMPH_TYPE_VOID           	= 0x12,
-	NYMPH_TYPE_BLOB				= 0x13
+    NYMPH_TYPE_VOID           	= 0x12
 };
 
 
@@ -69,12 +68,8 @@ enum NymphTypes {
 	NYMPH_SINT64,
 	NYMPH_FLOAT,
 	NYMPH_DOUBLE,
-	NYMPH_INT,
-	NYMPH_LONG,
-	NYMPH_SHORT,
 	NYMPH_STRING,
 	NYMPH_STRUCT,
-	NYMPH_BLOB,
 	NYMPH_ANY
 };
 
