@@ -104,6 +104,7 @@ class NymphType {
 	bool own = false;
 	std::string* string = 0;
 	NymphMessage* linkedMsg = 0;
+	static std::string loggerName;
 	
 public:
 	NymphType() { }
@@ -158,6 +159,8 @@ public:
 	void setValue(std::string* v, bool own = false);
 	void setValue(std::vector<NymphType*>* v, bool own = false);
 	void setValue(std::map<std::string, NymphPair>* v, bool own = false);
+	
+	bool parseValue(uint8_t typecode, uint8_t* binmsg, int &index);
 	
 	uint64_t bytes();
 	uint32_t string_length();

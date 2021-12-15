@@ -50,7 +50,7 @@ Int64 NymphUtilities::getMessageId() {
 // Parses the value section of a message's key/value pair. Determines the value
 // type and uses the appropriate NymphType to parse the value.
 //bool NymphUtilities::parseValue(UInt8 typecode, string* binmsg, int &index, NymphType* &value) {
-bool NymphUtilities::parseValue(UInt8 typecode, uint8_t* binmsg, int &index, NymphType &value) {
+/* bool NymphUtilities::parseValue(UInt8 typecode, uint8_t* binmsg, int &index, NymphType &value) {
 	//NYMPH_LOG_DEBUG("parseValue called with typecode: " + NumberFormatter::format(typecode) + ".");
 	
 	switch (typecode) {
@@ -228,4 +228,4 @@ bool NymphUtilities::parseValue(UInt8 typecode, uint8_t* binmsg, int &index, Nym
     }
 	
 	return true;
-}
+} */

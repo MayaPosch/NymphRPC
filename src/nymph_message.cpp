@@ -80,7 +80,8 @@ NymphMessage::NymphMessage(uint8_t* binmsg, uint64_t bytes) {
 	int index = 0;
 	version = *binmsg;
 	index++;
-	methodId = *((uint32_t*) (binmsg + index));
+	//methodId = *((uint32_t*) (binmsg + index));
+	memcpy(&methodId, (binmsg + index), 4);
 	index += 4;
 	
 	NYMPH_LOG_DEBUG("Method ID: " + NumberFormatter::format(methodId) + ".");
@@ -96,24 +97,28 @@ NymphMessage::NymphMessage(uint8_t* binmsg, uint64_t bytes) {
 	}
 	
 	// Read the message flags.
-	flags = *((uint32_t*) (binmsg + index));
+	//flags = *((uint32_t*) (binmsg + index));
+	memcpy(&flags, (binmsg + index), 4);
 	index += 4;
 	
 	NYMPH_LOG_DEBUG("Message flags: 0x" + NumberFormatter::formatHex(flags));
 	
 	// Read the message ID & optionally the request message ID (if response).
-	messageId = *((uint64_t*) (binmsg + index));
+	//messageId = *((uint64_t*) (binmsg + index));
+	memcpy(&messageId, (binmsg + index), 8);
 	index += 8;
 	
 	uint8_t typecode;
 	if (flags & NYMPH_MESSAGE_REPLY) {
-		responseId = *((uint64_t*) (binmsg + index));
+		//responseId = *((uint64_t*) (binmsg + index));
+		memcpy(&responseId, (binmsg + index), 8);
 		index += 8;
 		
 		// Read in the response
 		typecode = *(binmsg + index++);
 		response = new NymphType;
-		NymphUtilities::parseValue(typecode, binmsg, index, *response);
+		//NymphUtilities::parseValue(typecode, binmsg, index, *response);
+		response->parseValue(typecode, binmsg, index);
 		
 		if (index >= bytes) {
 			// Out of bounds, abort.
@@ -132,18 +137,21 @@ NymphMessage::NymphMessage(uint8_t* binmsg, uint64_t bytes) {
 		response->linkWithMessage(this);
 	}
 	else if (flags & NYMPH_MESSAGE_EXCEPTION) {
-		responseId = *((uint64_t*) (binmsg + index));
+		//responseId = *((uint64_t*) (binmsg + index));
+		memcpy(&responseId, (binmsg + index), 8);
 		
 		// Read in the exception (integer, string).
 		typecode = *(binmsg + index++);
 		NymphType value;
-		NymphUtilities::parseValue(typecode, binmsg, index, value);
+		//NymphUtilities::parseValue(typecode, binmsg, index, value);
+		value.parseValue(typecode, binmsg, index);
 		if (value.valuetype() == NYMPH_UINT32) {
 			exception.id = value.getUint32();
 		}
 		
 		typecode = *(binmsg + index++);
-		NymphUtilities::parseValue(typecode, binmsg, index, value);
+		//NymphUtilities::parseValue(typecode, binmsg, index, value);
+		value.parseValue(typecode, binmsg, index);
 		if (value.valuetype() == NYMPH_STRING) {
 			exception.value = std::string(value.getChar(), value.string_length());
 		}
@@ -152,7 +160,8 @@ NymphMessage::NymphMessage(uint8_t* binmsg, uint64_t bytes) {
 		// Read in the name of the callback method.
 		typecode = *(binmsg + index++);
 		NymphType value;
-		NymphUtilities::parseValue(typecode, binmsg, index, value);
+		//NymphUtilities::parseValue(typecode, binmsg, index, value);
+		value.parseValue(typecode, binmsg, index);
 		if (value.valuetype() == NYMPH_STRING) {
 			callbackName = std::string(value.getChar(), value.string_length());
 		}
@@ -161,7 +170,8 @@ NymphMessage::NymphMessage(uint8_t* binmsg, uint64_t bytes) {
 		while (index < bytes && *(binmsg + index) != NYMPH_TYPE_NONE) {		
 			typecode = *(binmsg + index++);
 			NymphType* val = new NymphType;
-			NymphUtilities::parseValue(typecode, binmsg, index, *val);
+			//NymphUtilities::parseValue(typecode, binmsg, index, *val);
+			val->parseValue(typecode, binmsg, index);
 			val->linkWithMessage(this);
 			values.push_back(val);
 			
@@ -186,7 +196,8 @@ NymphMessage::NymphMessage(uint8_t* binmsg, uint64_t bytes) {
 		while (index < bytes && *(binmsg + index) != NYMPH_TYPE_NONE) {
 			typecode = *(binmsg + index++);
 			NymphType* val = new NymphType;
-			NymphUtilities::parseValue(typecode, binmsg, index, *val);
+			//NymphUtilities::parseValue(typecode, binmsg, index, *val);
+			val->parseValue(typecode, binmsg, index);
 			val->linkWithMessage(this);
 			values.push_back(val);
 			
@@ -325,31 +336,39 @@ void NymphMessage::serialize() {
 	// Write header into buffer.
 	// FIXME: On a big-endian system all integers will be in the wrong byte order.
 	// TODO: add endianness-check. Currently assume LE.
-	*((uint32_t*) buf) = signature;
+	//*((uint32_t*) buf) = signature;
+	memcpy(buf, &signature, 4);
 	buf += 4;
-	*((uint32_t*) buf) = message_length;
+	//*((uint32_t*) buf) = message_length;
+	memcpy(buf, &message_length, 4);
 	buf += 4;
 	*buf = version;
 	buf++;
-	*((uint32_t*) buf) = methodId;
+	//*((uint32_t*) buf) = methodId;
+	memcpy(buf, &methodId, 4);
 	buf += 4;
-	*((uint32_t*) buf) = flags;
+	//*((uint32_t*) buf) = flags;
+	memcpy(buf, &flags, 4);
 	buf += 4;
-	*((uint64_t*) buf) = messageId;
+	//*((uint64_t*) buf) = messageId;
+	memcpy(buf, &messageId, 8);
 	buf += 8;
 	
 	
 	// Message types.
 	if (flags & NYMPH_MESSAGE_REPLY) {
-		*((uint64_t*) buf) = responseId;
+		//*((uint64_t*) buf) = responseId;
+		memcpy(buf, &responseId, 8);
 		buf += 8;
 		response->serialize(buf);
 	}
 	else if (flags & NYMPH_MESSAGE_EXCEPTION) {
-		*((uint64_t*) buf) = responseId;
+		//*((uint64_t*) buf) = responseId;
+		memcpy(buf, &responseId, 8);
 		buf += 8;
 		
-		*((uint32_t*) buf) = exception.id;
+		//*((uint32_t*) buf) = exception.id;
+		memcpy(buf, &exception.id, 4);
 		buf += 4;
 		
 		NymphType exstr(&exception.value);
