@@ -10,6 +10,10 @@ INCLUDE      = -I ../src
 LIBS        := -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON 
 CFLAGS      := $(INCLUDE) -std=c++11 -O2
 
+ifndef OS
+	LIBS += -pthread
+endif
+
 LIB_SOURCES := $(wildcard ../src/*.cpp)
 LIB_OBJECTS := $(subst    ../src/, obj/, $(LIB_SOURCES:.cpp=.o))
 LIB_OUTPUT   = libnymphrpc
