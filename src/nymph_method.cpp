@@ -101,7 +101,7 @@ void NymphMethod::setCallback(NymphMethodCallback callback) {
 NymphMessage* NymphMethod::callCallback(int handle, NymphMessage* msg) {
 	NYMPH_LOG_DEBUG("Calling callback for method: " + name);
 	
-	// TODO: validate the return type.
+	// Validate the return type.
 	NymphMessage* response = callback(handle, msg, 0);
 	if (response->getResponse(true)->valuetype() != returnType) {
 		NYMPH_LOG_ERROR("Callback returned invalid return type. Expected " + 
@@ -151,8 +151,6 @@ bool NymphMethod::call(Net::StreamSocket* socket, NymphRequest* &request, vector
 		
 		msg.addValue(values[i]);
 	}
-	
-	//msg.addValues(values);
 	
 	// Obtain binary message.
 	msg.serialize();

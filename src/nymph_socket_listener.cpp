@@ -69,7 +69,6 @@ void NymphSocketListener::run() {
 				continue;
 			}
 			
-			//UInt32 signature = *((UInt32*) &headerBuff[0]);
 			uint32_t signature;
 			memcpy(&signature, &headerBuff, 4);
 			if (signature != 0x4452474e) { // 'DRGN' ASCII in LE format.
@@ -80,7 +79,6 @@ void NymphSocketListener::run() {
 			}
 			
 			uint32_t length = 0;
-			//length = *((UInt32*) &headerBuff[4]);
 			memcpy(&length, (headerBuff + 4), 4);
 			
 			NYMPH_LOG_DEBUG("Message length: " + NumberFormatter::format(length) + " bytes.");

@@ -295,21 +295,18 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 			break;
         case NYMPH_TYPE_BOOLEAN_FALSE:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_BOOLEAN_FALSE");
-			//value.setValue(false);
 			type = NYMPH_BOOL;
 			length = 1; 
 			data.boolean = false;
 			break;
         case NYMPH_TYPE_BOOLEAN_TRUE:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_BOOLEAN_TRUE");
-			//value.setValue(true);
 			type = NYMPH_BOOL;
 			length = 1; 
 			data.boolean = true;
 			break;
 		case NYMPH_TYPE_FLOAT: {
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_FLOAT");
-			//value.setValue(*((float*) (binmsg + index)));
 			type = NYMPH_FLOAT;	
 			length = 5; 
 			memcpy(&(data.fp32), (binmsg + index), 4);
@@ -318,7 +315,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 		}
 		case NYMPH_TYPE_DOUBLE:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_DOUBLE");
-			//value.setValue(*((double*) (binmsg + index)));
 			type = NYMPH_DOUBLE;	
 			length = 9;	
 			memcpy(&(data.fp64), (binmsg + index), 8);
@@ -326,7 +322,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 			break;
         case NYMPH_TYPE_UINT8:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_UINT8");
-			//value.setValue(*((binmsg + index)));
 			type = NYMPH_UINT8;	
 			length = 2; 
 			memcpy(&(data.uint8), (binmsg + index), 1);
@@ -334,7 +329,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
             break;
 		case NYMPH_TYPE_SINT8:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_SINT8");
-			//value.setValue(*((int8_t*) (binmsg + index)));
 			type = NYMPH_SINT8;	
 			length = 2; 
 			memcpy(&(data.int8), (binmsg + index), 1);
@@ -342,7 +336,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 			break;
 		case NYMPH_TYPE_UINT16:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_UINT16");
-			//value.setValue(*((uint16_t*) (binmsg + index)));
 			type = NYMPH_UINT16;	
 			length = 3;	
 			memcpy(&(data.uint16), (binmsg + index), 2);
@@ -350,7 +343,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 			break;
 		case NYMPH_TYPE_SINT16:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_SINT16");
-			//value.setValue(*((int16_t*) (binmsg + index)));
 			type = NYMPH_SINT16;	
 			length = 3;	
 			memcpy(&(data.int16), (binmsg + index), 2);
@@ -358,7 +350,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 			break;
 		case NYMPH_TYPE_UINT32:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_UINT32");
-			//value.setValue(*((uint32_t*) (binmsg + index)));
 			type = NYMPH_UINT32;	
 			length = 5; 
 			memcpy(&(data.uint32), (binmsg + index), 4);
@@ -366,7 +357,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 			break;
 		case NYMPH_TYPE_SINT32:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_SINT32");
-			//value.setValue(*((int32_t*) (binmsg + index)));
 			type = NYMPH_SINT32;	
 			length = 5; 
 			memcpy(&(data.int32), (binmsg + index), 4);
@@ -374,7 +364,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 			break;
 		case NYMPH_TYPE_UINT64:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_UINT64");
-			//value.setValue(*((uint64_t*) (binmsg + index)));
 			type = NYMPH_UINT64;	
 			length = 9; 
 			memcpy(&(data.uint64), (binmsg + index), 8);
@@ -382,7 +371,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 			break;
 		case NYMPH_TYPE_SINT64:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_SINT64");
-			//value.setValue(*((int64_t*) (binmsg + index)));
 			type = NYMPH_SINT64;	
 			length = 9; 
 			memcpy(&(data.int64), (binmsg + index), 8);
@@ -390,7 +378,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 			break;
         case NYMPH_TYPE_EMPTY_STRING:
 			NYMPH_LOG_DEBUG("NYMPH_TYPE_EMPTY_STRING");
-			//value.setValue((char*) 0, 0);
 			type = NYMPH_STRING;
 			length = binaryStringLength(0);
 			strLength = 0;
@@ -412,7 +399,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 				 }
 					break;
 				case NYMPH_TYPE_UINT16: {
-					//l = *((uint16_t*) (binmsg + index));
 					uint16_t t;
 					memcpy(&t, (binmsg + index), 2);
 					l = t;
@@ -421,7 +407,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 				}
 					break;
 				case NYMPH_TYPE_UINT32: {
-					//l = *((uint32_t*) (binmsg + index));
 					uint32_t t;
 					memcpy(&t, (binmsg + index), 4);
 					l = t;
@@ -430,7 +415,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 				}
 					break;
 				case NYMPH_TYPE_UINT64: {
-					//l = *((uint64_t*) (binmsg + index));
 					memcpy(&l, (binmsg + index), 8);
 					NYMPH_LOG_DEBUG("String uint64 length: " + NumberFormatter::format(l));
 					index += 8;
@@ -441,7 +425,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 					return false;
 			}
 			
-			//value.setValue((char*) (binmsg + index), l);
 			type = NYMPH_STRING;
 			length = binaryStringLength(l);
 			strLength = l;
@@ -471,7 +454,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 				NYMPH_LOG_TRACE("Parsing array index " + NumberFormatter::format(i) + " of " + NumberFormatter::format(numElements) + " elements - Index: " + NumberFormatter::format(index) + ".");
 				tc = *(binmsg + index++);
 				NymphType* elVal = new NymphType;
-				//NymphUtilities::parseValue(tc, binmsg, index, *elVal);
 				elVal->parseValue(tc, binmsg, index);
 				length += elVal->bytes();
 				vec->push_back(elVal);
@@ -482,7 +464,6 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 				NYMPH_LOG_ERROR("Array terminator was not found where expected.");
 			}
 			
-			//value.setValue(vec, true);
 			own = true;
 			type = NYMPH_ARRAY;
 			data.vector = vec;
@@ -506,10 +487,8 @@ bool NymphType::parseValue(uint8_t typecode, uint8_t* binmsg, int &index) {
 				NymphPair p;
 				p.key = new NymphType;
 				p.value = new NymphType;
-				//if (!NymphUtilities::parseValue(tc, binmsg, index, *(p.key))) { return false; }
 				if (!p.key->parseValue(tc, binmsg, index)) { return false; }
 				tc = *(binmsg + index++);
-				//if (!NymphUtilities::parseValue(tc, binmsg, index, *(p.value))) { return false; }
 				if (!p.value->parseValue(tc, binmsg, index)) { return false; }
 				
 				length += p.key->bytes();
@@ -573,7 +552,6 @@ void NymphType::serialize(uint8_t* &index) {
 		index++;
 		
 		uint64_t valueCount = (uint64_t) data.vector->size();
-		//*((uint64_t*) index) = valueCount;
 		memcpy(index, &valueCount, 8);
 		index += 8;
 		
@@ -614,7 +592,6 @@ void NymphType::serialize(uint8_t* &index) {
 		*index = typecode;
 		index++;
 	
-		//*((uint16_t*) index) = data.uint16;
 		memcpy(index, &(data.uint16), 2);
 		index += 2;
 	}
@@ -623,7 +600,6 @@ void NymphType::serialize(uint8_t* &index) {
 		*index = typecode;
 		index++;
 	
-		//*((int16_t*) index) = data.int16;
 		memcpy(index, &(data.int16), 2);
 		index += 2;
 	}
@@ -632,7 +608,6 @@ void NymphType::serialize(uint8_t* &index) {
 		*index = typecode;
 		index++;
 	
-		//*((uint32_t*) index) = data.uint32;
 		memcpy(index, &(data.uint32), 4);
 		index += 4;
 	}
@@ -641,7 +616,6 @@ void NymphType::serialize(uint8_t* &index) {
 		*index = typecode;
 		index++;
 	
-		//*((int32_t*) index) = data.int32;
 		memcpy(index, &(data.int32), 4);
 		index += 4;
 	}
@@ -650,7 +624,6 @@ void NymphType::serialize(uint8_t* &index) {
 		*index = typecode;
 		index++;
 	
-		//*((uint64_t*) index) = data.uint64;
 		memcpy(index, &(data.uint64), 8);
 		index += 8;
 	}
@@ -659,7 +632,6 @@ void NymphType::serialize(uint8_t* &index) {
 		*index = typecode;
 		index++;
 	
-		//*((int64_t*) index) = data.int64;
 		memcpy(index, &(data.int64), 8);
 		index += 8;
 	}
@@ -668,7 +640,6 @@ void NymphType::serialize(uint8_t* &index) {
 		*index = typecode;
 		index++;
 		
-		//*((float*) index) = data.fp32;
 		memcpy(index, &(data.fp32), 4);
 		index += 4;
 	}
@@ -677,7 +648,6 @@ void NymphType::serialize(uint8_t* &index) {
 		*index = typecode;
 		index++;
 		
-		//*((double*) index) = data.fp64;
 		memcpy(index, &(data.fp64), 8);
 		index += 8;
 	}
@@ -708,7 +678,6 @@ void NymphType::serialize(uint8_t* &index) {
 				index++;
 				
 				uint16_t l = strLength;
-				//*((uint16_t*) index) = l;
 				memcpy(index, &(l), 2);
 				index += 2;
 			}
@@ -718,7 +687,6 @@ void NymphType::serialize(uint8_t* &index) {
 				index++;
 				
 				uint32_t l = strLength;
-				//*((uint32_t*) index) = l;
 				memcpy(index, &(l), 4);
 				index += 4;
 			}
@@ -728,7 +696,6 @@ void NymphType::serialize(uint8_t* &index) {
 				index++;
 				
 				uint64_t l = strLength;
-				//*((uint64_t*) index) = l;
 				memcpy(index, &(l), 8);
 				index += 8;
 			}

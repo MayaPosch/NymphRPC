@@ -31,8 +31,6 @@ class NymphUtilities {
 	
 public:
 	static int64_t getMessageId();
-	static NymphType* dynamicVarToNymphType(Poco::Dynamic::Var &object);
-	//static bool parseValue(uint8_t typecode, uint8_t* binmsg, int &index, NymphType &value);
 };
 
 #endif
