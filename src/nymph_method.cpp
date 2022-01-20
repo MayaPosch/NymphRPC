@@ -103,11 +103,16 @@ NymphMessage* NymphMethod::callCallback(int handle, NymphMessage* msg) {
 	
 	// Validate the return type.
 	NymphMessage* response = callback(handle, msg, 0);
-	if (response->getResponse(true)->valuetype() != returnType) {
+	NymphType* resval = response->getResponse(true);
+	if (resval == 0 && returnType != NYMPH_NULL) {
+		NYMPH_LOG_ERROR("Callback returned NULL when a value was expected.");
+		return 0;
+	}
+	else if (resval->valuetype() != returnType) {
 		NYMPH_LOG_ERROR("Callback returned invalid return type. Expected " + 
 							Poco::NumberFormatter::format(returnType) + 
 							", but received: " +
-							Poco::NumberFormatter::format(response->getResponse()->valuetype()) + 
+							Poco::NumberFormatter::format(resval->valuetype()) + 
 							".");
 		return 0;
 	}
