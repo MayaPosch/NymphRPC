@@ -39,7 +39,7 @@ if exist "%VCPKG_ROOT%\installed\%VCPKG_TRIPLET%\include\Poco" (
     echo Setup NymphRPC: Poco is already installed at "%VCPKG_ROOT%\installed\%VCPKG_TRIPLET%\include\Poco".
 ) else (
     echo [Installing vcpkg Poco; please be patient, this may take about 10 minutes...]
-    echo vcpkg install --triplet %VCPKG_TRIPLET% poco
+    vcpkg install --triplet %VCPKG_TRIPLET% poco
 )
 
 echo Setup NymphRPC: Using POCO_ROOT=%VCPKG_ROOT%\installed\%VCPKG_TRIPLET%
