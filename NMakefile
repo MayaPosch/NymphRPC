@@ -31,9 +31,9 @@
 # - `NC_LNKCRT` defaults to `-MD`.
 # - `NC_WARNING` defaults to empty, default compiler behaviour.
 # - `NC_OPTIMIZATION` defaults to `-Od` for Debug, `-O2` for Release.
+# - `INSTALL_PREFIX` defaults to `$(NYMPHRPC_ROOT)`
 # - If defined, environment variable `POCO_ROOT` is used for Poco dependency.
-# - If defined, environment variable `NYMPHRPC_ROOT` is used for target `install`, unless
-#   `INSTALL_PREFIX` is specified on the commandline.
+# - If defined, environment variable `NYMPHRPC_ROOT` is used for LibNymphCast dependency [D:\Libraries\NymphRPC].
 #
 # Dependencies:
 # - Poco: PocoFoundation, PocoNet, https://pocoproject.org/
@@ -154,9 +154,20 @@ LIB_ARCH    = x86_$(LIB_BITS)-w64-msvc				# e.g.: x86_32-w64-msvc
 LIB_FOLDER  = lib/$(LIB_ARCH)/$(LIB_CONFIG)			# e.g.: lib\x86_32-w64-msvc\Release
 OBJ_FOLDER  = obj/static/$(LIB_ARCH)/$(LIB_CONFIG)	# e.g.: obj\static\x86_32-w64-msvc\Release
 
-LIB_INCLUDE = -I src -I $(POCO_ROOT)/include
-# LIB_LIBS  = -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON
-CXXFLAGS    = $(LIB_CPPSTD) -EHsc $(LIB_LNKCRT) $(LIB_WARNING) $(LIB_OPTIMIZATION) $(LIB_INCLUDE)
+LIB_INCLUDE = \
+	-I src \
+	-I $(POCO_ROOT)/include
+
+# libraries to link to when using NymphRPC:
+
+LIB_LIBS  = \
+    PocoFoundation$(LIB_LNKCRT_MT).lib \
+    PocoNet$(LIB_LNKCRT_MT).lib \
+    PocoUtil$(LIB_LNKCRT_MT).lib \
+	Ws2_32.lib \
+	iphlpapi.lib
+
+CXXFLAGS = $(LIB_CPPSTD) -EHsc -Zi -MP $(LIB_LNKCRT) $(LIB_WARNING) $(LIB_OPTIMIZATION) $(LIB_INCLUDE)
 
 INST_FOLDER_INC = $(INSTALL_PREFIX)\include\nymph
 INST_FOLDER_LIB = $(INSTALL_PREFIX)\lib

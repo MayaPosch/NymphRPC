@@ -15,10 +15,19 @@
 
 echo.
 
-::set NC_LNKCRT=-MT
+set INSTALL_PREFIX=D:\Programs\NymphRPC
+
+set NC_LNKCRT=-MD
+:: set NC_LNKCRT=-MT
+
+set NC_CONFIG=Release
+:: set NC_CONFIG=Debug
 
 set NC_TGT_BITS=64
 set NC_TGT_ARCH=x%NC_TGT_BITS%
+
+set VCPKG_TRIPLET=%NC_TGT_ARCH%-windows
+:: set VCPKG_TRIPLET=%NC_TGT_ARCH%-windows-static
 
 :: Check for 64-bit Native Tools Command Prompt
 
@@ -32,8 +41,7 @@ if [%VCPKG_ROOT%] == [] (
     endlocal & goto :EOF
 )
 
-set VCPKG_TRIPLET=%NC_TGT_ARCH%-windows
-::set VCPKG_TRIPLET=%NC_TGT_ARCH%-windows-static
+:: Make sure NymphRPC and LibNymphCast will be build with the same Poco version:
 
 if exist "%VCPKG_ROOT%\installed\%VCPKG_TRIPLET%\include\Poco" (
     echo Setup NymphRPC: Poco is already installed at "%VCPKG_ROOT%\installed\%VCPKG_TRIPLET%\include\Poco".
@@ -55,13 +63,17 @@ set POCO_ROOT=%VCPKG_ROOT%\installed\%VCPKG_TRIPLET%
 ::echo CMD_ARGS: '%CMD_ARGS%'
 
 nmake -nologo -f NMakefile ^
-    NC_LNKCRT=-MD ^
-    POCO_ROOT=%POCO_ROOT% ^
+       NC_LNKCRT=-MD ^
+       NC_CONFIG=%NC_CONFIG% ^
+       POCO_ROOT=%POCO_ROOT% ^
+  INSTALL_PREFIX=%INSTALL_PREFIX% ^
         clean all install %*
 
 nmake -nologo -f NMakefile ^
-    NC_LNKCRT=-MT ^
-    POCO_ROOT=%POCO_ROOT% ^
+       NC_LNKCRT=-MT ^
+       NC_CONFIG=%NC_CONFIG% ^
+       POCO_ROOT=%POCO_ROOT% ^
+  INSTALL_PREFIX=%INSTALL_PREFIX% ^
         clean all install %*
 
 echo.
