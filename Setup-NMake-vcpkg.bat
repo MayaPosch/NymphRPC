@@ -15,10 +15,10 @@
 
 echo.
 
-set INSTALL_PREFIX=D:\Programs\NymphRPC
+set INSTALL_PREFIX=D:\Libraries\NymphRPC
 
-set NC_LNKCRT=-MD
-:: set NC_LNKCRT=-MT
+set NC_STATIC=0
+:: set NC_STATIC=1
 
 set NC_CONFIG=Release
 :: set NC_CONFIG=Debug
@@ -26,8 +26,13 @@ set NC_CONFIG=Release
 set NC_TGT_BITS=64
 set NC_TGT_ARCH=x%NC_TGT_BITS%
 
-set VCPKG_TRIPLET=%NC_TGT_ARCH%-windows
-:: set VCPKG_TRIPLET=%NC_TGT_ARCH%-windows-static
+set NC_LNKCRT=-MD
+set VCPKG_TRIPLET=x64-windows
+
+if [%NC_STATIC%] == [1] (
+    set NC_LNKCRT=-MT
+    set VCPKG_TRIPLET=x64-windows-static
+)
 
 :: Check for 64-bit Native Tools Command Prompt
 
@@ -63,6 +68,7 @@ set POCO_ROOT=%VCPKG_ROOT%\installed\%VCPKG_TRIPLET%
 ::echo CMD_ARGS: '%CMD_ARGS%'
 
 nmake -nologo -f NMakefile ^
+       NC_STATIC=%NC_STATIC% ^
        NC_LNKCRT=-MD ^
        NC_CONFIG=%NC_CONFIG% ^
        POCO_ROOT=%POCO_ROOT% ^
@@ -70,6 +76,7 @@ nmake -nologo -f NMakefile ^
         clean all install %*
 
 nmake -nologo -f NMakefile ^
+       NC_STATIC=%NC_STATIC% ^
        NC_LNKCRT=-MT ^
        NC_CONFIG=%NC_CONFIG% ^
        POCO_ROOT=%POCO_ROOT% ^
