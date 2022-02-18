@@ -33,7 +33,7 @@
 # - `NC_LNKCRT` defaults to `-MD`.
 # - `NC_WARNING` defaults to empty, default compiler behaviour.
 # - `NC_OPTIMIZATION` defaults to `-Od` for Debug, `-O2` for Release.
-# - `INSTALL_PREFIX` defaults to `$(NYMPHRPC_ROOT)`
+# - `INSTALL_PREFIX` defaults to `$(NYMPHRPC_ROOT)`.
 # - If defined, environment variable `POCO_ROOT` is used for Poco dependency.
 # - If defined, environment variable `NYMPHRPC_ROOT` is used for LibNymphCast dependency [D:\Libraries\NymphRPC].
 #
