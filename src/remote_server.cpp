@@ -415,15 +415,35 @@ bool NymphRemoteServer::shutdown() {
 // the connection.
 bool NymphRemoteServer::connect(string host, int port, uint32_t &handle, void* data, 
 															string &result) {
-	Poco::Net::SocketAddress sa(host, port);
-	return connect(sa, handle, data, result);
+	try {
+		Poco::Net::SocketAddress sa(host, port);
+		return connect(sa, handle, data, result);
+	}
+	catch (Poco::Net::HostNotFoundException &ex) {
+		result = "Host not found: " + ex.displayText();
+		return false;
+	}
+	catch (...) {
+		result = "Invalid host.";
+		return false;
+	}
 }
 
 
 bool NymphRemoteServer::connect(string url, uint32_t &handle, void* data, 
 															string &result) {
-	Poco::Net::SocketAddress sa(url);
-	return connect(sa, handle, data, result);
+	try {
+		Poco::Net::SocketAddress sa(url);
+		return connect(sa, handle, data, result);
+	}	
+	catch (Poco::Net::HostNotFoundException &ex) {
+		result = ex.displayText();
+		return false;
+	}
+	catch (...) {
+		result = "Invalid host.";
+		return false;
+	}
 }
 
 
@@ -431,6 +451,7 @@ bool NymphRemoteServer::connect(Poco::Net::SocketAddress sa, uint32_t &handle,
 												void* data, string &result) {
 	Poco::Net::StreamSocket* socket;
 	try {
+		NYMPH_LOG_ERROR("Connect remote server...");
 		socket = new Poco::Net::StreamSocket(sa);
 	}
 	catch (Poco::Net::ConnectionRefusedException &ex) {
@@ -452,6 +473,10 @@ bool NymphRemoteServer::connect(Poco::Net::SocketAddress sa, uint32_t &handle,
 	}
 	catch (Poco::TimeoutException &ex) {
 		result = "Connect timed out: " + ex.displayText();
+		return false;
+	}
+	catch (...) {
+		result = "Invalid host.";
 		return false;
 	}
 	
