@@ -420,7 +420,7 @@ bool NymphRemoteServer::connect(string host, int port, uint32_t &handle, void* d
 		return connect(sa, handle, data, result);
 	}
 	catch (Poco::Net::HostNotFoundException &ex) {
-		result = "Host not found: " + ex.displayText();
+		result = ex.displayText();
 		return false;
 	}
 	catch (...) {
