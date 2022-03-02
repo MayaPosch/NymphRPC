@@ -11,6 +11,7 @@
 :: Install vcpkg tool:
 :: > git clone https://github.com/microsoft/vcpkg
 :: > .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+:: > set VCPKG_ROOT=/path/to/vcpkg-folder
 ::
 
 echo.
@@ -43,6 +44,10 @@ if not [%VSCMD_ARG_TGT_ARCH%] == [%NC_TGT_ARCH%] (
     endlocal & goto :EOF
 )
 
+:: Check for vcpkg:
+
+set vcpkg=%VCPKG_ROOT%\vcpkg.exe
+
 if [%VCPKG_ROOT%] == [] (
     echo [Setup NymphRPC: Make sure environment variable 'VCPKG_ROOT' points to your vcpkg installation; it's empty or does not exist. Bailing out.]
     endlocal & goto :EOF
@@ -54,7 +59,7 @@ if exist "%VCPKG_ROOT%\installed\%VCPKG_TRIPLET%\include\Poco" (
     echo Setup NymphRPC: Poco is already installed at "%VCPKG_ROOT%\installed\%VCPKG_TRIPLET%\include\Poco".
 ) else (
     echo [Installing vcpkg Poco; please be patient, this may take about 10 minutes...]
-    vcpkg install --triplet %VCPKG_TRIPLET% poco
+    %vcpkg% install --triplet %VCPKG_TRIPLET% poco
 )
 
 echo Setup NymphRPC: Using POCO_ROOT=%VCPKG_ROOT%\installed\%VCPKG_TRIPLET%
