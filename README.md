@@ -1,12 +1,9 @@
 # NymphRPC #
 
-**Author:** Maya Posch
-
-**Date:** 2021/11/11
 
 ## Overview ##
 
-NymphRPC is a compact, C++-based Remote Procedure Call (RPC) library. Look at the example server and client implementations in the `test` folder to get an idea of how NymphRPC is integrated into an application.
+NymphRPC is a compact, C++-based Remote Procedure Call (RPC) library. Please see the example server and client implementations in the `test` folder to get an idea of how NymphRPC is integrated into an application.
 
 The basic procedure is to define the RPC methods and client-side callbacks in the server, which the client will synchronise with when it connects to the server. There is no Domain-Specific Language (DSL) or auto-generated code.
 
