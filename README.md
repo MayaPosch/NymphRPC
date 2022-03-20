@@ -39,6 +39,17 @@ With the common C++ build tools installed (g++, make, etc.) and the optional Ope
 
 `make clean-test-server` - Clean just the test server.
 
+## Android target ##
+
+In order to compile for Android platforms, ensure that the Clang-based cross-compiler is accessible on the system PATH, and that libPoco has been compiled & made available. The use of the [POCO-build](https://github.com/MayaPosch/Poco-build) project is recommended here.
+
+With these dependencies in place, compiling for any of the specific Android platforms is done by adding any of the following behind the `make` command:
+
+- **ANDROID=1** for targeting ARMv7-based (32-bit) Android.
+- **ANDROID64=1** for targeting ARMv8-based (64-bit) Android.
+- **ANDROIDX86=1** for targeting x86-based (32-bit) Android.
+- **ANDROIDX64=1** for targeting x86_64 (64-bit) Android.
+
 ## Installing ##
 
 Use `make install` to install NymphRPC after building with `make`. This has been tested with MSYS2 (Windows) and Linux.
