@@ -92,8 +92,13 @@ endif
 
 
 INCLUDE = -I src
+ifdef NPOCO
+LIBS := -lNPocoNet -lNPocoCore
+CFLAGS := $(CFLAGS) -DNPOCO
+else
 LIBS := -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON 
-CFLAGS := $(INCLUDE) -g3 -std=c++11 -O0
+endif
+CFLAGS := $(INCLUDE) $(CFLAGS) -g3 -std=c++11 -O0
 SHARED_FLAGS := -fPIC -shared -Wl,$(SONAME),$(LIBNAME)
 
 ifdef ANDROID
