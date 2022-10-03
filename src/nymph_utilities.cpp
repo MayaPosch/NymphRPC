@@ -22,10 +22,17 @@
 
 using namespace std;
 
+#ifdef NPOCO
+//#include <npoco/JSON/Parser.h>
+//#include <npoco/JSON/Array.h>
+//#include <npoco/JSON/Object.h>
+#include <npoco/NumberFormatter.h>
+#else
 #include <Poco/JSON/Parser.h>
 #include <Poco/JSON/Array.h>
 #include <Poco/JSON/Object.h>
 #include <Poco/NumberFormatter.h>
+#endif
 
 using namespace Poco;
 

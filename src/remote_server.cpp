@@ -14,8 +14,15 @@
 */
 
 
+#ifdef HOST_FREERTOS
+
+#elif defined NPOCO
+//#include <npoco/net/NetException.h>
+#include <npoco/NumberFormatter.h>
+#else
 #include <Poco/Net/NetException.h>
 #include <Poco/NumberFormatter.h>
+#endif
 
 using namespace Poco;
 
@@ -33,7 +40,11 @@ long NymphRemoteServer::timeout = 3000;
 string NymphRemoteServer::loggerName = "NymphRemoteServer";
 uint32_t NymphRemoteServer::nextMethodId = 0;
 std::map<uint32_t, NymphServerInstance*> NymphRemoteServer::instances;
+#ifdef HOST_FREERTOS
+//
+#else
 Poco::Mutex NymphRemoteServer::instancesMutex;
+#endif
 
 
 // --- NYMPH SERVER INSTANCE ---
@@ -87,10 +98,10 @@ bool NymphServerInstance::sync(std::string &result) {
 	std::string binmsg(retval->getChar(), retval->string_length());
 	
 	if (binmsg.length() < 11) { return false; }
-	UInt32 index = 0;
+	uint32_t index = 0;
 	string signature = binmsg.substr(0, 7);
 	index += 7;
-	UInt32 methodCount = *((UInt32*) &binmsg[index]);
+	uint32_t methodCount = *((uint32_t*) &binmsg[index]);
 	index += 4;
 	
 	NYMPH_LOG_DEBUG("Received " + NumberFormatter::format(methodCount) + " methods.");
@@ -110,10 +121,10 @@ bool NymphServerInstance::sync(std::string &result) {
 	// Parse the methods. The IDs are expected to start at 0 and
 	// increment without gaps.
 	//UInt32 nextMethodId = 0;
-	for (UInt32 i = 0; i < methodCount; ++i) {
+	for (uint32_t i = 0; i < methodCount; ++i) {
 		signature = binmsg.substr(index, 6);
 		index += 6;
-		UInt32 methodId = *((UInt32*) &binmsg[index]);
+		uint32_t methodId = *((uint32_t*) &binmsg[index]);
 		index += 4;
 		
 		NYMPH_LOG_DEBUG("Validating method...");
@@ -130,20 +141,20 @@ bool NymphServerInstance::sync(std::string &result) {
 		
 		//++nextMethodId;
 		
-		UInt8 l = *((UInt8*) &binmsg[index++]);
+		uint8_t l = *((uint8_t*) &binmsg[index++]);
 		string methodName = binmsg.substr(index, l);
 		index += l;
 		
 		NYMPH_LOG_DEBUG("Synchronising method: " + methodName);
 		
 		vector<NymphTypes> parameters;
-		l = *((UInt8*) &binmsg[index++]);
-		for (UInt8 i = 0; i < l; ++i) {
-			UInt8 t = *((UInt8*) &binmsg[index++]);
+		l = *((uint8_t*) &binmsg[index++]);
+		for (uint8_t i = 0; i < l; ++i) {
+			uint8_t t = *((uint8_t*) &binmsg[index++]);
 			parameters.push_back((NymphTypes) t);
 		}
 		
-		UInt8 t = *((UInt8*) &binmsg[index++]);
+		uint8_t t = *((uint8_t*) &binmsg[index++]);
 		
 		// Skip the 'sync' method, as we already have it registered.
 		if (methodId == 0) {
@@ -322,6 +333,13 @@ bool NymphServerInstance::disconnect(std::string& result) {
 	// Shutdown socket. Set the semaphore once done to signal that the socket's 
 	// listener thread that it's safe to delete the socket.
 	bool res = true;
+#if defined NPOCO
+	// TODO: return value.
+	res = socket->shutdown();
+	if (!res) { return res; }
+	res = socket->close();
+	if (!res) { return res; }
+#else
 	try {
 		socket->shutdown();
 		socket->close();
@@ -338,6 +356,7 @@ bool NymphServerInstance::disconnect(std::string& result) {
 		result = "Caught unknown exception.";
 		res = false;
 	}
+#endif
 	
 	socketSemaphore->set();
 	
@@ -415,6 +434,12 @@ bool NymphRemoteServer::shutdown() {
 // the connection.
 bool NymphRemoteServer::connect(string host, int port, uint32_t &handle, void* data, 
 															string &result) {
+#ifdef LWIP_SOCKET
+	socket = socket(addr_family, SOCK_STREAM, ip_protocol);
+#elif defined NPOCO
+	Poco::Net::SocketAddress sa(host, port);
+	return connect(sa, handle, data, result);
+#else
 	try {
 		Poco::Net::SocketAddress sa(host, port);
 		return connect(sa, handle, data, result);
@@ -427,11 +452,18 @@ bool NymphRemoteServer::connect(string host, int port, uint32_t &handle, void* d
 		result = "Invalid host.";
 		return false;
 	}
+#endif
 }
 
 
 bool NymphRemoteServer::connect(string url, uint32_t &handle, void* data, 
 															string &result) {
+#ifdef LWIP_SOCKET
+	//
+#elif defined NPOCO
+	Poco::Net::SocketAddress sa(url);
+	return connect(sa, handle, data, result);
+#else
 	try {
 		Poco::Net::SocketAddress sa(url);
 		return connect(sa, handle, data, result);
@@ -444,12 +476,16 @@ bool NymphRemoteServer::connect(string url, uint32_t &handle, void* data,
 		result = "Invalid host.";
 		return false;
 	}
+#endif
 }
 
-
+#ifndef LWIP_SOCKET
 bool NymphRemoteServer::connect(Poco::Net::SocketAddress sa, uint32_t &handle, 
 												void* data, string &result) {
 	Poco::Net::StreamSocket* socket;
+#ifdef NPOCO
+	socket = new Poco::Net::StreamSocket(sa);
+#else
 	try {
 		NYMPH_LOG_ERROR("Connect remote server...");
 		socket = new Poco::Net::StreamSocket(sa);
@@ -479,6 +515,7 @@ bool NymphRemoteServer::connect(Poco::Net::SocketAddress sa, uint32_t &handle,
 		result = "Invalid host.";
 		return false;
 	}
+#endif
 	
 	// Create new NymphServerInstance instance for this connection.
 	// Add it to the instances map.
@@ -504,7 +541,7 @@ bool NymphRemoteServer::connect(Poco::Net::SocketAddress sa, uint32_t &handle,
 
 	return true;
 }
-
+#endif
 
 // --- DISCONNECT ---
 bool NymphRemoteServer::disconnect(uint32_t handle, string &result) {

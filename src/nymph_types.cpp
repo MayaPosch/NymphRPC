@@ -26,11 +26,18 @@
 
 using namespace std;
 
+#ifdef NPOCO
+#include <npoco/NumberFormatter.h>
+//#include <npoco/JSON/Stringifier.h>
+//#include <npoco/JSON/Parser.h>
+//#include <npoco/Base64Decoder.h>
+#else
 #include <Poco/NumberFormatter.h>
-#include <Poco/JSON/Stringifier.h>
-#include <Poco/JSON/Parser.h>
-#include <Poco/Base64Decoder.h>
-#include <Poco/Exception.h>
+//#include <Poco/JSON/Stringifier.h>
+//#include <Poco/JSON/Parser.h>
+//#include <Poco/Base64Decoder.h>
+//#include <Poco/Exception.h>
+#endif
 
 using namespace Poco;
 

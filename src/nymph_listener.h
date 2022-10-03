@@ -22,7 +22,11 @@
 #include <string>
 #include <functional>
 
+#ifdef NPOCO
+#include <npoco/Mutex.h>
+#else
 #include <Poco/Mutex.h>
+#endif
 
 #include "nymph_socket_listener.h"
 

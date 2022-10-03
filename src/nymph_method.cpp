@@ -25,7 +25,11 @@
 
 using namespace std;
 
+#ifdef NPOCO
+#include <npoco/NumberFormatter.h>
+#else
 #include <Poco/NumberFormatter.h>
+#endif
 
 using namespace Poco;
 
@@ -165,6 +169,16 @@ bool NymphMethod::call(Net::StreamSocket* socket, NymphRequest* &request, vector
 	NymphListener::addMessage(request);
 	
 	// Send the message.
+#ifdef NPOCO
+	int ret = socket->sendBytes(((const void*) msg.buffer()), msg.buffer_size());
+	if (ret != msg.buffer_size()) {
+		// Handle error.
+		result = "Failed to send message: ";	
+		return false;
+	}
+	
+	NYMPH_LOG_DEBUG("Sent " + NumberFormatter::format(ret) + " bytes.");
+#else
 	try {
 		int ret = socket->sendBytes(((const void*) msg.buffer()), msg.buffer_size());
 		if (ret != msg.buffer_size()) {
@@ -179,6 +193,7 @@ bool NymphMethod::call(Net::StreamSocket* socket, NymphRequest* &request, vector
 		result = "Failed to send message: " + e.message();
 		return false;
 	}
+#endif
 	
 	return true;
 }

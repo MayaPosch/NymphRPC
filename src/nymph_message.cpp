@@ -25,7 +25,11 @@
 
 using namespace std;
 
+#ifdef NPOCO
+#include <npoco/NumberFormatter.h>
+#else
 #include <Poco/NumberFormatter.h>
+#endif
 
 using namespace Poco;
 

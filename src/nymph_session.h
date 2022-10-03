@@ -19,8 +19,13 @@
 
 #include <string>
 
+#ifdef NPOCO
+#include <npoco/net/TCPServerConnection.h>
+#include <npoco/Mutex.h>
+#else
 #include <Poco/Net/TCPServerConnection.h>
 #include <Poco/Mutex.h>
+#endif
 
 
 class NymphSession : public Poco::Net::TCPServerConnection {

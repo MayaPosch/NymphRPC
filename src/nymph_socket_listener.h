@@ -19,10 +19,17 @@
 
 #include "nymph_message.h"
 
+#ifdef NPOCO
+#include <npoco/Runnable.h>
+#include <npoco/net/StreamSocket.h>
+#include <npoco/Semaphore.h>
+#include <npoco/Condition.h>
+#else
 #include <Poco/Runnable.h>
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Semaphore.h>
 #include <Poco/Condition.h>
+#endif
 
 #include <map>
 #include <string>

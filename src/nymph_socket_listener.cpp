@@ -21,7 +21,11 @@
 
 using namespace std;
 
+#ifdef NPOCO
+#include <npoco/NumberFormatter.h>
+#else
 #include <Poco/NumberFormatter.h>
+#endif
 
 using namespace Poco;
 
@@ -137,7 +141,7 @@ void NymphSocketListener::run() {
 			// The 'In Reply To' message ID in this message is now used to notify
 			// the waiting thread that a response has arrived, along with the
 			// received message.
-			UInt64 msgId = msg->getResponseId();
+			uint64_t msgId = msg->getResponseId();
 			if (msg->isCallback()) {
 				NYMPH_LOG_INFORMATION("Callback received. Trying to find registered method.");
 				
@@ -151,7 +155,7 @@ void NymphSocketListener::run() {
 			NYMPH_LOG_DEBUG("Found message ID: " + NumberFormatter::format(msgId) + ".");
 			
 			messagesMutex.lock();
-			map<UInt64, NymphRequest*>::iterator it;
+			map<uint64_t, NymphRequest*>::iterator it;
 			it = messages.find(msgId);
 			if (it == messages.end()) {
 				// Message ID not found.

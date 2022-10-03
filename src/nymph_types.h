@@ -18,7 +18,11 @@
 #ifndef NYMPH_TYPES_H
 #define NYMPH_TYPES_H
 
-#include <Poco/Poco.h>
+#ifdef NPOCO
+//#include <>
+#else
+//#include <Poco/Poco.h>
+#endif
 
 #include <string>
 #include <map>

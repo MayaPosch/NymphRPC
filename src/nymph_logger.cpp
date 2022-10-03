@@ -15,9 +15,14 @@
 
 #include "nymph_logger.h"
 
+#ifdef NPOCO
+#include <npoco/AutoPtr.h>
+#include <npoco/NumberFormatter.h>
+#else
 #include <Poco/AutoPtr.h>
 #include <Poco/NumberFormatter.h>
 //#include <Poco/DateTimeFormatter.h>
+#endif
 
 using namespace Poco;
 

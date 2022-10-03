@@ -17,7 +17,7 @@
 
 #include "nymph_types.h"
 
-#include <Poco/Poco.h>
+//#include <Poco/Poco.h>
 
 #include <vector>
 #include <atomic>

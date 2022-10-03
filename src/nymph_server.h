@@ -20,7 +20,11 @@
 #include <string>
 #include <atomic>
 
+#ifdef NPOCO
+#include <npoco/net/TCPServer.h>
+#else
 #include <Poco/Net/TCPServer.h>
+#endif
 
 
 class NymphServer {

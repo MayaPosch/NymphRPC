@@ -22,8 +22,13 @@
 #include "nymph_message.h"
 #include "nymph_session.h"
 
+#ifdef NPOCO
+#include <npoco/Poco.h>
+#include <npoco/net/StreamSocket.h>
+#else
 #include <Poco/Poco.h>
 #include <Poco/Net/StreamSocket.h>
+#endif
 
 #include <vector>
 #include <string>

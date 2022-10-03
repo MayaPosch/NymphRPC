@@ -14,9 +14,15 @@
 #ifndef NYMPH_LOGGER_H
 #define NYMPH_LOGGER_H
 
+#ifdef NPOCO
+#include <npoco/Logger.h>
+#include <npoco/LogStream.h>
+#include <npoco/Channel.h>
+#else
 #include <Poco/Logger.h>
 #include <Poco/LogStream.h>
 #include <Poco/Channel.h>
+#endif
 
 #include <string>
 

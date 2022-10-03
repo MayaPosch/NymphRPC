@@ -19,9 +19,25 @@
 #include <string>
 #include <map>
 
-#include <Poco/Semaphore.h>
+#ifdef HOST_FREERTOS
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
+#else
+//#include <Poco/Semaphore.h>
+#endif
+
+#ifdef LWIP_SOCKET
+#include <lwip/sockets.h>
+#include <lwip/sys.h>
+#elif defined NPOCO
+#include <npoco/net/SocketAddress.h>
+#include <npoco/net/StreamSocket.h>
+#include <npoco/Semaphore.h>
+#else
 #include <Poco/Net/SocketAddress.h>
 #include <Poco/Net/StreamSocket.h>
+#include <Poco/Semaphore.h>
+#endif
 
 #include "nymph_method.h"
 #include "nymph_listener.h"
@@ -30,22 +46,38 @@
 
 class NymphServerInstance {
 	std::string loggerName = "NymphServerInstance";
+#ifdef LWIP_SOCKET
+	int socket;
+#else
 	Poco::Net::StreamSocket* socket = 0;
+#endif
 	Poco::Semaphore* socketSemaphore = 0;
 	uint32_t nextMethodId = 0;
 	std::map<std::string, NymphMethod> methods;
 	std::map<uint32_t, NymphMethod*> methodIds;
+#ifdef HOST_FREERTOS
+	//
+#else
 	Poco::Mutex methodsMutex;
+#endif
 	uint32_t handle;
 	uint32_t timeout;
 	
 public:
+#ifdef HOST_FREERTOS
+	//
+#else
 	NymphServerInstance(uint32_t handle, Poco::Net::StreamSocket* socket, uint32_t timeout = 3000);
+#endif
 	~NymphServerInstance();
 	
 	void setHandle(uint32_t handle);
 	uint32_t getHandle();
+#ifdef HOST_FREERTOS
+	//
+#else
 	Poco::Semaphore* semaphore();
+#endif
 	bool sync(std::string &result);
 	bool addMethod(std::string name, NymphMethod method);
 	bool removeMethod(std::string name);
@@ -58,7 +90,11 @@ public:
 
 class NymphRemoteServer {
 	static std::map<uint32_t, NymphServerInstance*> instances;
+#ifdef HOST_FREERTOS
+	//
+#else
 	static Poco::Mutex instancesMutex;
+#endif
 	static uint32_t lastHandle;
 	static long timeout;
 	static std::string loggerName;
@@ -70,7 +106,9 @@ public:
 	static bool shutdown();
 	static bool connect(std::string host, int port, uint32_t &handle, void* data, std::string &result);
 	static bool connect(std::string url, uint32_t &handle, void* data, std::string &result);
+#ifndef LWIP_SOCKET
 	static bool connect(Poco::Net::SocketAddress sa, uint32_t &handle, void* data, std::string &result);
+#endif
 	static bool disconnect(uint32_t handle, std::string &result);
 	static bool callMethod(uint32_t handle, std::string name, std::vector<NymphType*> &values, 
 										NymphType* &returnvalue, std::string &result);

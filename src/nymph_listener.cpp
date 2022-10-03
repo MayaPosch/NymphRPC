@@ -23,9 +23,15 @@
 
 using namespace std;
 
+#ifdef NPOCO
+#include <npoco/Thread.h>
+#include <npoco/NumberFormatter.h>
+#include <npoco/Condition.h>
+#else
 #include <Poco/Thread.h>
 #include <Poco/NumberFormatter.h>
 #include <Poco/Condition.h>
+#endif
 
 using namespace Poco;
 

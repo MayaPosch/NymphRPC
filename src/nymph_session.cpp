@@ -18,7 +18,11 @@
 #include "nymph_message.h"
 #include "remote_client.h"
 
+#ifdef NPOCO
+#include <npoco/NumberFormatter.h>
+#else
 #include <Poco/NumberFormatter.h>
+#endif
 
 using namespace Poco;
 
@@ -153,7 +157,7 @@ void NymphSession::run() {
 			NymphMessage* response = 0;
 			if (!NymphRemoteClient::callMethodCallback(handle, id, msg, response)) {
 				NYMPH_LOG_ERROR("Calling callback for message " + NumberFormatter::format(msgId) + " failed. Skipping message.");
-				delete msg;
+				//delete msg;
 				continue;
 			}
 			
@@ -169,7 +173,9 @@ void NymphSession::run() {
 			response->serialize();
 			
 			// Send the message.
+#ifndef NPOCO
 			try {
+#endif
 				int ret = socket.sendBytes(((const void*) response->buffer()), 
 														response->buffer_size());
 				if (ret != response->buffer_size()) {
@@ -180,12 +186,14 @@ void NymphSession::run() {
 				}
 				
 				NYMPH_LOG_DEBUG("Sent " + NumberFormatter::format(ret) + " bytes.");
+#ifndef NPOCO
 			}
 			catch (Poco::Exception &e) {
 				NYMPH_LOG_ERROR("Failed to send message: " + e.message());
 				delete response;
 				continue;
 			}
+#endif
 			
 			delete response;
 		} // if
@@ -202,7 +210,9 @@ bool NymphSession::send(uint8_t* msg, uint32_t length, std::string &result) {
 	Net::StreamSocket& socket = this->socket();
 	
 	// Send the message.
+#ifndef NPOCO
 	try {
+#endif
 		int ret = socket.sendBytes((const void*) msg, length);
 		if (ret != length) {
 			// Handle error.
@@ -211,11 +221,13 @@ bool NymphSession::send(uint8_t* msg, uint32_t length, std::string &result) {
 		}
 		
 		NYMPH_LOG_DEBUG("Sent " + NumberFormatter::format(ret) + " bytes.");
+#ifndef NPOCO
 	}
 	catch (Poco::Exception &e) {
 		result = "Failed to send message: " + e.message();
 		return false;
 	}
+#endif
 	
 	return true;
 }

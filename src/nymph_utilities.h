@@ -18,9 +18,15 @@
 
 #include "nymph_types.h"
 
+#if defined NPOCO
+#include <npoco/Poco.h>
+#include <npoco/Mutex.h>
+//#include <npoco/Dynamic/Var.h>
+#else
 #include <Poco/Poco.h>
 #include <Poco/Mutex.h>
 #include <Poco/Dynamic/Var.h>
+#endif
 
 #include <string>
 

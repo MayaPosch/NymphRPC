@@ -20,9 +20,15 @@
 #include <string>
 #include <map>
 
+#ifdef NPOCO
+#include <npoco/Mutex.h>
+#include <npoco/net/SocketAddress.h>
+#include <npoco/net/StreamSocket.h>
+#else
 #include <Poco/Mutex.h>
 #include <Poco/Net/SocketAddress.h>
 #include <Poco/Net/StreamSocket.h>
+#endif
 
 #include "nymph_method.h"
 #include "nymph_listener.h"

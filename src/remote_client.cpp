@@ -15,9 +15,12 @@
 
 #include "dispatcher.h"
 
-
-#include <Poco/Net/NetException.h>
+#ifdef NPOCO
+#include <npoco/NumberFormatter.h>
+#else
+//#include <Poco/Net/NetException.h>
 #include <Poco/NumberFormatter.h>
+#endif
 
 using namespace Poco;
 

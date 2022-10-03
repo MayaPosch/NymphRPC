@@ -17,7 +17,9 @@
 #include "nymph_logger.h"
 #include "nymph_session.h"
 
+#ifndef NPOCO
 #include <Poco/Net/NetException.h>
+#endif
 
 using namespace Poco;
 
@@ -33,7 +35,9 @@ std::atomic<bool> NymphServer::running;
 
 // --- START ---
 bool NymphServer::start(int port) {
+#ifndef NPOCO
 	try {
+#endif
 		// Create a server socket that listens on all interfaces, IPv4 and IPv6.
 		// Assign it to the new TCPServer.
 		ss.bind6(port, true, false); // Port, SO_REUSEADDR, IPv6-only.
@@ -41,11 +45,13 @@ bool NymphServer::start(int port) {
 		server = new Net::TCPServer(new Net::TCPServerConnectionFactoryImpl<NymphSession>(),
 									ss);
 		server->start();
+#ifndef NPOCO
 	}
 	catch (Net::NetException& e) {
 		NYMPH_LOG_ERROR("Error starting TCP server: " + e.message());
 		return false;
 	}
+#endif
 	
 	running = true;
 	return true;
