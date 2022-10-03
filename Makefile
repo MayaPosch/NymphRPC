@@ -128,7 +128,8 @@ else
 	LIBS += -pthread
 	UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Linux)
-        MAKE := gmake
+        #MAKE := gmake
+		# Should be BSD?
     endif
 endif
 
