@@ -21,9 +21,13 @@
 #include <vector>
 #include <csignal>
 
-
+#ifdef NPOCO
+#include <npoco/Condition.h>
+#include <npoco/Thread.h>
+#else
 #include <Poco/Condition.h>
 #include <Poco/Thread.h>
+#endif
 
 
 Poco::Condition gCon;

@@ -13,7 +13,7 @@ endif
 OUTPUT = nymph_server
 INCLUDE = -I $(TOP)/src
 LIB := ../../lib/$(ARCH)libnymphrpc.a -lPocoNet -lPocoUtil -lPocoFoundation
-CFLAGS := $(INCLUDE) -std=c++11 -U__STRICT_ANSI__ -g3
+CFLAGS := $(INCLUDE) -std=c++11 -DNPOCO=1 -g3
 SOURCES := $(wildcard *.cpp)
 OBJECTS := $(addprefix obj/,$(notdir) $(SOURCES:.cpp=.o))
 
