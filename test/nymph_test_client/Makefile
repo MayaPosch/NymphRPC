@@ -14,8 +14,14 @@ endif
 
 OUTPUT = nymph_client
 INCLUDE = -I $(TOP)/src
+ifdef NPOCO
+LIB := ../../lib/$(ARCH)libnymphrpc.a -lNPocoNet -lNPocoCore
+CFLAGS := $(CFLAGS) -DNPOCO
+else
 LIB := ../../lib/$(ARCH)libnymphrpc.a -lPocoNet -lPocoUtil -lPocoFoundation
-CFLAGS := $(INCLUDE) -std=c++11 -g3
+endif
+
+CFLAGS := $(INCLUDE) $(CFLAGS) -std=c++11 -g3
 
 # Check for MinGW and patch up POCO
 # The OS variable is only set on Windows.
