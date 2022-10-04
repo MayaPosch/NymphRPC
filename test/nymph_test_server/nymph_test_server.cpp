@@ -219,9 +219,11 @@ int main() {
 	signal(SIGINT, signal_handler);
 	
 	// Start server on port 4004.
+	std::cout << "Starting server..." << std::endl;
 	NymphRemoteClient::start(4004);
 	
 	// Loop until the SIGINT signal has been received.
+	std::cout << "Waiting for clients..." << std::endl;
 	gMutex.lock();
 	gCon.wait(gMutex);
 	
