@@ -24,6 +24,7 @@ class AbstractRequest {
 	
 public:
 	//virtual void setValue(std::string value) = 0;
+	virtual ~AbstractRequest() { }
 	virtual void process() = 0;
 	virtual void finish() = 0;
 };

@@ -46,11 +46,12 @@
 
 class NymphServerInstance {
 	std::string loggerName = "NymphServerInstance";
-#ifdef LWIP_SOCKET
+	uint32_t handle;
+/* #ifdef LWIP_SOCKET
 	int socket;
-#else
+#else */
 	Poco::Net::StreamSocket* socket = 0;
-#endif
+//#endif
 	Poco::Semaphore* socketSemaphore = 0;
 	uint32_t nextMethodId = 0;
 	std::map<std::string, NymphMethod> methods;
@@ -60,7 +61,6 @@ class NymphServerInstance {
 #else
 	Poco::Mutex methodsMutex;
 #endif
-	uint32_t handle;
 	uint32_t timeout;
 	
 public:
@@ -106,9 +106,9 @@ public:
 	static bool shutdown();
 	static bool connect(std::string host, int port, uint32_t &handle, void* data, std::string &result);
 	static bool connect(std::string url, uint32_t &handle, void* data, std::string &result);
-#ifndef LWIP_SOCKET
+//#ifndef LWIP_SOCKET
 	static bool connect(Poco::Net::SocketAddress sa, uint32_t &handle, void* data, std::string &result);
-#endif
+//#endif
 	static bool disconnect(uint32_t handle, std::string &result);
 	static bool callMethod(uint32_t handle, std::string name, std::vector<NymphType*> &values, 
 										NymphType* &returnvalue, std::string &result);

@@ -434,9 +434,10 @@ bool NymphRemoteServer::shutdown() {
 // the connection.
 bool NymphRemoteServer::connect(string host, int port, uint32_t &handle, void* data, 
 															string &result) {
-#ifdef LWIP_SOCKET
+/* #ifdef LWIP_SOCKET
 	socket = socket(addr_family, SOCK_STREAM, ip_protocol);
-#elif defined NPOCO
+#elif defined NPOCO */
+#if defined NPOCO
 	Poco::Net::SocketAddress sa(host, port);
 	return connect(sa, handle, data, result);
 #else
@@ -458,9 +459,8 @@ bool NymphRemoteServer::connect(string host, int port, uint32_t &handle, void* d
 
 bool NymphRemoteServer::connect(string url, uint32_t &handle, void* data, 
 															string &result) {
-#ifdef LWIP_SOCKET
-	//
-#elif defined NPOCO
+
+#if defined NPOCO
 	Poco::Net::SocketAddress sa(url);
 	return connect(sa, handle, data, result);
 #else
@@ -479,7 +479,7 @@ bool NymphRemoteServer::connect(string url, uint32_t &handle, void* data,
 #endif
 }
 
-#ifndef LWIP_SOCKET
+//#ifndef LWIP_SOCKET
 bool NymphRemoteServer::connect(Poco::Net::SocketAddress sa, uint32_t &handle, 
 												void* data, string &result) {
 	Poco::Net::StreamSocket* socket;
@@ -541,7 +541,7 @@ bool NymphRemoteServer::connect(Poco::Net::SocketAddress sa, uint32_t &handle,
 
 	return true;
 }
-#endif
+//#endif
 
 // --- DISCONNECT ---
 bool NymphRemoteServer::disconnect(uint32_t handle, string &result) {
