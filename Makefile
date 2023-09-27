@@ -104,7 +104,7 @@ SHARED_FLAGS := -fPIC -shared -Wl,$(SONAME),$(LIBNAME)
 ifdef ANDROID
 CFLAGS += -fPIC
 else ifdef ANDROID64
-#CFLAGS += -fPIC
+CFLAGS += -fPIC
 else ifdef ANDROIDX86
 CFLAGS += -fPIC
 else ifdef ANDROIDX64
