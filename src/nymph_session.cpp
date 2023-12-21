@@ -58,6 +58,12 @@ void NymphSession::run() {
 	// Add this client to the list of sessions.
 	NymphRemoteClient::addSession(handle, this);
 	
+#ifdef __FREERTOS__
+	#include <freertos/task.h>
+	UBaseType_t uxHighWaterMark = uxTaskGetStackHighWaterMark(0);
+	NYMPH_LOG_DEBUG("Stack free: " + NumberFormatter::format((uint32_t) uxHighWaterMark) + " words.");
+#endif
+	
 	Timespan timeout(1, 0); // 1 second timeout
 	char headerBuff[8];
 	while (NymphServer::running) {
@@ -91,6 +97,11 @@ void NymphSession::run() {
 			memcpy(&length, (headerBuff + 4), 4);
 			
 			NYMPH_LOG_DEBUG("Message length: " + NumberFormatter::format(length) + " bytes.");
+	
+#ifdef __FREERTOS__
+	uxHighWaterMark = uxTaskGetStackHighWaterMark(0);
+	NYMPH_LOG_DEBUG("Stack free: " + NumberFormatter::format((uint32_t) uxHighWaterMark) + " words.");
+#endif
 			
 			uint8_t* buff = new uint8_t[length];
 			
@@ -151,7 +162,7 @@ void NymphSession::run() {
 			}
 			
 			// The message ID is now used to find the appropriate callback to call.
-			Int64 msgId = msg->getMessageId();
+			uint64_t msgId = msg->getMessageId();
 			NYMPH_LOG_DEBUG("Calling method callback for message ID: " + NumberFormatter::format(msgId));
 			UInt32 id = msg->getMethodId();
 			NymphMessage* response = 0;
