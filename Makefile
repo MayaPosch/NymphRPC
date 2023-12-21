@@ -98,7 +98,7 @@ CFLAGS := $(CFLAGS) -DNPOCO
 else
 LIBS := -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON 
 endif
-CFLAGS := $(INCLUDE) $(CFLAGS) -g3 -std=c++11 -O0
+CFLAGS := $(INCLUDE) $(CFLAGS) -g3 -std=c++14 -O0
 SHARED_FLAGS := -fPIC -shared -Wl,$(SONAME),$(LIBNAME)
 
 ifdef ANDROID
