@@ -40,7 +40,9 @@ bool NymphServer::start(int port) {
 #endif
 		// Create a server socket that listens on all interfaces, IPv4 and IPv6.
 		// Assign it to the new TCPServer.
-		ss.bind6(port, true, false); // Port, SO_REUSEADDR, IPv6-only.
+		// TODO: Lack of (full) IPv6-support makes bind() necessary. Check this is sufficient.
+		//ss.bind6(port, true, false); // Port, SO_REUSEADDR, IPv6-only.
+		ss.bind(port, true, false); // Port, SO_REUSEADDR, SO_REUSEPORT.
 		ss.listen();
 		server = new Net::TCPServer(new Net::TCPServerConnectionFactoryImpl<NymphSession>(),
 									ss);
