@@ -42,7 +42,43 @@ bool NymphServer::start(int port) {
 		// Assign it to the new TCPServer.
 		// TODO: Lack of (full) IPv6-support makes bind() necessary. Check this is sufficient.
 		//ss.bind6(port, true, false); // Port, SO_REUSEADDR, IPv6-only.
-		ss.bind(port, true, false); // Port, SO_REUSEADDR, SO_REUSEPORT.
+#ifndef NPOCO
+		try {
+#endif
+			ss.bind(port, true, true); // Port, SO_REUSEADDR, SO_REUSEPORT.
+#ifndef NPOCO
+		}
+		catch (...) {
+			// Exception while calling bind(). Give it a retry for 2 minutes before giving up.
+			NYMPH_LOG_ERROR("Exception in bind. Retrying for 120 seconds...");
+			uint32_t countdown = 120; // seconds.
+			bool success = true;
+			while (1) {
+				// Wait 5 seconds.
+				Thread::sleep(5000); // milliseconds.
+				success = true;
+				try {
+					ss.bind(port, true, true);
+				}
+				catch (...) {
+					NYMPH_LOG_ERROR("Exception in bind.");
+					success = false;
+				}
+				
+				if (success) {
+					NYMPH_LOG_INFORMATION("Connected to port after retrying.");
+					break;
+				}
+				
+				countdown -= 5;
+				if (countdown < 5) {
+					NYMPH_LOG_ERROR("Error starting TCP server, abort.");
+					return false;
+				}
+			}
+		}
+#endif
+		
 		ss.listen();
 		server = new Net::TCPServer(new Net::TCPServerConnectionFactoryImpl<NymphSession>(),
 									ss);
@@ -63,6 +99,7 @@ bool NymphServer::start(int port) {
 // --- STOP ---
 bool NymphServer::stop() {
 	server->stop();
+	ss.close();
 	running = false;
 	delete server;
 	
