@@ -190,6 +190,7 @@ endif
 
 ifeq ($(USYS),Haiku)
 	PREFIX := /boot/system/non-packaged/develop
+	#TODO: SO files have to go into /boot/system/non-packaged/lib as well
 	HAIKU := true
 endif
 
@@ -199,6 +200,9 @@ install:
 	install -m 644 lib/$(ARCH)$(OUTPUT).a $(DESTDIR)$(PREFIX)/lib/
 ifndef OS
 	install -m 644 lib/$(ARCH)$(OUTPUT).so.$(VERSION) $(DESTDIR)$(PREFIX)/lib/
+ifdef HAIKU
+	install -m 644 lib/$(ARCH)$(OUTPUT).so.$(VERSION) /boot/system/non-packaged/lib
+endif
 endif
 ifdef HAIKU
 	install -d $(DESTDIR)$(PREFIX)/headers/nymph
