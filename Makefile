@@ -44,6 +44,16 @@ endif
 USYS := $(shell uname -s)
 UMCH := $(shell uname -m)
 
+ifdef TOOLCHAIN
+include toolchain/$(TOOLCHAIN).mk
+else
+GPP = g++
+GCC = gcc
+STRIP = strip
+MAKEDIR = mkdir -p
+RM = rm
+endif
+
 ifdef ANDROID
 #GCC := $(TOOLCHAIN_PREFIX)g++$(TOOLCHAIN_POSTFIX)
 GCC := armv7a-linux-androideabi$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)

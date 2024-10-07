@@ -39,6 +39,10 @@ With the common C++ build tools installed (g++, make, etc.) and the optional Ope
 
 `make clean-test-server` - Clean just the test server.
 
+**Notes**: When building on **FreeBSD** make sure to use `gmake`. To use `clang` instead of `gcc` specify the toolchain on the command to `make/gmake`:
+
+`make TOOLCHAIN=clang`
+
 ## Android target ##
 
 In order to compile for Android platforms, ensure that the Clang-based cross-compiler is accessible on the system PATH, and that libPoco has been compiled & made available. The use of the [POCO-build](https://github.com/MayaPosch/Poco-build) project is recommended here.
