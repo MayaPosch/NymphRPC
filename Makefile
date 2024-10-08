@@ -108,6 +108,12 @@ CFLAGS := $(CFLAGS) -DNPOCO
 else
 LIBS := -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON 
 endif
+
+ifeq ($(USYS),FreeBSD)
+	INCLUDE += -I /usr/local/include
+	LIBS += -L /usr/local/lib
+endif
+
 CFLAGS := $(INCLUDE) $(CFLAGS) -g3 -std=c++14 -O0
 SHARED_FLAGS := -fPIC -shared -Wl,$(SONAME),$(LIBNAME)
 
@@ -141,11 +147,6 @@ else
         #MAKE := gmake
 		# Should be BSD?
     endif
-endif
-
-ifeq ($(USYS),FreeBSD)
-	INCLUDE += -I /usr/local/include
-	LIBS += -L /usr/local/lib
 endif
 
 
