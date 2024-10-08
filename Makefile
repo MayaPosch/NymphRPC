@@ -55,33 +55,33 @@ RM = rm
 endif
 
 ifdef ANDROID
-#GCC := $(TOOLCHAIN_PREFIX)g++$(TOOLCHAIN_POSTFIX)
-GCC := armv7a-linux-androideabi$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
+#GPP := $(TOOLCHAIN_PREFIX)g++$(TOOLCHAIN_POSTFIX)
+GPP := armv7a-linux-androideabi$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
 MAKEDIR = mkdir -p
 RM = rm
 AR = $(TOOLCHAIN_PREFIX)ar
 else ifdef ANDROID64
-GCC := aarch64-linux-android$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
+GPP := aarch64-linux-android$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
 MAKEDIR = mkdir -p
 RM = rm
 AR = $(TOOLCHAIN_PREFIX)ar
 else ifdef ANDROIDX86
-GCC := i686-linux-android$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
+GPP := i686-linux-android$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
 MAKEDIR = mkdir -p
 RM = rm
 AR = $(TOOLCHAIN_PREFIX)ar
 else ifdef ANDROIDX64
-GCC := x86_64-linux-android$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
+GPP := x86_64-linux-android$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
 MAKEDIR = mkdir -p
 RM = rm
 AR = $(TOOLCHAIN_PREFIX)ar
 else ifdef WASM
-GCC = emc++
+GPP = emc++
 MAKEDIR = mkdir -p
 RM = rm
 AR = ar 
 else
-GCC ?= g++
+GPP ?= g++
 MAKEDIR ?= mkdir -p
 RM ?= rm
 AR ?= ar
@@ -153,17 +153,17 @@ all: lib
 lib: makedir lib/$(ARCH)$(OUTPUT).a lib/$(ARCH)$(LIBNAME)
 	
 obj/static/$(ARCH)%.o: %.cpp
-	$(GCC) -c -o $@ $< $(CFLAGS)
+	$(GPP) -c -o $@ $< $(CFLAGS)
 	
 obj/shared/$(ARCH)%.o: %.cpp
-	$(GCC) -c -o $@ $< $(SHARED_FLAGS) $(CFLAGS) $(LIBS)
+	$(GPP) -c -o $@ $< $(SHARED_FLAGS) $(CFLAGS) $(LIBS)
 	
 lib/$(ARCH)$(OUTPUT).a: $(OBJECTS)
 	-rm -f $@
 	$(AR) rcs $@ $^
 	
 lib/$(ARCH)$(LIBNAME): $(SHARED_OBJECTS)
-	$(GCC) -o $@ $(CFLAGS) $(SHARED_FLAGS) $(SHARED_OBJECTS) $(LIBS)
+	$(GPP) -o $@ $(CFLAGS) $(SHARED_FLAGS) $(SHARED_OBJECTS) $(LIBS)
 	
 makedir:
 	$(MAKEDIR) lib/$(ARCH)
