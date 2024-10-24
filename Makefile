@@ -117,6 +117,10 @@ endif
 CFLAGS := $(INCLUDE) $(CFLAGS) -g3 -std=c++14 -O0
 SHARED_FLAGS := -fPIC -shared -Wl,$(SONAME),$(LIBNAME)
 
+ifeq ($(GPP),g++)
+	CFLAGS += -fext-numeric-literals
+endif
+
 ifdef ANDROID
 CFLAGS += -fPIC
 else ifdef ANDROID64
@@ -134,7 +138,8 @@ ifndef ANDROID
 ifndef ANDROID64
 ifndef ANDROIDX86
 ifndef ANDROIDX64
-	CFLAGS := $(CFLAGS) -U__STRICT_ANSI__ -DPOCO_WIN32_UTF8
+	# -U__STRICT_ANSI__
+	CFLAGS := $(CFLAGS) -DPOCO_WIN32_UTF8
 	LIBS += -lws2_32
 endif
 endif
