@@ -109,6 +109,10 @@ else
 LIBS := -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON 
 endif
 
+ifeq ($(shell uname -s),Haiku)
+    LIBS += -lnetwork
+endif
+
 ifeq ($(USYS),FreeBSD)
 	INCLUDE += -I /usr/local/include
 	LIBS += -L /usr/local/lib
@@ -203,37 +207,26 @@ clean-test-server:
 	$(MAKE) -C ./test/nymph_test_server clean
 
 PREFIX ?= /usr
+LIBDIR ?= $(PREFIX)/lib
+INCLUDEDIR ?= $(PREFIX)/include
 ifdef OS
 # Assume 64-bit MSYS2
 #PREFIX = /mingw64
 PREFIX = $(MINGW_PREFIX)
 endif
 
-ifeq ($(USYS),Haiku)
-	PREFIX := /boot/system/non-packaged/develop
-	#TODO: SO files have to go into /boot/system/non-packaged/lib as well
-	HAIKU := true
-endif
-
 .PHONY: install
 install:
-	install -d $(DESTDIR)$(PREFIX)/lib/
-	install -m 644 lib/$(ARCH)$(OUTPUT).a $(DESTDIR)$(PREFIX)/lib/
+	install -d $(DESTDIR)$(LIBDIR)
+	install -m 644 lib/$(ARCH)$(OUTPUT).a $(DESTDIR)$(LIBDIR)
 ifndef OS
-	install -m 644 lib/$(ARCH)$(OUTPUT).so.$(VERSION) $(DESTDIR)$(PREFIX)/lib/
-ifdef HAIKU
-	install -m 644 lib/$(ARCH)$(OUTPUT).so.$(VERSION) /boot/system/non-packaged/lib
+	install -m 644 lib/$(ARCH)$(OUTPUT).so.$(VERSION) $(DESTDIR)$(LIBDIR)
 endif
-endif
-ifdef HAIKU
-	install -d $(DESTDIR)$(PREFIX)/headers/nymph
-	install -m 644 src/*.h $(DESTDIR)$(PREFIX)/headers/nymph/
-else
-	install -d $(DESTDIR)$(PREFIX)/include/nymph
-	install -m 644 src/*.h $(DESTDIR)$(PREFIX)/include/nymph/
-endif
+	install -d $(DESTDIR)$(INCLUDEDIR)/nymph/
+	install -m 644 src/*.h $(DESTDIR)$(INCLUDEDIR)/nymph/
+
 ifndef OS
-	cd $(DESTDIR)$(PREFIX)/lib && \
+	cd $(DESTDIR)$(LIBDIR) && \
 		if [ -f $(OUTPUT).so ]; then \
 			rm $(OUTPUT).so; \
 		fi && \
