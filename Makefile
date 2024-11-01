@@ -222,8 +222,8 @@ install:
 ifndef OS
 	install -m 644 lib/$(ARCH)$(OUTPUT).so.$(VERSION) $(DESTDIR)$(PREFIX)/lib/
 endif
-	install -d $(DESTDIR)$(PREFIX)/include/nymph
-	install -m 644 src/*.h $(DESTDIR)$(PREFIX)/include/nymph/
+	install -d $(DESTDIR)$(PREFIX)$(DEVFOLDER)/include/nymph
+	install -m 644 src/*.h $(DESTDIR)$(PREFIX)$(DEVFOLDER)/include/nymph/
 
 ifndef OS
 	cd $(DESTDIR)$(PREFIX)/lib && \
