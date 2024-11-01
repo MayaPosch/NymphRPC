@@ -232,6 +232,11 @@ else
 	install -d $(DESTDIR)$(PREFIX)/include/nymph
 	install -m 644 src/*.h $(DESTDIR)$(PREFIX)/include/nymph/
 endif
+
+ifdef HAIKU
+	PREFIX := /boot/system/non-packaged
+endif
+
 ifndef OS
 	cd $(DESTDIR)$(PREFIX)/lib && \
 		if [ -f $(OUTPUT).so ]; then \
