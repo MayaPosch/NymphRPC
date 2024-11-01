@@ -210,7 +210,9 @@ PREFIX = $(MINGW_PREFIX)
 endif
 
 ifeq ($(USYS),Haiku)
-	PREFIX := /boot/system/non-packaged/develop
+	PREFIX := /boot/system/non-packaged
+	DEVFOLDER := /develop
+	LIBFOLDER := /lib
 	#TODO: SO files have to go into /boot/system/non-packaged/lib as well
 	HAIKU := true
 endif
@@ -218,12 +220,9 @@ endif
 .PHONY: install
 install:
 	install -d $(DESTDIR)$(PREFIX)/lib/
-	install -m 644 lib/$(ARCH)$(OUTPUT).a $(DESTDIR)$(PREFIX)/lib/
+	install -m 644 lib/$(ARCH)$(OUTPUT).a $(DESTDIR)$(PREFIX)$(DEVFOLDER)/lib/
 ifndef OS
 	install -m 644 lib/$(ARCH)$(OUTPUT).so.$(VERSION) $(DESTDIR)$(PREFIX)/lib/
-ifdef HAIKU
-	install -m 644 lib/$(ARCH)$(OUTPUT).so.$(VERSION) /boot/system/non-packaged/lib
-endif
 endif
 ifdef HAIKU
 	install -d $(DESTDIR)$(PREFIX)/headers/nymph
@@ -231,10 +230,6 @@ ifdef HAIKU
 else
 	install -d $(DESTDIR)$(PREFIX)/include/nymph
 	install -m 644 src/*.h $(DESTDIR)$(PREFIX)/include/nymph/
-endif
-
-ifdef HAIKU
-	PREFIX := /boot/system/non-packaged
 endif
 
 ifndef OS
