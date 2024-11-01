@@ -18,14 +18,14 @@ CFLAGS := $(CFLAGS) -DNPOCO
 else
 LIB := ../../lib/$(ARCH)libnymphrpc.a -lPocoNet -lPocoUtil -lPocoFoundation
 endif
-CFLAGS := $(INCLUDE) -std=c++11 -DNPOCO=1 -g3
+CFLAGS := $(INCLUDE) -std=c++14 -g3
 SOURCES := $(wildcard *.cpp)
 OBJECTS := $(addprefix obj/,$(notdir) $(SOURCES:.cpp=.o))
 
 # Check for MinGW and patch up POCO
 # The OS variable is only set on Windows.
 ifdef OS
-	CFLAGS := $(CFLAGS) -U__STRICT_ANSI__ -DPOCO_WIN32_UTF8
+	CFLAGS := $(CFLAGS) -DPOCO_WIN32_UTF8
 	#LIB += -lws2_32
 else
 	LIB += -pthread
