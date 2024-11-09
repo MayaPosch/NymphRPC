@@ -3,7 +3,7 @@ Release notes for NymphRPC
 ---
 
 
-> v0.2:
+> v0.1.1:
 
 New:
 - Add support for FreeBSD & Haiku.
