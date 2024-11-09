@@ -1,0 +1,22 @@
+Release notes for NymphRPC
+
+---
+
+
+> v0.2:
+
+New:
+- Add support for FreeBSD & Haiku.
+- Improve MSYS2 support.
+- Support for GCC ext-numeric-literals flag.
+- Switched Make to use CXX and CXXFLAGS variable names.
+
+Bugs:
+- Fix server socket issue on IPv4-only platforms (Haiku).
+- Fix memory leak with missing server socket destructor.
+- Added missing double quotes in MSVC scripts for spaces in paths.
+
+
+> v0.1:
+
+- Original release.
