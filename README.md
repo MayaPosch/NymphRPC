@@ -40,10 +40,12 @@ With the common C++ build tools installed (g++, make, etc.) and the optional Ope
 `make clean-test-server` - Clean just the test server.
 
 **Note 1**: When building on **FreeBSD** make sure to use `gmake`. 
+
 **Note 2**: To use `clang` instead of `gcc` specify the toolchain on the command to `make/gmake`:
-**Note 3**: The `CXX` environment variable is used by default. The fallback is `g++`.
 
 `make TOOLCHAIN=clang`
+
+**Note 3**: The `CXX` environment variable is used by default. The fallback is `g++`.
 
 ## Android target ##
 
