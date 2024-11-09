@@ -47,41 +47,41 @@ UMCH := $(shell uname -m)
 ifdef TOOLCHAIN
 include toolchain/$(TOOLCHAIN).mk
 else
-GPP = g++
-GCC = gcc
+CXX ?= g++
+CC ?= gcc
 STRIP = strip
 MAKEDIR = mkdir -p
 RM = rm
 endif
 
 ifdef ANDROID
-#GPP := $(TOOLCHAIN_PREFIX)g++$(TOOLCHAIN_POSTFIX)
-GPP := armv7a-linux-androideabi$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
+#CXX := $(TOOLCHAIN_PREFIX)g++$(TOOLCHAIN_POSTFIX)
+CXX := armv7a-linux-androideabi$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
 MAKEDIR = mkdir -p
 RM = rm
 AR = $(TOOLCHAIN_PREFIX)ar
 else ifdef ANDROID64
-GPP := aarch64-linux-android$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
+CXX := aarch64-linux-android$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
 MAKEDIR = mkdir -p
 RM = rm
 AR = $(TOOLCHAIN_PREFIX)ar
 else ifdef ANDROIDX86
-GPP := i686-linux-android$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
+CXX := i686-linux-android$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
 MAKEDIR = mkdir -p
 RM = rm
 AR = $(TOOLCHAIN_PREFIX)ar
 else ifdef ANDROIDX64
-GPP := x86_64-linux-android$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
+CXX := x86_64-linux-android$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
 MAKEDIR = mkdir -p
 RM = rm
 AR = $(TOOLCHAIN_PREFIX)ar
 else ifdef WASM
-GPP = emc++
+CXX = emc++
 MAKEDIR = mkdir -p
 RM = rm
 AR = ar 
 else
-GPP ?= g++
+CXX ?= g++
 MAKEDIR ?= mkdir -p
 RM ?= rm
 AR ?= ar
@@ -104,7 +104,7 @@ endif
 INCLUDE = -I src
 ifdef NPOCO
 LIBS := -lNPocoNet -lNPocoCore
-CFLAGS := $(CFLAGS) -DNPOCO
+CXXFLAGS := $(CXXFLAGS) -DNPOCO
 else
 LIBS := -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON 
 endif
@@ -114,10 +114,10 @@ ifeq ($(USYS),FreeBSD)
 	LIBS += -L /usr/local/lib
 endif
 
-CFLAGS := $(INCLUDE) $(CFLAGS) -g3 -std=c++14 -O0
+CXXFLAGS := $(INCLUDE) $(CXXFLAGS) -g3 -std=c++14 -O0
 SHARED_FLAGS := -fPIC -shared -Wl,$(SONAME),$(LIBNAME)
 
-ifeq ($(GPP),g++)
+ifeq ($(CXX),g++)
 	CFLAGS += -fext-numeric-literals
 endif
 
@@ -139,7 +139,7 @@ ifndef ANDROID64
 ifndef ANDROIDX86
 ifndef ANDROIDX64
 	# -U__STRICT_ANSI__
-	CFLAGS := $(CFLAGS) -DPOCO_WIN32_UTF8
+	CFLAGS := $(CXXFLAGS) -DPOCO_WIN32_UTF8
 	LIBS += -lws2_32
 endif
 endif
@@ -164,17 +164,17 @@ all: lib
 lib: makedir lib/$(ARCH)$(OUTPUT).a lib/$(ARCH)$(LIBNAME)
 	
 obj/static/$(ARCH)%.o: %.cpp
-	$(GPP) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 	
 obj/shared/$(ARCH)%.o: %.cpp
-	$(GPP) -c -o $@ $< $(SHARED_FLAGS) $(CFLAGS) $(LIBS)
+	$(CXX) -c -o $@ $< $(SHARED_FLAGS) $(CXXFLAGS) $(LIBS)
 	
 lib/$(ARCH)$(OUTPUT).a: $(OBJECTS)
 	-rm -f $@
 	$(AR) rcs $@ $^
 	
 lib/$(ARCH)$(LIBNAME): $(SHARED_OBJECTS)
-	$(GPP) -o $@ $(CFLAGS) $(SHARED_FLAGS) $(SHARED_OBJECTS) $(LIBS)
+	$(CXX) -o $@ $(CXXFLAGS) $(SHARED_FLAGS) $(SHARED_OBJECTS) $(LIBS)
 	
 makedir:
 	$(MAKEDIR) lib/$(ARCH)
