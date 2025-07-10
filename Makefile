@@ -114,7 +114,7 @@ ifeq ($(USYS),FreeBSD)
 	LIBS += -L /usr/local/lib
 endif
 
-CXXFLAGS := $(INCLUDE) $(CXXFLAGS) -g3 -std=c++14 -O0
+CXXFLAGS := $(INCLUDE) $(CXXFLAGS) -g3 -std=c++17 -O0
 SHARED_FLAGS := -fPIC -shared -Wl,$(SONAME),$(LIBNAME)
 
 ifeq ($(CXX),g++)
