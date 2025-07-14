@@ -11,6 +11,8 @@ The basic procedure is to define the RPC methods and client-side callbacks in th
 
 Extensive documentation is provided in this [PDF document](doc/nymphrpc_documentation.pdf). There is also Doxygen-generated documentation in the `doc/` folder.
 
+The protocol and type specification can be found in [this Markdown document](doc/nymphrpc_protocol_specification.md).
+
 ## Planned ports ##
 
 In addition to the current C++ implementation, an Ada version of the library is also planned.
