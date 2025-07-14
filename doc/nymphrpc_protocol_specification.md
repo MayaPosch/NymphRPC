@@ -82,6 +82,7 @@ Types in NymphRPC are divided into internal and external types. The external typ
 
 **Internal typecodes**
 
+- All internal typecodes are serialised as Uint8 values.
 - Unsigned integers are defined as <i>Uint*</i>.
 - Signed integers are defined as <i>Sint*</i>.
 - Float is 32-bit floating point.
@@ -114,9 +115,62 @@ Void			0x12
 **External typecodes**
 
 <pre>
-
+Null	0
+Array	1
+Bool	2
+Uint8	3
+Sint8	4
+Uint16	5
+Sint16	6
+Uint32	7
+Sint32	8
+Uint64	9
+Sint64	10
+Float	11
+Double	12
+String	13
+Struct	14
+Any		15
 </pre>
 
 ----
 
 ## Complex types
+
+**String**
+
+Strings in NymphRPC are defined by a length and the characters that make up the string. Internally during serialisation/deserialisation the String is either empty or has a length of 1+. 
+
+The 'empty string' type (0x0f) is an optimisation that removes the need to specify a length field.
+
+For non-empty strings, the length field can be specified as a Uint8, Uint16, Uint32 or Uint64, also as an optimisation. E.g. a length of &lt;=0xFF would fit in a Uint8.
+
+E.g.:
+
+<pre>
+uint8	Typecode (String: 0x10)
+uint16	Length (&gt; 0xff, &lt;= 0xffff)
+</pre>
+
+
+<b>Struct</b>
+
+Structs are simple key/value pairs. They feature the following structure:
+
+<pre>
+uint8	Typecode (Struct: 0x11)
+&lt;key/value pairs&gt;
+uint8	Typecode (None, 0x01)
+</pre>
+
+
+<b>Array</b>
+
+Arrays are defined as a count of elements followed by the element values.
+
+<pre>
+uint8	Typecode (Array: 0x0e)
+uint64	Number of elements
+&lt;elements&gt;
+uint8	Typecode (None, 0x01)
+</pre>
