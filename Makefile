@@ -220,17 +220,29 @@ install:
 	install -d $(DESTDIR)$(PREFIX)/lib/
 	install -m 644 lib/$(ARCH)$(OUTPUT).a $(DESTDIR)$(PREFIX)$(DEVFOLDER)/lib/
 ifndef OS
+ifeq ($(shell uname -s),Darwin)
+	install -m 644 lib/$(ARCH)$(OUTPUT).0.dylib $(DESTDIR)$(PREFIX)/lib/
+else
 	install -m 644 lib/$(ARCH)$(OUTPUT).so.$(VERSION) $(DESTDIR)$(PREFIX)/lib/
+endif
 endif
 	install -d $(DESTDIR)$(PREFIX)$(DEVFOLDER)/include/nymph
 	install -m 644 src/*.h $(DESTDIR)$(PREFIX)$(DEVFOLDER)/include/nymph/
 
 ifndef OS
+ifeq ($(shell uname -s),Darwin)
+	cd $(DESTDIR)$(PREFIX)/lib && \
+		if [ -f $(OUTPUT).dylib ]; then \
+			rm $(OUTPUT).dylib; \
+		fi && \
+		ln -s $(OUTPUT).0.dylib $(OUTPUT).dylib
+else
 	cd $(DESTDIR)$(PREFIX)/lib && \
 		if [ -f $(OUTPUT).so ]; then \
 			rm $(OUTPUT).so; \
 		fi && \
 		ln -s $(OUTPUT).so.$(VERSION) $(OUTPUT).so
+endif
 endif
 
 package:
