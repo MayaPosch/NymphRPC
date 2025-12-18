@@ -103,32 +103,37 @@ endif
 
 INCLUDE = -I src
 ifdef NPOCO
-LIBS := -lNPocoNet -lNPocoCore
+LDFLAGS += -lNPocoNet -lNPocoCore
 CXXFLAGS := $(CXXFLAGS) -DNPOCO
 else
-LIBS := -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON 
+LDFLAGS += -lPocoNet -lPocoUtil -lPocoFoundation -lPocoJSON 
 endif
 
 ifeq ($(USYS),FreeBSD)
 	INCLUDE += -I /usr/local/include
-	LIBS += -L /usr/local/lib
+	LDFLAGS += -L /usr/local/lib
 endif
 
 CXXFLAGS := $(INCLUDE) $(CXXFLAGS) -g3 -std=c++17 -O0
 SHARED_FLAGS := -fPIC -shared -Wl,$(SONAME),$(LIBNAME)
+
+ifndef NPOCO
+# Current Poco has troubles with MinGW, so network init has to be done manually.
+CXXFLAGS += -DPOCO_NO_AUTOMATIC_LIB_INIT
+endif
 
 ifeq ($(CXX),g++)
 	CFLAGS += -fext-numeric-literals
 endif
 
 ifdef ANDROID
-CFLAGS += -fPIC
+CXXFLAGS += -fPIC
 else ifdef ANDROID64
-CFLAGS += -fPIC
+CXXFLAGS += -fPIC
 else ifdef ANDROIDX86
-CFLAGS += -fPIC
+CXXFLAGS += -fPIC
 else ifdef ANDROIDX64
-CFLAGS += -fPIC
+CXXFLAGS += -fPIC
 endif
 
 # Check for MinGW and patch up POCO
@@ -139,14 +144,14 @@ ifndef ANDROID64
 ifndef ANDROIDX86
 ifndef ANDROIDX64
 	# -U__STRICT_ANSI__
-	CFLAGS := $(CXXFLAGS) -DPOCO_WIN32_UTF8
-	LIBS += -lws2_32
+	CXXFLAGS := $(CXXFLAGS) -DPOCO_WIN32_UTF8
+	LDFLAGS += -lws2_32
 endif
 endif
 endif
 endif
 else
-	LIBS += -pthread
+	LDFLAGS += -pthread
 	UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Linux)
         #MAKE := gmake
@@ -167,14 +172,14 @@ obj/static/$(ARCH)%.o: %.cpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 	
 obj/shared/$(ARCH)%.o: %.cpp
-	$(CXX) -c -o $@ $< $(SHARED_FLAGS) $(CXXFLAGS) $(LIBS)
+	$(CXX) -c -o $@ $< $(SHARED_FLAGS) $(CXXFLAGS) $(LDFLAGS)
 	
 lib/$(ARCH)$(OUTPUT).a: $(OBJECTS)
 	-rm -f $@
 	$(AR) rcs $@ $^
 	
 lib/$(ARCH)$(LIBNAME): $(SHARED_OBJECTS)
-	$(CXX) -o $@ $(CXXFLAGS) $(SHARED_FLAGS) $(SHARED_OBJECTS) $(LIBS)
+	$(CXX) -o $@ $(CXXFLAGS) $(SHARED_FLAGS) $(SHARED_OBJECTS) $(LDFLAGS)
 	
 makedir:
 	$(MAKEDIR) lib/$(ARCH)

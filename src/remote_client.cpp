@@ -95,6 +95,11 @@ NymphMessage* NymphRemoteClient::syncMethods(int session, NymphMessage* msg, voi
 // --- INIT ---
 // Initialise the runtime.
 bool NymphRemoteClient::init(logFnc logger, int level, long timeout) {
+#ifndef NPOCO	
+	// FIXME: Added to work around Poco issue on Windows. Also see auto lib init disable in Makefile.
+	Poco::Net::initializeNetwork();
+#endif
+
 	NymphRemoteClient::timeout = timeout;
 	setLogger(logger, level);
 	

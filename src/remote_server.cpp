@@ -50,7 +50,7 @@ Poco::Mutex NymphRemoteServer::instancesMutex;
 // --- NYMPH SERVER INSTANCE ---
 //--- CONSTRUCTOR ---
 NymphServerInstance::NymphServerInstance(uint32_t handle, Poco::Net::StreamSocket* socket, uint32_t timeout) 
-	: handle(handle), socket(socket), timeout(timeout) { 
+	: handle(handle), socket(socket), timeout(timeout) {
 	socketSemaphore = new Poco::Semaphore(0, 1);
 	
 	// Register built-in synchronisation method ('nymphsync').
@@ -380,6 +380,11 @@ bool NymphServerInstance::disconnect(std::string& result) {
 // NYMPH_LOG_LEVEL_DEBUG,
 // NYMPH_LOG_LEVEL_TRACE
 bool NymphRemoteServer::init(logFnc logger, int level, long timeout) {
+#ifndef NPOCO	
+	// FIXME: Added to work around Poco issue on Windows. Also see auto lib init disable in Makefile.
+	Poco::Net::initializeNetwork();
+#endif
+
 	NymphRemoteServer::timeout = timeout;
 	setLogger(logger, level);
 	
