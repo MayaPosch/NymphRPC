@@ -27,6 +27,7 @@ uint64		Message ID. Simple incrementing global counter.
 **Flags**
 
 <pre>
+0x00	Regular message.
 0x01	Reply message.
 0x02	Exception message.
 0x04	Callback message.
