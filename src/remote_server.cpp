@@ -492,7 +492,7 @@ bool NymphRemoteServer::connect(Poco::Net::SocketAddress sa, uint32_t &handle,
 	socket = new Poco::Net::StreamSocket(sa);
 #else
 	try {
-		NYMPH_LOG_ERROR("Connect remote server...");
+		NYMPH_LOG_INFORMATION("Connect remote server...");
 		socket = new Poco::Net::StreamSocket(sa);
 	}
 	catch (Poco::Net::ConnectionRefusedException &ex) {
