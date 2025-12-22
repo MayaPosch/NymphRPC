@@ -39,6 +39,7 @@ uint32_t NymphRemoteServer::lastHandle = 0;
 long NymphRemoteServer::timeout = 3000;
 string NymphRemoteServer::loggerName = "NymphRemoteServer";
 uint32_t NymphRemoteServer::nextMethodId = 0;
+NymphDisconnectCallback NymphRemoteServer::disconnectedCallback;
 std::map<uint32_t, NymphServerInstance*> NymphRemoteServer::instances;
 #ifdef HOST_FREERTOS
 //
@@ -70,8 +71,14 @@ void NymphServerInstance::setHandle(uint32_t handle) {
 }
 
 
-// --- HANDLE ---
+// --- GET HANDLE ---
 uint32_t NymphServerInstance::getHandle() { return handle; }
+
+
+// -- SET DISCONNECT CALLBACK ---
+void NymphServerInstance::setDisconnectCallback(NymphDisconnectCallback cb) {
+	disconnectCallback = cb;
+}
 
 
 // --- SEMAPHORE ---
@@ -360,6 +367,11 @@ bool NymphServerInstance::disconnect(std::string& result) {
 	
 	socketSemaphore->set();
 	
+	// Inform listener about disconnected remote.
+	if (disconnectCallback) {
+		disconnectCallback(handle);
+	}
+	
 	// Remove socket from listener.
 	NymphListener::removeConnection(handle);
 	
@@ -409,6 +421,13 @@ bool NymphRemoteServer::init(logFnc logger, int level, long timeout) {
 void NymphRemoteServer::setLogger(logFnc logger, int level) {
 	NymphLogger::setLoggerFunction(logger);
 	NymphLogger::setLogLevel((Poco::Message::Priority) level);
+}
+
+
+// --- SET DISCONNECT CALLBACK ---
+// Sets the callback for when a remote disconnects.
+void NymphRemoteServer::setDisconnectCallback(NymphDisconnectCallback cb) {
+	disconnectedCallback = cb;
 }
 
 
@@ -528,6 +547,8 @@ bool NymphRemoteServer::connect(Poco::Net::SocketAddress sa, uint32_t &handle,
 	NymphServerInstance* si = new NymphServerInstance(lastHandle, socket);
 	instances.insert(std::pair<uint32_t, NymphServerInstance*>(lastHandle, si));
 	instancesMutex.unlock();
+	
+	si->setDisconnectCallback(disconnectedCallback);
 	
 	NymphSocket ns;
 	ns.socket = socket;

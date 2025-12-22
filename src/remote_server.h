@@ -18,6 +18,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <functional>
 
 #ifdef HOST_FREERTOS
 #include <freertos/FreeRTOS.h>
@@ -44,6 +45,9 @@
 #include "nymph_logger.h"
 
 
+typedef std::function<void(uint32_t)> NymphDisconnectCallback;
+
+
 class NymphServerInstance {
 	std::string loggerName = "NymphServerInstance";
 	uint32_t handle;
@@ -54,6 +58,7 @@ class NymphServerInstance {
 //#endif
 	Poco::Semaphore* socketSemaphore = 0;
 	uint32_t nextMethodId = 0;
+	NymphDisconnectCallback disconnectCallback = 0;
 	std::map<std::string, NymphMethod> methods;
 	std::map<uint32_t, NymphMethod*> methodIds;
 #ifdef HOST_FREERTOS
@@ -73,6 +78,7 @@ public:
 	
 	void setHandle(uint32_t handle);
 	uint32_t getHandle();
+	void setDisconnectCallback(NymphDisconnectCallback cb);
 #ifdef HOST_FREERTOS
 	//
 #else
@@ -99,10 +105,12 @@ class NymphRemoteServer {
 	static long timeout;
 	static std::string loggerName;
 	static uint32_t nextMethodId;
+	static NymphDisconnectCallback disconnectedCallback;
 	
 public:
 	static bool init(logFnc logger, int level = NYMPH_LOG_LEVEL_TRACE, long timeout = 3000);
 	static void setLogger(logFnc logger, int level);
+	static void setDisconnectCallback(NymphDisconnectCallback cb);
 	static bool shutdown();
 	static bool connect(std::string host, int port, uint32_t &handle, void* data, std::string &result);
 	static bool connect(std::string url, uint32_t &handle, void* data, std::string &result);
