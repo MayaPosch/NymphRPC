@@ -365,10 +365,11 @@ bool NymphServerInstance::disconnect(std::string& result) {
 	}
 #endif
 	
-	socketSemaphore->set();
+	//socketSemaphore->set();
 	
 	// Inform listener about disconnected remote.
 	if (disconnectCallback) {
+		NYMPH_LOG_DEBUG("Calling remote disconnected callback.");
 		disconnectCallback(handle);
 	}
 	
@@ -592,7 +593,8 @@ bool NymphRemoteServer::disconnect(uint32_t handle, string &result) {
 	instances.erase(it);
 	
 	// Remove socket from listener.
-	NymphListener::removeConnection(handle);
+	// Removed: is redundant.
+	//NymphListener::removeConnection(handle);
 	
 	instancesMutex.unlock();
 	

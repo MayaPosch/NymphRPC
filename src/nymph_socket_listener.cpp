@@ -18,6 +18,7 @@
 #include "nymph_listener.h"
 #include "dispatcher.h"
 #include "callback_request.h"
+#include "remote_server.h"
 
 using namespace std;
 
@@ -60,9 +61,9 @@ void NymphSocketListener::run() {
 			// Attempt to receive the entire message.
 			// First validate the header (0x4452474e), then read the uint32
 			// following it. This contains the data length (LE format).
-			int received = socket->receiveBytes((void*) &headerBuff, 8);
+			int received = socket->receiveBytes((void*) &headerBuff, 8, 0);
 			if (received == 0) {
-				// Remote disconnnected. Socket should be discarded.
+				// Remote disconnected. Socket should be discarded.
 				NYMPH_LOG_INFORMATION("Received remote disconnected notice. Terminating listener thread.");
 				break;
 			}
@@ -200,7 +201,14 @@ void NymphSocketListener::run() {
 	// Clean-up.
 	delete readyCond;
 	delete readyMutex;
-	nymphSocket.semaphore->wait();	// Wait for the connection to be closed.
+	
+	// Let the RemoteServer clean up the socket resources.
+	std::string result;
+	if (!NymphRemoteServer::disconnect(nymphSocket.handle, result)) {
+		NYMPH_LOG_ERROR("Failed to cleanly disconnect socket: " + result);
+	}
+	
+	//nymphSocket.semaphore->wait();	// Wait for the connection to be closed.
 	delete socket;
 	delete nymphSocket.semaphore;
 	nymphSocket.semaphore = 0;
