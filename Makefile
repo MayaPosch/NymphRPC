@@ -123,7 +123,7 @@ CXXFLAGS += -DPOCO_NO_AUTOMATIC_LIB_INIT
 endif
 
 ifeq ($(CXX),g++)
-	CFLAGS += -fext-numeric-literals
+	CXXFLAGS += -fext-numeric-literals
 endif
 
 ifdef ANDROID
