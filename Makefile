@@ -59,22 +59,26 @@ ifdef ANDROID
 CXX := armv7a-linux-androideabi$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
 MAKEDIR = mkdir -p
 RM = rm
-AR = $(TOOLCHAIN_PREFIX)ar
+#AR = $(TOOLCHAIN_PREFIX)ar
+AR = llvm-ar
 else ifdef ANDROID64
 CXX := aarch64-linux-android$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
 MAKEDIR = mkdir -p
 RM = rm
-AR = $(TOOLCHAIN_PREFIX)ar
+#AR = $(TOOLCHAIN_PREFIX)ar
+AR = llvm-ar
 else ifdef ANDROIDX86
 CXX := i686-linux-android$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
 MAKEDIR = mkdir -p
 RM = rm
-AR = $(TOOLCHAIN_PREFIX)ar
+#AR = $(TOOLCHAIN_PREFIX)ar
+AR = llvm-ar
 else ifdef ANDROIDX64
 CXX := x86_64-linux-android$(ANDROID_ABI_LEVEL)-clang++$(TOOLCHAIN_POSTFIX)
 MAKEDIR = mkdir -p
 RM = rm
-AR = $(TOOLCHAIN_PREFIX)ar
+#AR = $(TOOLCHAIN_PREFIX)ar
+AR = llvm-ar
 else ifdef WASM
 CXX = emc++
 MAKEDIR = mkdir -p
